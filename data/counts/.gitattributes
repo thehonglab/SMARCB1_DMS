@@ -1,0 +1,2 @@
+new_folder_name/*.csv filter=lfs diff=lfs merge=lfs -text
+/Users/gwcoope/Documents/GitHub/SMARCB1_DMS/data/counts/variant_counts.csv filter=lfs diff=lfs merge=lfs -text

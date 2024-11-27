@@ -1,0 +1,1463 @@
+---
+title: "MITEseq Analysis Pipeline"
+author: "Garrett Cooper, Benjamin Lee"
+date: 11/27/2024
+output:
+  github_document:
+    toc: true
+    html_preview: false
+editor_options: 
+  chunk_output_type: inline
+---
+
+
+## Overview
+Deep Mutational Scan of SMARCB1
+
+This document outlines how mutational abundance was determined after a growth competition series.
+
+Authors: Benjamin Lee and Garrett Cooper
+Date: September 18, 2024
+Methodology: Raw sequencing data was processed using Analyze Sat Mut v1.0. The output of that analysis is being read in and processed.
+
+```{r, message = FALSE}
+library(ggplot2)
+library(readr)
+library(scales)
+library(base)
+library(datasets)
+library(graphics)
+library(grDevices)
+library(methods)
+library(stats)
+library(tools)
+library(utils)
+library(dplyr)
+library(rmarkdown)
+library(zoo)
+library(RColorBrewer)
+library(viridis)
+library(VennDiagram)
+library(tidyverse)
+library(colorspace)  
+library(writexl)
+library(tidyr)
+library(bookdown)
+
+```
+
+## Importing Raw Data from DMS Analysis (Analyze Sat Mut v1.0)
+```{r, message = FALSE}
+
+raw_read_data_complete = read.csv("data/counts/variant_counts.csv")
+
+```
+
+
+## Data Filtering for High-Quality Reads and Mutation Ratios
+```{r, message = FALSE}
+
+## Filtering for 16 reads and core group of molecules
+
+
+export_data = raw_read_data_complete %>%
+  filter((raw_read_data_complete$G401_1st_rep_Day_3.ct >= 16 &
+           raw_read_data_complete$G401_2nd_rep_Day_3.ct >= 16) |
+           (raw_read_data_complete$BT16_1st_rep_Day_4.ct >= 16 &
+           raw_read_data_complete$BT16_2nd_rep_Day_4.ct >= 16) |
+           (raw_read_data_complete$RCRF1009T_1st_rep_Day_4.ct >= 16 &
+           raw_read_data_complete$RCRF1009T_2nd_rep_Day_4.ct >= 16) &
+           raw_read_data_complete$num.whole.mol.nt.changes_Ted < 10)
+
+
+
+
+
+export_data$G401_1st_rep_Day_3.ct[export_data$G401_1st_rep_Day_3.ct < 16] = NA
+export_data$G401_2nd_rep_Day_3.ct[export_data$G401_2nd_rep_Day_3.ct < 16] = NA
+export_data$BT16_1st_rep_Day_4.ct[export_data$BT16_1st_rep_Day_4.ct < 16] = NA
+export_data$BT16_2nd_rep_Day_4.ct[export_data$BT16_2nd_rep_Day_4.ct < 16] = NA
+export_data$RCRF1009T_1st_rep_Day_4.ct[export_data$RCRF1009T_1st_rep_Day_4.ct < 16] = NA
+export_data$RCRF1009T_2nd_rep_Day_4.ct[export_data$RCRF1009T_2nd_rep_Day_4.ct < 16] = NA
+
+
+G401_rep1_day3 <- sum(export_data$G401_1st_rep_Day_3.ct,na.rm=TRUE)
+G401_rep1_day10 <- sum(export_data$G401_1st_rep_Day_10.ct,na.rm=TRUE)
+G401_rep2_day3 <- sum(export_data$G401_2nd_rep_Day_3.ct,na.rm=TRUE)
+G401_rep2_day10 <- sum(export_data$G401_2nd_rep_Day_10.ct,na.rm=TRUE)
+BT16_rep1_day4 <- sum(export_data$BT16_1st_rep_Day_4.ct,na.rm=TRUE)
+BT16_rep1_day8 <- sum(export_data$BT16_1st_rep_Day_8.ct,na.rm=TRUE)
+BT16_rep2_day4 <- sum(export_data$BT16_2nd_rep_Day_4.ct,na.rm=TRUE)
+BT16_rep2_day8 <- sum(export_data$BT16_2nd_rep_Day_8.ct,na.rm=TRUE)
+RCRF1009T_rep1_day4 <- sum(export_data$RCRF1009T_1st_rep_Day_4.ct,na.rm=TRUE)
+RCRF1009T_rep1_day14 <- sum(export_data$RCRF1009T_1st_rep_Day_14.ct,na.rm=TRUE)
+RCRF1009T_rep2_day4 <- sum(export_data$RCRF1009T_2nd_rep_Day_4.ct,na.rm=TRUE)
+RCRF1009T_rep2_day14 <- sum(export_data$RCRF1009T_2nd_rep_Day_14.ct,na.rm=TRUE)
+
+
+
+
+
+
+
+
+
+
+export_data = export_data %>% 
+  mutate(G401_1st_rep_Day_3_log.ct = log2(G401_1st_rep_Day_3.ct),
+         G401_2nd_rep_Day_3_log.ct = log2(G401_2nd_rep_Day_3.ct),
+         G401_1st_rep_Day_10_log.ct = log2(G401_1st_rep_Day_10.ct),
+         G401_2nd_rep_Day_10_log.ct = log2(G401_2nd_rep_Day_10.ct),
+         BT16_1st_rep_Day_4_log.ct = log2(BT16_1st_rep_Day_4.ct),
+         BT16_2nd_rep_Day_4_log.ct = log2(BT16_2nd_rep_Day_4.ct),
+         BT16_1st_rep_Day_8_log.ct = log2(BT16_1st_rep_Day_8.ct),
+         BT16_2nd_rep_Day_8_log.ct = log2(BT16_2nd_rep_Day_8.ct),
+         RCRF1009T_1st_rep_Day_4_log.ct = log2(RCRF1009T_1st_rep_Day_4.ct),
+         RCRF1009T_2nd_rep_Day_4_log.ct = log2(RCRF1009T_2nd_rep_Day_4.ct),
+         RCRF1009T_1st_rep_Day_14_log.ct = log2(RCRF1009T_1st_rep_Day_14.ct),
+         RCRF1009T_2nd_rep_Day_14_log.ct = log2(RCRF1009T_2nd_rep_Day_14.ct),
+         G401_1st_rep_Day_3_log.ref_ct = log2(G401_1st_rep_Day_3.ref_ct),
+         G401_2nd_rep_Day_3_log.ref_ct = log2(G401_2nd_rep_Day_3.ref_ct),
+         G401_1st_rep_Day_10_log.ref_ct = log2(G401_1st_rep_Day_10.ref_ct),
+         G401_2nd_rep_Day_10_log.ref_ct = log2(G401_2nd_rep_Day_10.ref_ct),
+         BT16_1st_rep_Day_4_log.ref_ct = log2(BT16_1st_rep_Day_4.ref_ct),
+         BT16_2nd_rep_Day_4_log.ref_ct = log2(BT16_2nd_rep_Day_4.ref_ct),
+         BT16_1st_rep_Day_8_log.ref_ct = log2(BT16_1st_rep_Day_8.ref_ct),
+         BT16_2nd_rep_Day_8_log.ref_ct = log2(BT16_2nd_rep_Day_8.ref_ct),
+         RCRF1009T_1st_rep_Day_4_log.ref_ct = log2(RCRF1009T_1st_rep_Day_4.ref_ct),
+         RCRF1009T_2nd_rep_Day_4_log.ref_ct = log2(RCRF1009T_2nd_rep_Day_4.ref_ct),
+         RCRF1009T_1st_rep_Day_14_log.ref_ct = log2(RCRF1009T_1st_rep_Day_14.ref_ct),
+         RCRF1009T_2nd_rep_Day_14_log.ref_ct = log2(RCRF1009T_2nd_rep_Day_14.ref_ct),
+         G401_1st_rep_day3.ct_new_frctn = G401_1st_rep_Day_3.ct/G401_rep1_day3,
+         G401_1st_rep_day10.ct_new_frctn = G401_1st_rep_Day_10.ct/G401_rep1_day10,
+         G401_2nd_rep_day3.ct_new_frctn = G401_2nd_rep_Day_3.ct/G401_rep2_day3,
+         G401_2nd_rep_day10.ct_new_frctn = G401_2nd_rep_Day_10.ct/G401_rep2_day10,
+         BT16_1st_rep_day4.ct_new_frctn = BT16_1st_rep_Day_4.ct/BT16_rep1_day4,
+         BT16_1st_rep_day8.ct_new_frctn = BT16_1st_rep_Day_8.ct/BT16_rep1_day4,
+         BT16_2nd_rep_day4.ct_new_frctn = BT16_2nd_rep_Day_4.ct/BT16_rep2_day4,
+         BT16_2nd_rep_day8.ct_new_frctn = BT16_2nd_rep_Day_8.ct/BT16_rep2_day8,
+         RCRF1009T_1st_rep_day4.ct_new_frctn = RCRF1009T_1st_rep_Day_4.ct/RCRF1009T_rep1_day4,
+         RCRF1009T_1st_rep_day14.ct_new_frctn = RCRF1009T_1st_rep_Day_14.ct/RCRF1009T_rep1_day14,
+         RCRF1009T_2nd_rep_day4.ct_new_frctn = RCRF1009T_2nd_rep_Day_4.ct/RCRF1009T_rep2_day4,
+         RCRF1009T_2nd_rep_day14.ct_new_frctn = RCRF1009T_2nd_rep_Day_14.ct/RCRF1009T_rep2_day14) %>%
+  
+  mutate(G401_1st_rep_Day_3_log.ct_frctn = G401_1st_rep_Day_3_log.ct/G401_1st_rep_Day_3_log.ref_ct,
+         G401_2nd_rep_Day_3_log.ct_frctn = G401_2nd_rep_Day_3_log.ct/G401_2nd_rep_Day_3_log.ref_ct,
+         G401_1st_rep_Day_10_log.ct_frctn = G401_1st_rep_Day_10_log.ct/G401_1st_rep_Day_10_log.ref_ct,
+         G401_2nd_rep_Day_10_log.ct_frctn = G401_2nd_rep_Day_10_log.ct/G401_2nd_rep_Day_10_log.ref_ct,
+         BT16_1st_rep_Day_4_log.ct_frctn = BT16_1st_rep_Day_4_log.ct/BT16_1st_rep_Day_4_log.ref_ct,
+         BT16_2nd_rep_Day_4_log.ct_frctn = BT16_2nd_rep_Day_4_log.ct/BT16_2nd_rep_Day_4_log.ref_ct,
+         BT16_1st_rep_Day_8_log.ct_frctn = BT16_1st_rep_Day_8_log.ct/BT16_1st_rep_Day_8_log.ref_ct,
+         BT16_2nd_rep_Day_8_log.ct_frctn = BT16_2nd_rep_Day_8_log.ct/BT16_2nd_rep_Day_8_log.ref_ct,
+         RCRF1009T_1st_rep_Day_4_log.ct_frctn = RCRF1009T_1st_rep_Day_4_log.ct/RCRF1009T_1st_rep_Day_4_log.ref_ct,
+         RCRF1009T_2nd_rep_Day_4_log.ct_frctn = RCRF1009T_2nd_rep_Day_4_log.ct/RCRF1009T_2nd_rep_Day_4_log.ref_ct,
+         RCRF1009T_1st_rep_Day_14_log.ct_frctn = RCRF1009T_1st_rep_Day_14_log.ct/RCRF1009T_1st_rep_Day_14_log.ref_ct,
+         RCRF1009T_2nd_rep_Day_14_log.ct_frctn = RCRF1009T_2nd_rep_Day_14_log.ct/RCRF1009T_2nd_rep_Day_14_log.ref_ct)
+
+
+
+
+export_data = export_data %>%
+  mutate(g401_count_average = rowMeans(dplyr::select(export_data,
+                                              G401_1st_rep_Day_3.ct,
+                                              G401_2nd_rep_Day_3.ct),
+                                       na.rm = TRUE),
+         g401_frctn_average = rowMeans(dplyr::select(export_data,
+                                              G401_1st_rep_Day_3.ct_frctn,
+                                              G401_2nd_rep_Day_3.ct_frctn),
+                                       na.rm = TRUE),
+         g401_frctn_day3_average = rowMeans(dplyr::select(export_data,
+                                              G401_1st_rep_Day_3.ct_frctn,
+                                              G401_2nd_rep_Day_3.ct_frctn),
+                                       na.rm = TRUE),
+         g401_frctn_day10_average = rowMeans(dplyr::select(export_data,
+                                              G401_1st_rep_Day_10.ct_frctn,
+                                              G401_2nd_rep_Day_10.ct_frctn),
+                                       na.rm = TRUE),
+         g401_ref_average = rowMeans(dplyr::select(export_data,
+                                            G401_1st_rep_Day_3.ref_ct,
+                                            G401_2nd_rep_Day_3.ref_ct),
+                                     na.rm = TRUE),
+         bt16_count_average = rowMeans(dplyr::select(export_data,
+                                              BT16_1st_rep_Day_4.ct,
+                                              BT16_2nd_rep_Day_4.ct),
+                                       na.rm = TRUE),
+         bt16_frctn_average = rowMeans(dplyr::select(export_data,
+                                              BT16_1st_rep_Day_4.ct_frctn,
+                                              BT16_2nd_rep_Day_4.ct_frctn),
+                                       na.rm = TRUE),
+         bt16_ref_average = rowMeans(dplyr::select(export_data,
+                                            BT16_1st_rep_Day_4.ref_ct,
+                                            BT16_2nd_rep_Day_4.ref_ct),
+                                     na.rm = TRUE),
+         bt16_frctn_day4_average = rowMeans(dplyr::select(export_data,
+                                              BT16_1st_rep_Day_4.ct_frctn,
+                                              BT16_2nd_rep_Day_4.ct_frctn),
+                                       na.rm = TRUE),
+         bt16_frctn_day8_average = rowMeans(dplyr::select(export_data,
+                                              BT16_1st_rep_Day_8.ct_frctn,
+                                              BT16_2nd_rep_Day_8.ct_frctn),
+                                       na.rm = TRUE),
+         rcrf1009t_count_average = rowMeans(dplyr::select(export_data,
+                                                   RCRF1009T_1st_rep_Day_4.ct,
+                                                   RCRF1009T_2nd_rep_Day_4.ct),
+                                            na.rm = TRUE),
+         rcrf1009t_frctn_average = rowMeans(dplyr::select(export_data,
+                                                   RCRF1009T_1st_rep_Day_4.ct_frctn,
+                                                   RCRF1009T_2nd_rep_Day_4.ct_frctn),
+                                            na.rm = TRUE),
+         rcrf1009t_ref_average = rowMeans(dplyr::select(export_data,
+                                                 RCRF1009T_1st_rep_Day_4.ref_ct,
+                                                 RCRF1009T_2nd_rep_Day_4.ref_ct),
+                                          na.rm = TRUE),
+         rcrf1009t_frctn_day4_average = rowMeans(dplyr::select(export_data,
+                                                   RCRF1009T_1st_rep_Day_4.ct_frctn,
+                                                   RCRF1009T_2nd_rep_Day_4.ct_frctn),
+                                            na.rm = TRUE),
+         rcrf1009t_frctn_day14_average = rowMeans(dplyr::select(export_data,
+                                                   RCRF1009T_1st_rep_Day_14.ct_frctn,
+                                                   RCRF1009T_2nd_rep_Day_14.ct_frctn),
+                                            na.rm = TRUE),
+         all_count_average = rowMeans(dplyr::select(export_data,
+                                             G401_1st_rep_Day_3.ct,
+                                             G401_2nd_rep_Day_3.ct,
+                                             BT16_1st_rep_Day_4.ct,
+                                             BT16_2nd_rep_Day_4.ct,
+                                             RCRF1009T_1st_rep_Day_4.ct,
+                                             RCRF1009T_2nd_rep_Day_4.ct),
+                                      na.rm = TRUE),
+         all_frctn_average = rowMeans(dplyr::select(export_data,
+                                             G401_1st_rep_Day_3.ct_frctn,
+                                             G401_2nd_rep_Day_3.ct_frctn,
+                                             BT16_1st_rep_Day_4.ct_frctn,
+                                             BT16_2nd_rep_Day_4.ct_frctn,
+                                             RCRF1009T_1st_rep_Day_4.ct_frctn,
+                                             RCRF1009T_2nd_rep_Day_4.ct_frctn),
+                                      na.rm = TRUE),
+         all_ref_average = rowMeans(dplyr::select(export_data,
+                                           G401_1st_rep_Day_3.ref_ct,
+                                           G401_2nd_rep_Day_3.ref_ct,
+                                           BT16_1st_rep_Day_4.ref_ct,
+                                           BT16_2nd_rep_Day_4.ref_ct,
+                                           RCRF1009T_1st_rep_Day_4.ref_ct,
+                                           RCRF1009T_2nd_rep_Day_4.ref_ct),
+                                    na.rm = TRUE))
+
+export_data$G401_1st_rep_Day_10.ct_frctn[is.na(export_data$G401_1st_rep_Day_10.ct_frctn)] = 0
+export_data$G401_2nd_rep_Day_10.ct_frctn[is.na(export_data$G401_2nd_rep_Day_10.ct_frctn)] = 0
+export_data$BT16_1st_rep_Day_8.ct_frctn[is.na(export_data$BT16_1st_rep_Day_8.ct_frctn)] = 0
+export_data$BT16_2nd_rep_Day_8.ct_frctn[is.na(export_data$BT16_2nd_rep_Day_8.ct_frctn)] = 0
+export_data$RCRF1009T_1st_rep_Day_14.ct_frctn[is.na(export_data$RCRF1009T_1st_rep_Day_14.ct_frctn)] = 0
+export_data$RCRF1009T_2nd_rep_Day_14.ct_frctn[is.na(export_data$RCRF1009T_2nd_rep_Day_14.ct_frctn)] = 0
+
+
+
+export_data = export_data %>%
+  
+  mutate(g401_rep1_ref = (G401_1st_rep_day10.ct_new_frctn + 1e-8)/G401_1st_rep_day3.ct_new_frctn,
+         g401_rep2_ref = (G401_2nd_rep_day10.ct_new_frctn + 1e-8)/G401_2nd_rep_day3.ct_new_frctn,
+         bt16_rep1_ref = (BT16_1st_rep_day8.ct_new_frctn + 1e-8)/BT16_1st_rep_day4.ct_new_frctn,
+         bt16_rep2_ref = (BT16_2nd_rep_day8.ct_new_frctn + 1e-8)/BT16_2nd_rep_day4.ct_new_frctn,
+         rcrf1009t_rep1_ref = (RCRF1009T_1st_rep_day14.ct_new_frctn + 1e-8)/RCRF1009T_1st_rep_day4.ct_new_frctn,
+         rcrf1009t_rep2_ref = (RCRF1009T_2nd_rep_day14.ct_new_frctn + 1e-8)/RCRF1009T_2nd_rep_day4.ct_new_frctn) %>%
+  
+  mutate(g401_rep1_log2 = log2(g401_rep1_ref),
+         g401_rep2_log2 = log2(g401_rep2_ref),
+         bt16_rep1_log2 = log2(bt16_rep1_ref),
+         bt16_rep2_log2 = log2(bt16_rep2_ref),
+         rcrf1009t_rep1_log2 = log2(rcrf1009t_rep1_ref),
+         rcrf1009t_rep2_log2 = log2(rcrf1009t_rep2_ref))
+
+```
+
+## Correlation Plotting for Replicate Mutational Abundance
+
+```{r}
+
+setwd("/Users/gwcoope/Library/CloudStorage/GoogleDrive-gcooper.gene@gmail.com/My\ Drive/Hong\ Lab\ Project\ Folders.gdrive/Results\ GC/17-SMARCB1_MITEseq2/Manuscript/miteanalysis_supp_data/correlation_plots")
+
+
+
+tiff("G401_Day3_counts.tiff", units="in", width=6, height=6, res=600)
+
+x <- export_data$G401_1st_rep_Day_3_log.ct; y <- export_data$G401_2nd_rep_Day_3_log.ct; fit <- lm(x~y)
+
+plot(x,y,pch=16,col="#00000067",xlab="G401 1st rep Day 3 count log2",ylab="G401 2nd rep Day 3 count log2",main=paste("G401 Day3 logged counts, R-squared:",round(summary(fit)$r.squared,digits=4)),xlim = c(0, 16), ylim = c(0, 16))
+
+dev.off()
+
+x <- export_data$G401_1st_rep_Day_3_log.ct; y <- export_data$G401_2nd_rep_Day_3_log.ct; fit <- lm(x~y)
+
+plot(x,y,pch=16,col="#00000067",xlab="G401 1st rep Day 3 count log2",ylab="G401 2nd rep Day 3 count log2",main=paste("G401 Day3 logged counts, R-squared:",round(summary(fit)$r.squared,digits=4)),xlim = c(0, 16), ylim = c(0, 16))
+
+
+
+
+tiff("G401_Day10_counts.tiff", units="in", width=6, height=6, res=600)
+
+x <- export_data$G401_1st_rep_Day_10_log.ct; y <- export_data$G401_2nd_rep_Day_10_log.ct; fit <- lm(x~y)
+
+plot(x,y,pch=16,col="#00000067",xlab="G401 1st rep Day 10 count log2",ylab="G401 2nd rep Day 10 count log2",main=paste("G401 Day10 logged counts, R-squared:",round(summary(fit)$r.squared,digits=4)),xlim = c(0, 16), ylim = c(0, 16))
+
+dev.off()
+
+x <- export_data$G401_1st_rep_Day_10_log.ct; y <- export_data$G401_2nd_rep_Day_10_log.ct; fit <- lm(x~y)
+
+plot(x,y,pch=16,col="#00000067",xlab="G401 1st rep Day 10 count log2",ylab="G401 2nd rep Day 10 count log2",main=paste("G401 Day10 logged counts, R-squared:",round(summary(fit)$r.squared,digits=4)),xlim = c(0, 16), ylim = c(0, 16))
+
+
+
+
+
+tiff("BT16_Day4_counts.tiff", units="in", width=6, height=6, res=600)
+
+x <- export_data$BT16_1st_rep_Day_4_log.ct; y <- export_data$BT16_2nd_rep_Day_4_log.ct; fit <- lm(x~y)
+
+plot(x,y,pch=16,col="#00000067",xlab="BT16 1st rep Day 4 count log2",ylab="BT16 2nd rep Day 4 count_log2",main=paste("BT16 Day4 logged counts, R-squared:",round(summary(fit)$r.squared,digits=4)),xlim = c(0, 16), ylim = c(0, 16))
+
+dev.off()
+
+x <- export_data$BT16_1st_rep_Day_4_log.ct; y <- export_data$BT16_2nd_rep_Day_4_log.ct; fit <- lm(x~y)
+
+plot(x,y,pch=16,col="#00000067",xlab="BT16 1st rep Day 4 count log2",ylab="BT16 2nd rep Day 4 count_log2",main=paste("BT16 Day4 logged counts, R-squared:",round(summary(fit)$r.squared,digits=4)),xlim = c(0, 16), ylim = c(0, 16))
+
+
+
+
+
+tiff("BT16_Day8_counts.tiff", units="in", width=6, height=6, res=600)
+
+x <- export_data$BT16_1st_rep_Day_8_log.ct; y <- export_data$BT16_2nd_rep_Day_8_log.ct; fit <- lm(x~y)
+
+plot(x,y,pch=16,col="#00000067",xlab="BT16 1st rep Day 8 count log2",ylab="BT16 2nd rep Day 8 count log2",main=paste("BT16 Day8 logged counts, R-squared:",round(summary(fit)$r.squared,digits=4)))
+
+dev.off()
+
+x <- export_data$BT16_1st_rep_Day_8_log.ct; y <- export_data$BT16_2nd_rep_Day_8_log.ct; fit <- lm(x~y)
+
+plot(x,y,pch=16,col="#00000067",xlab="BT16 1st rep Day 8 count log2",ylab="BT16 2nd rep Day 8 count log2",main=paste("BT16 Day8 logged counts, R-squared:",round(summary(fit)$r.squared,digits=4)))
+
+
+
+
+tiff("RCRF1009T_Day4_counts.tiff", units="in", width=6, height=6, res=600)
+
+x <- export_data$RCRF1009T_1st_rep_Day_4_log.ct; y <- export_data$BT16_2nd_rep_Day_4_log.ct; fit <- lm(x~y)
+
+plot(x,y,pch=16,col="#00000067",xlab="G401 1st rep Day 3 count log2",ylab="G401 2nd rep Day 3 count log2",main=paste("RCRF1009T Day4 logged counts, R-squared:",round(summary(fit)$r.squared,digits=4)),xlim = c(0, 16), ylim = c(0, 16))
+
+dev.off()
+
+x <- export_data$RCRF1009T_1st_rep_Day_4_log.ct; y <- export_data$BT16_2nd_rep_Day_4_log.ct; fit <- lm(x~y)
+
+plot(x,y,pch=16,col="#00000067",xlab="G401 1st rep Day 3 count log2",ylab="G401 2nd rep Day 3 count log2",main=paste("RCRF1009T Day4 logged counts, R-squared:",round(summary(fit)$r.squared,digits=4)),xlim = c(0, 16), ylim = c(0, 16))
+
+
+
+
+tiff("RCRF1009T_Day14_counts.tiff", units="in", width=6, height=6, res=600)
+
+x <- export_data$RCRF1009T_1st_rep_Day_14_log.ct; y <- export_data$RCRF1009T_2nd_rep_Day_14_log.ct; fit <- lm(x~y)
+
+plot(x,y,pch=16,col="#00000067",xlab="RCRF1009T 1st rep Day 14 count log2",ylab="RCRF1009T 2nd rep Day 14 count log2",main=paste("RCRF1009T Day14 logged counts, R-squared:",round(summary(fit)$r.squared,digits=4)))
+
+dev.off()
+
+x <- export_data$RCRF1009T_1st_rep_Day_14_log.ct; y <- export_data$RCRF1009T_2nd_rep_Day_14_log.ct; fit <- lm(x~y)
+
+plot(x,y,pch=16,col="#00000067",xlab="RCRF1009T 1st rep Day 14 count log2",ylab="RCRF1009T 2nd rep Day 14 count log2",main=paste("RCRF1009T Day14 logged counts, R-squared:",round(summary(fit)$r.squared,digits=4)))
+
+
+
+
+```
+
+
+## Further Data Filtering
+
+Removal of Unnecessary Columns
+```{r, message = FALSE}
+
+column_mask = logical(length = 247)
+column_mask[c(1, 3, 5:9, 170:247)] = TRUE
+
+export_data_all_cols = export_data
+export_data = export_data_all_cols[ , column_mask]
+
+```
+
+
+Separation of Frameshifts and Indels
+```{r, message = FALSE}
+
+frameshift_mask = grepl("FS", export_data$list.whole.mol.all.aa.changes_upto.a.stop_Ted)
+
+frameshift_data = filter(export_data,
+                         frameshift_mask)
+
+export_data_all_mutants = export_data
+
+export_data = filter(export_data,
+                       !frameshift_mask)
+
+export_data_no_fs = export_data
+
+```
+
+
+Data Re-structuring for Downstream Analysis
+```{r, message = FALSE}
+export_data = export_data %>%
+
+  mutate("mutations" = export_data$list.whole.mol.all.cdn.changes_upto.a.stop_Ted) %>%
+
+  separate(mutations,
+           c("mut_1", "temp_1", "nt_1", "mut_2", "temp_2", "nt_2", "mut_3", "temp_3", "nt_3", "mut_4", "temp_4", "nt_4", "mut_5", "temp_5", "nt_5"),
+           sep = "([\\:\\,\\>])",
+           convert = TRUE,
+           extra = "drop",
+           fill = "right")
+
+export_data = export_data %>%
+  
+  mutate("mutations" = export_data$list.whole.mol.all.aa.changes_upto.a.stop_Ted) %>%
+  
+  separate(mutations,
+           c("mut_1_type", NA, "new_aa_1", "mut_2_type", NA, "new_aa_2", "mut_3_type", NA, "new_aa_3", "mut_4_type", NA, "new_aa_4", "mut_5_type", NA, "new_aa_5"),
+           sep = "([\\:\\,\\>])",
+           convert = TRUE,
+           extra = "drop",
+           fill = "right")
+
+export_data$mut_2_type = str_squish(export_data$mut_2_type)
+export_data$mut_3_type = str_squish(export_data$mut_3_type)
+export_data$mut_4_type = str_squish(export_data$mut_4_type)
+export_data$mut_5_type = str_squish(export_data$mut_5_type)
+
+export_data = export_data %>%
+  unite(all_mut,
+        mut_1_type,
+        mut_2_type,
+        mut_3_type,
+        mut_4_type,
+        mut_5_type,
+        sep = "",
+        remove = FALSE,
+        na.rm = TRUE)
+
+export_data$all_reps = rowMeans(dplyr::select(export_data,
+                                                   g401_rep1_log2,
+                                                   g401_rep2_log2,
+                                                   bt16_rep1_log2,
+                                                   bt16_rep2_log2,
+                                                   rcrf1009t_rep1_log2,
+                                                   rcrf1009t_rep2_log2),
+                                     na.rm = TRUE)
+
+
+export_data$all_reps_sd = matrixStats::rowSds(as.matrix(dplyr::select(export_data,
+                                                                           g401_rep1_log2,
+                                                                           g401_rep2_log2,
+                                                                           bt16_rep1_log2,
+                                                                           bt16_rep2_log2,
+                                                                           rcrf1009t_rep1_log2,
+                                                                           rcrf1009t_rep2_log2)),
+                                                   na.rm = TRUE)
+
+```
+
+
+Indel and Frameshift Parsing
+```{r, message = FALSE}
+
+indel_mask = grepl("D", export_data$all_mut) |
+  grepl("I", export_data$all_mut)
+
+indel_data = dplyr::filter(export_data,
+                           indel_mask)
+
+# write_csv(export_data,
+#           file = "C:/Users/bplee3/Google Drive/Hong Lab Project Folders/Results BL/1 - SMARCB1 MITE-seq/Filter by Cell Lines Data/20210729_BL_excel_export_indel.csv")
+
+export_data = filter(export_data,
+                     !indel_mask)
+
+export_data_no_fs_no_indel = export_data
+
+```
+
+
+Adjusting Parsing for Frameshift Data
+```{r, message = FALSE}
+
+frameshift_data_hold = frameshift_data
+
+frameshift_data = frameshift_data %>%
+
+  mutate("mutations" = frameshift_data$list.whole.mol.all.cdn.changes_upto.a.stop_Ted) %>%
+
+  separate(mutations,
+           c(NA, "fs_1"),
+           sep = "([\\:\\,\\>])",
+           convert = TRUE,
+           extra = "drop",
+           fill = "right")
+
+frameshift_data = frameshift_data %>%
+  filter(fs_1 == "FS")
+
+frameshift_data = frameshift_data %>%
+  subset(select = -c(fs_1))
+
+
+frameshift_data = frameshift_data %>%
+
+  mutate("mutations" = frameshift_data$list.whole.mol.all.cdn.changes_upto.a.stop_Ted) %>%
+
+  separate(mutations,
+           c(NA, NA, "mut_1", "temp_1", "nt_1", "mut_2", "temp_2", "nt_2", "mut_3", "temp_3", "nt_3", "mut_4", "temp_4", "nt_4", "mut_5", "temp_5", "nt_5"),
+           sep = "([\\:\\,\\>])",
+           convert = TRUE,
+           extra = "drop",
+           fill = "right")
+
+
+frameshift_data = frameshift_data %>%
+  
+  mutate("mutations" = frameshift_data$list.whole.mol.all.aa.changes_upto.a.stop_Ted) %>%
+  
+  separate(mutations,
+           c("mut_1_type", NA, NA, "new_aa_1", "mut_2_type", NA, "new_aa_2", "mut_3_type", NA, "new_aa_3", "mut_4_type", NA, "new_aa_4", "mut_5_type", NA, "new_aa_5"),
+           sep = "([\\:\\,\\>])",
+           convert = TRUE,
+           extra = "drop",
+           fill = "right")
+
+frameshift_data$mut_1_type[frameshift_data$mut_1_type == "FS"] = "F"
+
+frameshift_data$mut_2_type = str_squish(frameshift_data$mut_2_type)
+frameshift_data$mut_3_type = str_squish(frameshift_data$mut_3_type)
+frameshift_data$mut_4_type = str_squish(frameshift_data$mut_4_type)
+frameshift_data$mut_5_type = str_squish(frameshift_data$mut_5_type)
+
+frameshift_data = frameshift_data %>%
+  unite(all_mut,
+        mut_1_type,
+        mut_2_type,
+        mut_3_type,
+        mut_4_type,
+        mut_5_type,
+        sep = "",
+        remove = FALSE,
+        na.rm = TRUE)
+
+frameshift_data$all_reps = rowMeans(dplyr::select(frameshift_data,
+                                                   g401_rep1_log2,
+                                                   g401_rep2_log2,
+                                                   bt16_rep1_log2,
+                                                   bt16_rep2_log2,
+                                                   rcrf1009t_rep1_log2,
+                                                   rcrf1009t_rep2_log2),
+                                     na.rm = TRUE)
+
+
+frameshift_data$all_reps_sd = matrixStats::rowSds(as.matrix(dplyr::select(frameshift_data,
+                                                                           g401_rep1_log2,
+                                                                           g401_rep2_log2,
+                                                                           bt16_rep1_log2,
+                                                                           bt16_rep2_log2,
+                                                                           rcrf1009t_rep1_log2,
+                                                                           rcrf1009t_rep2_log2)),
+                                                   na.rm = TRUE)
+
+```
+
+
+Concatenation of Frameshift Data with Consistent Column Names
+```{r, message = FALSE}
+
+export_data_hold = export_data
+
+export_data = rbind(export_data,
+                      frameshift_data)
+
+export_data = export_data[order(export_data$mut_1), ]
+
+```
+
+Mutation Count Masks
+```{r, message = FALSE}
+
+frameshift_mask = export_data$mut_1_type == "F"
+
+single_mask = is.na(export_data$mut_2) &
+  !frameshift_mask
+
+double_mask = is.na(export_data$mut_3) &
+  !single_mask &
+  !frameshift_mask
+
+triple_mask = is.na(export_data$mut_4) &
+  !double_mask &
+  !single_mask &
+  !frameshift_mask
+
+four_mask = is.na(export_data$mut_5) &
+  !single_mask &
+  !double_mask &
+  !triple_mask &
+  !frameshift_mask
+
+five_mask = !is.na(export_data$mut_5) &
+  !frameshift_mask
+
+```
+
+
+Single Mutant Analysis -- Filtering Missense Mutants
+```{r, message = FALSE}
+
+single_mutants_data = filter(export_data,
+                             single_mask |
+                               frameshift_mask,
+                             !is.na(export_data$mut_1))
+
+single_mutants_data = single_mutants_data[order(single_mutants_data$mut_1), ]
+
+```
+
+
+Inclusion of Double Mutant Molecules to Avoid Restriction Sites
+```{r, message = FALSE}
+
+intended_double_mutants = readxl::read_excel(path = "/Users/gwcoope/Library/CloudStorage/GoogleDrive-gcooper.gene@gmail.com/My\ Drive/Hong\ Lab\ Project\ Folders.gdrive/Results\ GC/2-SMARCB1\ MITE-seq/20210311_BL_SMARCB1_restriction_enzymes_fix.xlsx")
+
+
+
+
+
+test_df = single_mutants_data[1, ]
+
+for (i in 1:nrow(intended_double_mutants)) {
+  mask_1 = (export_data$mut_1 == intended_double_mutants$mut_1[i] &
+              export_data$nt_1 == intended_double_mutants$nt_1[i] &
+              export_data$mut_2 == intended_double_mutants$mut_2[i] &
+              export_data$nt_2 == intended_double_mutants$nt_2[i] &
+              is.na(export_data$nt_3))
+  test_df = rbind(test_df, filter(export_data, mask_1))
+  single_mutants_data = rbind(single_mutants_data, filter(export_data, mask_1))
+}
+
+test_df = test_df[-1,]
+
+```
+
+
+Accounting for Molecules with Two Intended Mutations
+```{r, message = FALSE}
+
+mut_1_final = c()
+mut_1_type_final = c()
+new_aa_1_final = c()
+
+for (i in 1:nrow(single_mutants_data)) {
+  if (single_mutants_data$mut_1_type[i] == "F") {
+    mut_1_final = c(mut_1_final, single_mutants_data$mut_1[i])
+    mut_1_type_final = c(mut_1_type_final, single_mutants_data$mut_1_type[i])
+    new_aa_1_final = c(new_aa_1_final, "Z")
+  } else if (is.na(single_mutants_data$mut_2_type[i])) {
+    mut_1_final = c(mut_1_final, single_mutants_data$mut_1[i])
+    mut_1_type_final = c(mut_1_type_final, single_mutants_data$mut_1_type[i])
+    new_aa_1_final = c(new_aa_1_final, single_mutants_data$new_aa_1[i])
+  } else if (single_mutants_data$mut_2_type[i] != "S"){
+    mut_1_final = c(mut_1_final, single_mutants_data$mut_2[i])
+    mut_1_type_final = c(mut_1_type_final, single_mutants_data$mut_2_type[i])
+    new_aa_1_final = c(new_aa_1_final, single_mutants_data$new_aa_2[i])
+  } else {
+    mut_1_final = c(mut_1_final, single_mutants_data$mut_1[i])
+    mut_1_type_final = c(mut_1_type_final, single_mutants_data$mut_1_type[i])
+    new_aa_1_final = c(new_aa_1_final, single_mutants_data$new_aa_1[i])
+  }
+}
+
+
+single_mutants_data$mut_1_final = mut_1_final
+single_mutants_data$mut_1_type_final = mut_1_type_final
+single_mutants_data$new_aa_1_final = new_aa_1_final
+
+single_mutants_data = single_mutants_data[order(single_mutants_data$mut_1_final), ]
+
+```
+
+
+## Calculating Z-scores
+We employed a rolling z-score method, averaging the z-scores of the two amino acids flanking the mutation of interest to assess expected changes in abundance.
+
+``` {r, message = FALSE}
+
+single_mutants_data = single_mutants_data[order(single_mutants_data$mut_1_final), ]
+
+silent_data = filter(single_mutants_data,
+                          mut_1_type_final == "S")
+
+codons_w_23nt = unique(filter(silent_data,
+                              num.whole.mol.nt.changes_Ted == 2 |
+                                num.whole.mol.nt.changes_Ted == 3)$mut_1_final)
+
+silent_data = filter(silent_data,
+                     !(num.whole.mol.nt.changes_Ted == 1 &
+                       is.element(mut_1_final, codons_w_23nt)))
+
+rm(codons_w_23nt)
+
+
+## G401 Rep 1 Z-scores ####
+
+g401_silent_data = filter(silent_data,
+                          !is.na(g401_rep1_log2),
+                          !is.na(g401_rep2_log2))
+
+G401_roll_stats_1 = data.frame("codon" = c(0), "rolling_average" = c(0), "rolling_sd" = c(0))
+
+
+#This for loop is finding the mean 
+
+for (j in 1:386) {
+  rows_needed = g401_silent_data$mut_1_type_final == "S" &
+    g401_silent_data$mut_1_final >= j - 2 &
+    g401_silent_data$mut_1_final <= j + 2
+  codon_mean = mean(g401_silent_data$g401_rep1_log2[rows_needed], na.rm = TRUE)
+  codon_sd = sd(g401_silent_data$g401_rep1_log2[rows_needed], na.rm = TRUE)
+  G401_roll_stats_1 = rbind(G401_roll_stats_1, c(j, codon_mean, codon_sd))
+}
+
+G401_roll_stats_1 = G401_roll_stats_1[-1,]
+G401_roll_stats_1[c(1:2), c(2:3)] = G401_roll_stats_1[3, c(2:3)]
+
+rm(codon_mean)
+rm(codon_sd)
+rm(j)
+
+
+G401_mutant_zscore_vec_1 = c()
+
+for (j in 1:nrow(G401_roll_stats_1)) {
+  rows_needed = single_mutants_data$mut_1_final == j &
+    !is.na(single_mutants_data$mut_1_final)
+  zscores = ((single_mutants_data$g401_rep1_log2[rows_needed] -
+                G401_roll_stats_1$rolling_average[j]) /
+               G401_roll_stats_1$rolling_sd[j])
+  G401_mutant_zscore_vec_1 = c(G401_mutant_zscore_vec_1, zscores)
+}
+
+single_mutants_data$g401_rep1_zscore = G401_mutant_zscore_vec_1
+
+rm(G401_mutant_zscore_vec_1)
+rm(zscores)
+rm(rows_needed)
+rm(j)
+rm(g401_silent_data)
+
+
+## G401 Rep 2 Z-scores ####
+
+g401_silent_data = filter(silent_data,
+                          !is.na(g401_rep1_log2),
+                          !is.na(g401_rep2_log2))
+
+G401_roll_stats_2 = data.frame("codon" = c(0), "rolling_average" = c(0), "rolling_sd" = c(0))
+
+for (j in 1:386) {
+  rows_needed = g401_silent_data$mut_1_type_final == "S" &
+    g401_silent_data$mut_1_final >= j - 2 &
+    g401_silent_data$mut_1_final <= j + 2
+  codon_mean = mean(g401_silent_data$g401_rep2_log2[rows_needed], na.rm = TRUE)
+  codon_sd = sd(g401_silent_data$g401_rep2_log2[rows_needed], na.rm = TRUE)
+  G401_roll_stats_2 = rbind(G401_roll_stats_2, c(j, codon_mean, codon_sd))
+}
+
+G401_roll_stats_2 = G401_roll_stats_2[-1,]
+G401_roll_stats_2[c(1:2), c(2:3)] = G401_roll_stats_2[3, c(2:3)]
+
+rm(codon_mean)
+rm(codon_sd)
+rm(j)
+
+G401_mutant_zscore_vec_2 = c()
+
+for (j in 1:nrow(G401_roll_stats_2)) {
+  rows_needed = single_mutants_data$mut_1_final == j &
+    !is.na(single_mutants_data$mut_1_final)
+  zscores = ((single_mutants_data$g401_rep2_log2[rows_needed] -
+                G401_roll_stats_2$rolling_average[j]) /
+               G401_roll_stats_2$rolling_sd[j])
+  G401_mutant_zscore_vec_2 = c(G401_mutant_zscore_vec_2, zscores)
+}
+
+single_mutants_data$g401_rep2_zscore = G401_mutant_zscore_vec_2
+
+rm(G401_mutant_zscore_vec_2)
+rm(zscores)
+rm(rows_needed)
+rm(j)
+rm(g401_silent_data)
+
+
+## BT16 Rep 1 Z-scores ####
+
+bt16_silent_data = filter(silent_data,
+                          !is.na(bt16_rep1_log2),
+                          !is.na(bt16_rep2_log2))
+
+BT16_roll_stats_1 = data.frame("codon" = c(0), "rolling_average" = c(0), "rolling_sd" = c(0))
+
+for (j in 1:386) {
+  rows_needed = bt16_silent_data$mut_1_type_final == "S" &
+    bt16_silent_data$mut_1_final >= j - 2 &
+    bt16_silent_data$mut_1_final <= j + 2
+  codon_mean = mean(bt16_silent_data$bt16_rep1_log2[rows_needed], na.rm = TRUE)
+  codon_sd = sd(bt16_silent_data$bt16_rep1_log2[rows_needed], na.rm = TRUE)
+  BT16_roll_stats_1 = rbind(BT16_roll_stats_1, c(j, codon_mean, codon_sd))
+}
+
+BT16_roll_stats_1 = BT16_roll_stats_1[-1,]
+BT16_roll_stats_1[c(1:2), c(2:3)] = BT16_roll_stats_1[3, c(2:3)]
+
+rm(codon_mean)
+rm(codon_sd)
+rm(j)
+
+BT16_mutant_zscore_vec_1 = c()
+
+for (j in 1:nrow(BT16_roll_stats_1)) {
+  rows_needed = single_mutants_data$mut_1_final == j &
+    !is.na(single_mutants_data$mut_1_final)
+  zscores = ((single_mutants_data$bt16_rep1_log2[rows_needed] -
+                BT16_roll_stats_1$rolling_average[j]) /
+               BT16_roll_stats_1$rolling_sd[j])
+  BT16_mutant_zscore_vec_1 = c(BT16_mutant_zscore_vec_1, zscores)
+}
+
+single_mutants_data$bt16_rep1_zscore = BT16_mutant_zscore_vec_1
+
+rm(BT16_mutant_zscore_vec_1)
+rm(zscores)
+rm(rows_needed)
+rm(j)
+rm(bt16_silent_data)
+
+
+
+## BT16 Rep 2 Z-scores ####
+
+bt16_silent_data = filter(silent_data,
+                          !is.na(bt16_rep1_log2),
+                          !is.na(bt16_rep2_log2))
+
+BT16_roll_stats_2 = data.frame("codon" = c(0), "rolling_average" = c(0), "rolling_sd" = c(0))
+
+for (j in 1:386) {
+  rows_needed = bt16_silent_data$mut_1_type_final == "S" &
+    bt16_silent_data$mut_1_final >= j - 2 &
+    bt16_silent_data$mut_1_final <= j + 2
+  codon_mean = mean(bt16_silent_data$bt16_rep2_log2[rows_needed], na.rm = TRUE)
+  codon_sd = sd(bt16_silent_data$bt16_rep2_log2[rows_needed], na.rm = TRUE)
+  BT16_roll_stats_2 = rbind(BT16_roll_stats_2, c(j, codon_mean, codon_sd))
+}
+
+BT16_roll_stats_2 = BT16_roll_stats_2[-1,]
+BT16_roll_stats_2[c(1:2), c(2:3)] = BT16_roll_stats_2[3, c(2:3)]
+
+rm(codon_mean)
+rm(codon_sd)
+rm(j)
+
+BT16_mutant_zscore_vec_2 = c()
+
+for (j in 1:nrow(BT16_roll_stats_2)) {
+  rows_needed = single_mutants_data$mut_1_final == j &
+    !is.na(single_mutants_data$mut_1_final)
+  zscores = ((single_mutants_data$bt16_rep2_log2[rows_needed] -
+                BT16_roll_stats_2$rolling_average[j]) /
+               BT16_roll_stats_2$rolling_sd[j])
+  BT16_mutant_zscore_vec_2 = c(BT16_mutant_zscore_vec_2, zscores)
+}
+
+single_mutants_data$bt16_rep2_zscore = BT16_mutant_zscore_vec_2
+
+rm(BT16_mutant_zscore_vec_2)
+rm(zscores)
+rm(rows_needed)
+rm(j)
+rm(bt16_silent_data)
+
+
+### RCRF1009T Rep 1 Z-scores ####
+
+rcrf1009t_silent_data = filter(silent_data,
+                          !is.na(rcrf1009t_rep1_log2),
+                          !is.na(rcrf1009t_rep2_log2))
+
+RCRF1009T_roll_stats_1 = data.frame("codon" = c(0), "rolling_average" = c(0), "rolling_sd" = c(0))
+
+for (j in 1:386) {
+  rows_needed = rcrf1009t_silent_data$mut_1_type_final == "S" &
+    rcrf1009t_silent_data$mut_1_final >= j - 2 &
+    rcrf1009t_silent_data$mut_1_final <= j + 2
+  codon_mean = mean(rcrf1009t_silent_data$rcrf1009t_rep1_log2[rows_needed], na.rm = TRUE)
+  codon_sd = sd(rcrf1009t_silent_data$rcrf1009t_rep1_log2[rows_needed], na.rm = TRUE)
+  RCRF1009T_roll_stats_1 = rbind(RCRF1009T_roll_stats_1, c(j, codon_mean, codon_sd))
+}
+
+RCRF1009T_roll_stats_1 = RCRF1009T_roll_stats_1[-1,]
+RCRF1009T_roll_stats_1[c(1:2), c(2:3)] = RCRF1009T_roll_stats_1[3, c(2:3)]
+
+rm(codon_mean)
+rm(codon_sd)
+rm(j)
+
+RCRF1009T_mutant_zscore_vec_1 = c()
+
+for (j in 1:nrow(RCRF1009T_roll_stats_1)) {
+  rows_needed = single_mutants_data$mut_1_final == j &
+    !is.na(single_mutants_data$mut_1_final)
+  zscores = ((single_mutants_data$rcrf1009t_rep1_log2[rows_needed] -
+                RCRF1009T_roll_stats_1$rolling_average[j]) /
+               RCRF1009T_roll_stats_1$rolling_sd[j])
+  RCRF1009T_mutant_zscore_vec_1 = c(RCRF1009T_mutant_zscore_vec_1, zscores)
+}
+
+single_mutants_data$rcrf1009t_rep1_zscore = RCRF1009T_mutant_zscore_vec_1
+
+rm(RCRF1009T_mutant_zscore_vec_1)
+rm(zscores)
+rm(rows_needed)
+rm(j)
+rm(rcrf1009t_silent_data)
+
+
+### RCRF1009T Rep 2 Z-scores ####
+
+rcrf1009t_silent_data = filter(silent_data,
+                          !is.na(rcrf1009t_rep1_log2),
+                          !is.na(rcrf1009t_rep2_log2))
+
+RCRF1009T_roll_stats_2 = data.frame("codon" = c(0), "rolling_average" = c(0), "rolling_sd" = c(0))
+
+for (j in 1:386) {
+  rows_needed = rcrf1009t_silent_data$mut_1_type_final == "S" &
+    rcrf1009t_silent_data$mut_1_final >= j - 2 &
+    rcrf1009t_silent_data$mut_1_final <= j + 2
+  codon_mean = mean(rcrf1009t_silent_data$rcrf1009t_rep2_log2[rows_needed], na.rm = TRUE)
+  codon_sd = sd(rcrf1009t_silent_data$rcrf1009t_rep2_log2[rows_needed], na.rm = TRUE)
+  RCRF1009T_roll_stats_2 = rbind(RCRF1009T_roll_stats_2, c(j, codon_mean, codon_sd))
+}
+
+RCRF1009T_roll_stats_2 = RCRF1009T_roll_stats_2[-1,]
+RCRF1009T_roll_stats_2[c(1:2), c(2:3)] = RCRF1009T_roll_stats_2[3, c(2:3)]
+
+rm(codon_mean)
+rm(codon_sd)
+rm(j)
+
+RCRF1009T_mutant_zscore_vec_2 = c()
+
+for (j in 1:nrow(RCRF1009T_roll_stats_2)) {
+  rows_needed = single_mutants_data$mut_1_final == j &
+    !is.na(single_mutants_data$mut_1_final)
+  zscores = ((single_mutants_data$rcrf1009t_rep2_log2[rows_needed] -
+                RCRF1009T_roll_stats_2$rolling_average[j]) /
+               RCRF1009T_roll_stats_2$rolling_sd[j])
+  RCRF1009T_mutant_zscore_vec_2 = c(RCRF1009T_mutant_zscore_vec_2, zscores)
+}
+
+single_mutants_data$rcrf1009t_rep2_zscore = RCRF1009T_mutant_zscore_vec_2
+
+rm(RCRF1009T_mutant_zscore_vec_2)
+rm(zscores)
+rm(rows_needed)
+rm(j)
+rm(rcrf1009t_silent_data)
+
+
+
+single_mutants_data$all_reps_zscore = rowMeans(dplyr::select(single_mutants_data,
+                                                             g401_rep1_zscore,
+                                                             g401_rep2_zscore,
+                                                             bt16_rep1_zscore,
+                                                             bt16_rep2_zscore,
+                                                             rcrf1009t_rep1_zscore,
+                                                             rcrf1009t_rep2_zscore),
+                                               na.rm = TRUE)
+
+single_mutants_data$all_reps_zscore_sd = matrixStats::rowSds(as.matrix(dplyr::select(single_mutants_data,
+                                                                                     g401_rep1_zscore,
+                                                                                     g401_rep2_zscore,
+                                                                                     bt16_rep1_zscore,
+                                                                                     bt16_rep2_zscore,
+                                                                                     rcrf1009t_rep1_zscore,
+                                                                                     rcrf1009t_rep2_zscore)),
+                                                             na.rm = TRUE)
+
+single_mutants_data$g401_zscore_average = rowMeans(dplyr::select(single_mutants_data,
+                                                                 g401_rep1_zscore,
+                                                                 g401_rep2_zscore),
+                                                   na.rm= TRUE)
+single_mutants_data$bt16_zscore_average = rowMeans(dplyr::select(single_mutants_data,
+                                                                 bt16_rep1_zscore,
+                                                                 bt16_rep2_zscore),
+                                                   na.rm = TRUE)
+single_mutants_data$rcrf1009t_zscore_average = rowMeans(dplyr::select(single_mutants_data,
+                                                                      rcrf1009t_rep1_zscore,
+                                                                      rcrf1009t_rep2_zscore),
+                                                        na.rm = TRUE)
+
+single_mutants_data_no_b = single_mutants_data
+
+silents_to_b_vec = c()
+
+for (i in 1:nrow(single_mutants_data)) {
+  if (single_mutants_data$mut_1_type_final[i] == "S") {
+    silents_to_b_vec = c(silents_to_b_vec, "B")
+  } else {
+    silents_to_b_vec = c(silents_to_b_vec, single_mutants_data$new_aa_1_final[i])
+  }
+}
+
+single_mutants_data$new_aa_1_final_silents = silents_to_b_vec
+
+rm(silents_to_b_vec)
+rm(i)
+
+
+rm(G401_roll_stats_1)
+rm(G401_roll_stats_2)
+rm(BT16_roll_stats_1)
+rm(BT16_roll_stats_2)
+rm(RCRF1009T_roll_stats_1)
+rm(RCRF1009T_roll_stats_2)
+
+
+## Export ####
+
+write_csv(single_mutants_data,
+          file = "/Users/gwcoope/Library/CloudStorage/GoogleDrive-gcooper.gene@gmail.com/My\ Drive/Hong\ Lab\ Project\ Folders.gdrive/Results\ GC/2-SMARCB1\ MITE-seq/20240916_GC_single_mutants_data_w_fs_w_zscores.csv")
+```
+
+
+## Collapsing Molecules by Amino Acid Substitution
+
+Frameshift data filtered because each of these does not have the same identifier, here only missense, nonsense, and silent mutations are being collapsed
+
+```{r, message = FALSE}
+
+single_mutants_data <- read_csv("/Users/gwcoope/Library/CloudStorage/GoogleDrive-gcooper.gene@gmail.com/My\ Drive/Hong\ Lab\ Project\ Folders.gdrive/Results\ GC/2-SMARCB1\ MITE-seq/20240916_GC_single_mutants_data_w_fs_w_zscores.csv")
+
+#Frameshifts make this a bit difficult because they do not have unique names. So here we are going to filter out the frameshifts. Here we are averaging z-scores across all molecules for each missense, silent, and nonsense mutation.
+
+single_mutants_data_nofs <- single_mutants_data %>% 
+  filter(single_mutants_data$mut_1_type_final != "F")
+         
+
+average_mutation_zscore = c()
+
+average_mutation_zscore$G401_R1_av_zscore <- single_mutants_data_nofs %>% dplyr::group_by(mut_1_final, mut_1_type_final,new_aa_1_final, StdNom.Vt.aa.By.Ted) %>%
+  dplyr::summarise(average_allmolec_allrep_zscore = mean(g401_rep1_zscore, na.rm=TRUE))
+
+average_mutation_zscore$G401_R2_av_zscore <- single_mutants_data_nofs %>% dplyr::group_by(mut_1_final, mut_1_type_final,new_aa_1_final, StdNom.Vt.aa.By.Ted) %>%
+  dplyr::summarise(average_allmolec_allrep_zscore = mean(g401_rep2_zscore, na.rm=TRUE))
+
+average_mutation_zscore$BT16_R1_av_zscore <- single_mutants_data_nofs %>% dplyr::group_by(mut_1_final, mut_1_type_final,new_aa_1_final, StdNom.Vt.aa.By.Ted) %>%
+  dplyr::summarise(average_allmolec_allrep_zscore = mean(bt16_rep1_zscore, na.rm=TRUE))
+
+average_mutation_zscore$BT16_R2_av_zscore <- single_mutants_data_nofs %>% dplyr::group_by(mut_1_final, mut_1_type_final,new_aa_1_final, StdNom.Vt.aa.By.Ted) %>%
+  dplyr::summarise(average_allmolec_allrep_zscore = mean(bt16_rep2_zscore, na.rm=TRUE))
+
+average_mutation_zscore$RCRF1009T_R1_av_zscore <- single_mutants_data_nofs %>% dplyr::group_by(mut_1_final, mut_1_type_final,new_aa_1_final, StdNom.Vt.aa.By.Ted) %>%
+  dplyr::summarise(average_allmolec_allrep_zscore = mean(rcrf1009t_rep1_zscore, na.rm=TRUE))
+
+average_mutation_zscore$RCRF1009T_R2_av_zscore <- single_mutants_data_nofs %>% dplyr::group_by(mut_1_final, mut_1_type_final,new_aa_1_final, StdNom.Vt.aa.By.Ted) %>%
+  dplyr::summarise(average_allmolec_allrep_zscore = mean(rcrf1009t_rep2_zscore, na.rm=TRUE))
+
+average_mutation_zscore <- as.data.frame(average_mutation_zscore)
+
+average_mutation_zscore$all_reps_zscore = rowMeans(dplyr::select(average_mutation_zscore,
+                                                             G401_R1_av_zscore.average_allmolec_allrep_zscore,
+                                                             G401_R2_av_zscore.average_allmolec_allrep_zscore,
+                                                             BT16_R1_av_zscore.average_allmolec_allrep_zscore,
+                                                             BT16_R2_av_zscore.average_allmolec_allrep_zscore,
+                                                             RCRF1009T_R1_av_zscore.average_allmolec_allrep_zscore,
+                                                             RCRF1009T_R2_av_zscore.average_allmolec_allrep_zscore),
+                                               na.rm = TRUE)
+
+average_mutation_zscore$all_reps_zscore_sd = matrixStats::rowSds(as.matrix(dplyr::select(average_mutation_zscore,
+                                                             G401_R1_av_zscore.average_allmolec_allrep_zscore,
+                                                             G401_R2_av_zscore.average_allmolec_allrep_zscore,
+                                                             BT16_R1_av_zscore.average_allmolec_allrep_zscore,
+                                                             BT16_R2_av_zscore.average_allmolec_allrep_zscore,
+                                                             RCRF1009T_R1_av_zscore.average_allmolec_allrep_zscore,
+                                                             RCRF1009T_R2_av_zscore.average_allmolec_allrep_zscore)),
+                                               na.rm = TRUE)
+
+average_mutation_zscore$G401_average_zscore <- rowMeans(average_mutation_zscore[,c('G401_R1_av_zscore.average_allmolec_allrep_zscore',"G401_R2_av_zscore.average_allmolec_allrep_zscore" )], na.rm=TRUE)
+
+average_mutation_zscore$BT16_average_zscore <- rowMeans(average_mutation_zscore[,c('BT16_R1_av_zscore.average_allmolec_allrep_zscore',"BT16_R2_av_zscore.average_allmolec_allrep_zscore" )], na.rm=TRUE)
+
+average_mutation_zscore$RCRF1009T_average_zscore <- rowMeans(average_mutation_zscore[,c('RCRF1009T_R1_av_zscore.average_allmolec_allrep_zscore',"RCRF1009T_R2_av_zscore.average_allmolec_allrep_zscore" )], na.rm=TRUE)
+
+average_mutation_zscore <- average_mutation_zscore %>% separate(G401_R1_av_zscore.StdNom.Vt.aa.By.Ted, into = c('wildtype', 'amino acid'), sep = "(?<=[A-Za-z])(?=[0-9])", remove = FALSE)
+
+silents <- average_mutation_zscore %>%
+  filter(average_mutation_zscore$G401_R2_av_zscore.mut_1_type_final == "S")
+
+average_mutation_zscore <- average_mutation_zscore %>%
+  filter(average_mutation_zscore$G401_R2_av_zscore.mut_1_type_final != "S")
+
+silents$wildtype <- silents$G401_R1_av_zscore.new_aa_1_final
+
+silents$G401_R1_av_zscore.StdNom.Vt.aa.By.Ted <- gsub(" ","", paste(silents$wildtype, silents$G401_R1_av_zscore.mut_1_final, silents$wildtype))
+
+average_mutation_zscore <- rbind(average_mutation_zscore, silents)
+
+average_mutation_zscore$G401_R1_av_zscore.new_aa_1_final <- gsub("X", "Stop", average_mutation_zscore$G401_R1_av_zscore.new_aa_1_final)
+
+average_mutation_zscore_bind = average_mutation_zscore[,c(1,2,3,5,4,7,12,17,22,27,32,33,34,35,36,37)]
+
+names(average_mutation_zscore_bind)[names(average_mutation_zscore_bind) == "wildtype"] <- "G401_R1_av_zscore.wildtype"
+
+names(average_mutation_zscore_bind)[names(average_mutation_zscore_bind) == "G401_R1_av_zscore.new_aa_1_final"] <- "G401_R1_av_zscore.new_aa_1_final_silents"
+
+```
+
+
+
+Collapsing Frameshift Data
+
+```{r, message = FALSE}
+
+frameshift_data <- filter(single_mutants_data,
+       single_mutants_data$mut_1_type_final == "F")
+
+frameshift_data <- frameshift_data %>% separate(StdNom.Vt.aa.By.Ted, into = c('wildtype', 'amino acid'), sep = "(?<=[A-Za-z])(?=[0-9])", remove = FALSE)
+
+frameshift_data$new_aa_1_final_silents <- gsub("Z", "Fs", frameshift_data$new_aa_1_final_silents)
+
+frameshift_data$StdNom.Vt.aa.By.Ted <- gsub(" ","", paste(frameshift_data$wildtype,"", frameshift_data$mut_1_final,"", frameshift_data$new_aa_1_final_silents))
+
+
+
+
+
+frameshift_combine = c()
+
+
+frameshift_combine$G401_R1_av_zscore <- frameshift_data %>% dplyr::group_by(mut_1_final, mut_1_type_final, new_aa_1_final_silents, wildtype, StdNom.Vt.aa.By.Ted) %>%
+  dplyr::summarise(average_allmolec_allrep_zscore = mean(g401_rep1_zscore, na.rm=TRUE))
+
+frameshift_combine$G401_R2_av_zscore <- frameshift_data %>% dplyr::group_by(mut_1_final, mut_1_type_final, new_aa_1_final_silents, wildtype, StdNom.Vt.aa.By.Ted) %>%
+  dplyr::summarise(average_allmolec_allrep_zscore = mean(g401_rep2_zscore, na.rm=TRUE))
+
+frameshift_combine$BT16_R1_av_zscore <- frameshift_data %>% dplyr::group_by(mut_1_final, mut_1_type_final, new_aa_1_final_silents, wildtype, StdNom.Vt.aa.By.Ted) %>%
+  dplyr::summarise(average_allmolec_allrep_zscore = mean(bt16_rep1_zscore, na.rm=TRUE))
+
+frameshift_combine$BT16_R2_av_zscore <- frameshift_data %>% dplyr::group_by(mut_1_final, mut_1_type_final, new_aa_1_final_silents, wildtype, StdNom.Vt.aa.By.Ted) %>%
+  dplyr::summarise(average_allmolec_allrep_zscore = mean(bt16_rep2_zscore, na.rm=TRUE))
+
+frameshift_combine$RCRF1009T_R1_av_zscore <- frameshift_data %>% dplyr::group_by(mut_1_final, mut_1_type_final, new_aa_1_final_silents, wildtype, StdNom.Vt.aa.By.Ted) %>%
+  dplyr::summarise(average_allmolec_allrep_zscore = mean(rcrf1009t_rep1_zscore, na.rm=TRUE))
+
+frameshift_combine$RCRF1009T_R2_av_zscore <- frameshift_data %>% dplyr::group_by(mut_1_final, mut_1_type_final, new_aa_1_final_silents, wildtype, StdNom.Vt.aa.By.Ted) %>%
+  dplyr::summarise(average_allmolec_allrep_zscore = mean(rcrf1009t_rep2_zscore, na.rm=TRUE))
+
+frameshift_combine <- as.data.frame(frameshift_combine)
+
+frameshift_combine$all_reps_zscore = rowMeans(dplyr::select(frameshift_combine,
+                                                             G401_R1_av_zscore.average_allmolec_allrep_zscore,
+                                                             G401_R2_av_zscore.average_allmolec_allrep_zscore,
+                                                             BT16_R1_av_zscore.average_allmolec_allrep_zscore,
+                                                             BT16_R2_av_zscore.average_allmolec_allrep_zscore,
+                                                             RCRF1009T_R1_av_zscore.average_allmolec_allrep_zscore,
+                                                             RCRF1009T_R2_av_zscore.average_allmolec_allrep_zscore),
+                                               na.rm = TRUE)
+
+frameshift_combine$all_reps_zscore_sd = matrixStats::rowSds(as.matrix(dplyr::select(frameshift_combine,
+                                                             G401_R1_av_zscore.average_allmolec_allrep_zscore,
+                                                             G401_R2_av_zscore.average_allmolec_allrep_zscore,
+                                                             BT16_R1_av_zscore.average_allmolec_allrep_zscore,
+                                                             BT16_R2_av_zscore.average_allmolec_allrep_zscore,
+                                                             RCRF1009T_R1_av_zscore.average_allmolec_allrep_zscore,
+                                                             RCRF1009T_R2_av_zscore.average_allmolec_allrep_zscore)),
+                                               na.rm = TRUE)
+
+
+
+
+frameshift_combine <- frameshift_combine[,c(1,2,3,4,5,6,12,18,24,30,36,37,38)]
+
+
+#Calculate average between two replicates in each cell line
+
+frameshift_combine$G401_average_zscore <- rowMeans(frameshift_combine[,c('G401_R1_av_zscore.average_allmolec_allrep_zscore',"G401_R2_av_zscore.average_allmolec_allrep_zscore" )], na.rm=TRUE)
+
+frameshift_combine$BT16_average_zscore <- rowMeans(frameshift_combine[,c('BT16_R1_av_zscore.average_allmolec_allrep_zscore',"BT16_R2_av_zscore.average_allmolec_allrep_zscore" )], na.rm=TRUE)
+
+frameshift_combine$RCRF1009T_average_zscore <- rowMeans(frameshift_combine[,c('RCRF1009T_R1_av_zscore.average_allmolec_allrep_zscore',"RCRF1009T_R2_av_zscore.average_allmolec_allrep_zscore" )], na.rm=TRUE)
+
+
+#Combine both the frameshift and the missense, nonsense, silent data from above
+
+all_mutants_averaged <- rbind(average_mutation_zscore_bind, frameshift_combine)
+
+```
+
+
+Renaming Columns for Improved Readability
+
+```{r, message = FALSE}
+
+all_mutants_averaged <- all_mutants_averaged %>%
+  rename(Residue = G401_R1_av_zscore.mut_1_final)
+
+all_mutants_averaged <- all_mutants_averaged %>%
+  rename(Mutation_Type = G401_R1_av_zscore.mut_1_type_final)
+
+all_mutants_averaged <- all_mutants_averaged %>%
+  rename(Mutant_Amino_Acid = G401_R1_av_zscore.new_aa_1_final_silents)
+
+all_mutants_averaged <- all_mutants_averaged %>%
+  rename(Wildtype_Amino_Acid = G401_R1_av_zscore.wildtype)
+
+all_mutants_averaged <- all_mutants_averaged %>%
+  rename(Substitution = G401_R1_av_zscore.StdNom.Vt.aa.By.Ted)
+
+all_mutants_averaged <- all_mutants_averaged %>%
+  rename(G401_R1_zscore = G401_R1_av_zscore.average_allmolec_allrep_zscore)
+
+all_mutants_averaged <- all_mutants_averaged %>%
+  rename(G401_R2_zscore = G401_R2_av_zscore.average_allmolec_allrep_zscore)
+
+all_mutants_averaged <- all_mutants_averaged %>%
+  rename(BT16_R1_zscore = BT16_R1_av_zscore.average_allmolec_allrep_zscore)
+
+all_mutants_averaged <- all_mutants_averaged %>%
+  rename(BT16_R2_zscore = BT16_R2_av_zscore.average_allmolec_allrep_zscore)
+
+all_mutants_averaged <- all_mutants_averaged %>%
+  rename(RCRF1009T_R1_zscore = RCRF1009T_R1_av_zscore.average_allmolec_allrep_zscore)
+
+all_mutants_averaged <- all_mutants_averaged %>%
+  rename(RCRF1009T_R2_zscore = RCRF1009T_R2_av_zscore.average_allmolec_allrep_zscore)
+
+```
+
+
+Saving the Final Data Frame for Further Analysis
+```{r, message = FALSE}
+
+write_csv(all_mutants_averaged, "/Users/gwcoope/Library/CloudStorage/GoogleDrive-gcooper.gene@gmail.com/My\ Drive/Hong\ Lab\ Project\ Folders.gdrive/Results\ GC/17-SMARCB1_MITEseq2/Manuscript/miteanalysis_supp_data/mitedata_GC_20240916.csv")
+
+```
+
+
+## Plotting Z-scores Across 385 Amino Acids
+```{r}
+
+setwd("/Users/gwcoope/Library/CloudStorage/GoogleDrive-gcooper.gene@gmail.com/My\ Drive/Hong\ Lab\ Project\ Folders.gdrive/Results\ GC/17-SMARCB1_MITEseq2/Manuscript/miteanalysis_supp_data/zscore_plots")
+
+
+all_mutants_averaged <- all_mutants_averaged[order(all_mutants_averaged$Mutation_Type, decreasing = FALSE),]
+
+tiff("allreps_by_amino_acid.tiff", units="in", width=6, height=6, res=300)
+
+x <- all_mutants_averaged$Residue; y <- all_mutants_averaged$all_reps_zscore; z <-as.factor(all_mutants_averaged$Mutation_Type)
+
+plot(x,y,pch=16,col=c("blue", "gray", "red", "black")[z],xlab="Amino Acid Position",ylab="Average Z-Score",main=paste("All reps by amino acid"), cex=0.5, xlim=c(0,385), ylim=c(-7,10))
+
+dev.off()
+
+x <- all_mutants_averaged$Residue; y <- all_mutants_averaged$all_reps_zscore; z <-as.factor(all_mutants_averaged$Mutation_Type)
+
+plot(x,y,pch=16,col=c("blue", "gray", "red", "black")[z],xlab="Amino Acid Position",ylab="Average Z-Score",main=paste("All reps by amino acid"), cex=0.5, xlim=c(0,385), ylim=c(-7,10))
+
+
+
+
+
+tiff("G401_by_amino_acid.tiff", units="in", width=6, height=6, res=300)
+
+x <- all_mutants_averaged$Residue; y <- all_mutants_averaged$G401_average_zscore
+
+plot(x,y,pch=16,col=c("blue", "gray", "red", "black")[z],xlab="Amino Acid Position",ylab="Average Z-Score",main=paste("G401 by amino acid"), cex=0.5, xlim=c(0,385), ylim=c(-7,10))
+
+dev.off()
+
+x <- all_mutants_averaged$Residue; y <- all_mutants_averaged$G401_average_zscore
+
+plot(x,y,pch=16,col=c("blue", "gray", "red", "black")[z],xlab="Amino Acid Position",ylab="Average Z-Score",main=paste("G401 by amino acid"), cex=0.5, xlim=c(0,385), ylim=c(-7,10))
+
+
+
+
+
+
+tiff("BT16_by_amino_acid.tiff", units="in", width=6, height=6, res=300)
+
+x <- all_mutants_averaged$Residue; y <- all_mutants_averaged$BT16_average_zscore
+
+plot(x,y,pch=16,col=c("blue", "gray", "red", "black")[z],xlab="Amino Acid Position",ylab="Average Z-Score",main=paste("BT16 by amino acid"), cex=0.5, xlim=c(0,385), ylim=c(-7,10))
+
+dev.off()
+
+x <- all_mutants_averaged$Residue; y <- all_mutants_averaged$BT16_average_zscore
+
+plot(x,y,pch=16,col=c("blue", "gray", "red", "black")[z],xlab="Amino Acid Position",ylab="Average Z-Score",main=paste("BT16 by amino acid"), cex=0.5, xlim=c(0,385), ylim=c(-7,10))
+
+
+
+
+tiff("RCRF1009T_by_amino_acid.tiff", units="in", width=6, height=6, res=300)
+
+x <- all_mutants_averaged$Residue; y <- all_mutants_averaged$RCRF1009T_average_zscore
+
+plot(x,y,pch=16,col=c("blue", "gray", "red", "black")[z],xlab="Amino Acid Position",ylab="Average Z-Score",main=paste("RCRF1009T by amino acid"), cex=0.5, xlim=c(0,385), ylim=c(-7,10))
+
+dev.off()
+
+x <- all_mutants_averaged$Residue; y <- all_mutants_averaged$RCRF1009T_average_zscore
+
+plot(x,y,pch=16,col=c("blue", "gray", "red", "black")[z],xlab="Amino Acid Position",ylab="Average Z-Score",main=paste("RCRF1009T by amino acid"), cex=0.5, xlim=c(0,385), ylim=c(-7,10))
+
+
+
+
+
+missense_silent_mutants_averaged <- all_mutants_averaged %>%
+  filter(all_mutants_averaged$Mutation_Type == "M" | all_mutants_averaged$Mutation_Type == "S")
+
+
+tiff("allreps_by_amino_acid_missense_silent_only.tiff", units="in", width=6, height=6, res=300)
+
+x <- missense_silent_mutants_averaged$Residue; y <- missense_silent_mutants_averaged$all_reps_zscore; z <-as.factor(missense_silent_mutants_averaged$Mutation_Type)
+
+plot(x,y,pch=16,col=c("gray", "black")[z],xlab="Amino Acid Position",ylab="Average Z-Score",main=paste("All reps by amino acid silent and Missense"), cex=0.5, xlim=c(0,385), ylim=c(-7,10))
+
+dev.off()
+
+x <- missense_silent_mutants_averaged$Residue; y <- missense_silent_mutants_averaged$all_reps_zscore; z <-as.factor(missense_silent_mutants_averaged$Mutation_Type)
+
+plot(x,y,pch=16,col=c("gray", "black")[z],xlab="Amino Acid Position",ylab="Average Z-Score",main=paste("All reps by amino acid silent and Missense"), cex=0.5, xlim=c(0,385), ylim=c(-7,10))
+
+
+
+
+nonsense_frameshift_silent_mutants_averaged <- all_mutants_averaged %>%
+  filter(all_mutants_averaged$Mutation_Type == "F" | all_mutants_averaged$Mutation_Type == "N" | all_mutants_averaged$Mutation_Type == "S")
+
+tiff("allreps_by_amino_acid_nonsense_fs_silent_only.tiff", units="in", width=6, height=6, res=300)
+
+x <- nonsense_frameshift_silent_mutants_averaged$Residue; y <- nonsense_frameshift_silent_mutants_averaged$all_reps_zscore; z <-as.factor(nonsense_frameshift_silent_mutants_averaged$Mutation_Type)
+
+plot(x,y,pch=16,col=c("blue", "red", "black")[z],xlab="Amino Acid Position",ylab="Average Z-Score",main=paste("All reps by amino acid silent and Missense"), cex=0.5, xlim=c(0,385), ylim=c(-7,10))
+
+dev.off()
+
+x <- nonsense_frameshift_silent_mutants_averaged$Residue; y <- nonsense_frameshift_silent_mutants_averaged$all_reps_zscore; z <-as.factor(nonsense_frameshift_silent_mutants_averaged$Mutation_Type)
+
+plot(x,y,pch=16,col=c("blue", "red", "black")[z],xlab="Amino Acid Position",ylab="Average Z-Score",main=paste("All reps by amino acid silent and Missense"), cex=0.5, xlim=c(0,385), ylim=c(-7,10))
+  
+
+```
+
+
+
+
+
+
+```{r}
+
+library(dplyr)
+library(readr)
+
+mite_data <- read.csv("/Users/gwcoope/Library/CloudStorage/GoogleDrive-gcooper.gene@gmail.com/My\ Drive/Hong\ Lab\ Project\ Folders.gdrive/Results\ GC/17-SMARCB1_MITEseq2/Manuscript/miteanalysis_supp_data/mitedata_GC_20240916.csv")
+
+missense_mite_data <- mite_data %>%
+  filter(mite_data$Mutation_Type == "M")
+
+
+average_residue_result <- missense_mite_data %>%
+  group_by(Residue) %>%
+  summarise(avg_zscore = mean(all_reps_zscore, na.rm = TRUE))
+
+
+average_residue_result_sorted <- average_residue_result[order(-average_residue_result$avg_zscore), ]
+
+average_residue_result_sorted$rank <- 1:nrow(average_residue_result_sorted)
+
+
+write_csv(average_residue_result_sorted, "/Users/gwcoope/Library/CloudStorage/GoogleDrive-gcooper.gene@gmail.com/My\ Drive/Hong\ Lab\ Project\ Folders.gdrive/Results\ GC/17-SMARCB1_MITEseq2/Manuscript/miteanalysis_supp_data/mitedata_residues_averaged_GC_20241024.csv")
+
+
+sd <- sd(average_residue_result_sorted$avg_zscore)
+
+mean <- mean(average_residue_result_sorted$avg_zscore)
+
+one_sd_pos <-  mean + 2*sd
+
+one_sd_neg <- mean- 2*sd 
+
+
+
+
+
+
+
+```
+
+
+
+```{r}
+
+missense_mite_data <- mite_data %>%
+  filter(mite_data$Mutation_Type == "M")
+
+missense_mean <- mean(missense_mite_data$all_reps_zscore)
+
+missense_sd <- sd(missense_mite_data$all_reps_zscore)
+
+two_sd_lof = missense_mean + 2*missense_sd
+
+
+
+missense_mite_data_2sd_lof <- missense_mite_data %>%
+  filter(missense_mite_data$all_reps_zscore > two_sd_lof)
+
+
+
+WHD_mutants <- missense_mite_data_2sd_lof %>%
+  filter(missense_mite_data_2sd_lof$Residue > 10 & missense_mite_data_2sd_lof$Residue < 110)
+
+RPT1_mutants <- missense_mite_data_2sd_lof %>%
+  filter(missense_mite_data_2sd_lof$Residue > 183 & missense_mite_data_2sd_lof$Residue < 245)
+
+RPT2_mutants <- missense_mite_data_2sd_lof %>%
+  filter(missense_mite_data_2sd_lof$Residue > 259 & missense_mite_data_2sd_lof$Residue < 319)
+
+CCD_mutants <- missense_mite_data_2sd_lof %>%
+  filter(missense_mite_data_2sd_lof$Residue > 335 & missense_mite_data_2sd_lof$Residue < 378)
+
+IDR_mutants <- missense_mite_data_2sd_lof %>%
+  filter(missense_mite_data_2sd_lof$Residue > 110 & missense_mite_data_2sd_lof$Residue < 185)
+
+```
+
+
+
+
+
+```{r}
+sessionInfo()
+```
+
+
+
+
