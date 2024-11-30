@@ -1,6 +1,6 @@
 ---
 title: "MITEseq Analysis Pipeline"
-author: "Garrett Cooper, Benjamin Lee"
+authors: "Benjamin Lee, Garrett Cooper"
 date: 11/27/2024
 output:
   github_document:
@@ -43,13 +43,19 @@ library(colorspace)
 library(writexl)
 library(tidyr)
 library(bookdown)
+library(yaml)
+library(data.table)
 
 ```
 
 ## Importing Raw Data from DMS Analysis (Analyze Sat Mut v1.0)
 ```{r, message = FALSE}
 
-raw_read_data_complete = read.csv("data/counts/variant_counts.csv")
+#read in config file
+config <- read_yaml("./config.yaml")
+
+
+raw_read_data_complete <- read.csv(file=config$analyze_satmut_data)
 
 ```
 
@@ -274,11 +280,7 @@ export_data = export_data %>%
 
 ```{r}
 
-setwd("/Users/gwcoope/Library/CloudStorage/GoogleDrive-gcooper.gene@gmail.com/My\ Drive/Hong\ Lab\ Project\ Folders.gdrive/Results\ GC/17-SMARCB1_MITEseq2/Manuscript/miteanalysis_supp_data/correlation_plots")
-
-
-
-tiff("G401_Day3_counts.tiff", units="in", width=6, height=6, res=600)
+tiff("./plots/DMS_correlations/G401_Day3_counts.tiff", units="in", width=6, height=6, res=600)
 
 x <- export_data$G401_1st_rep_Day_3_log.ct; y <- export_data$G401_2nd_rep_Day_3_log.ct; fit <- lm(x~y)
 
@@ -293,7 +295,7 @@ plot(x,y,pch=16,col="#00000067",xlab="G401 1st rep Day 3 count log2",ylab="G401 
 
 
 
-tiff("G401_Day10_counts.tiff", units="in", width=6, height=6, res=600)
+tiff("./plots/DMS_correlations/G401_Day10_counts.tiff", units="in", width=6, height=6, res=600)
 
 x <- export_data$G401_1st_rep_Day_10_log.ct; y <- export_data$G401_2nd_rep_Day_10_log.ct; fit <- lm(x~y)
 
@@ -309,7 +311,7 @@ plot(x,y,pch=16,col="#00000067",xlab="G401 1st rep Day 10 count log2",ylab="G401
 
 
 
-tiff("BT16_Day4_counts.tiff", units="in", width=6, height=6, res=600)
+tiff("./plots/DMS_correlations/BT16_Day4_counts.tiff", units="in", width=6, height=6, res=600)
 
 x <- export_data$BT16_1st_rep_Day_4_log.ct; y <- export_data$BT16_2nd_rep_Day_4_log.ct; fit <- lm(x~y)
 
@@ -325,7 +327,7 @@ plot(x,y,pch=16,col="#00000067",xlab="BT16 1st rep Day 4 count log2",ylab="BT16 
 
 
 
-tiff("BT16_Day8_counts.tiff", units="in", width=6, height=6, res=600)
+tiff("./plots/DMS_correlations/BT16_Day8_counts.tiff", units="in", width=6, height=6, res=600)
 
 x <- export_data$BT16_1st_rep_Day_8_log.ct; y <- export_data$BT16_2nd_rep_Day_8_log.ct; fit <- lm(x~y)
 
@@ -340,7 +342,7 @@ plot(x,y,pch=16,col="#00000067",xlab="BT16 1st rep Day 8 count log2",ylab="BT16 
 
 
 
-tiff("RCRF1009T_Day4_counts.tiff", units="in", width=6, height=6, res=600)
+tiff("./plots/DMS_correlations/RCRF1009T_Day4_counts.tiff", units="in", width=6, height=6, res=600)
 
 x <- export_data$RCRF1009T_1st_rep_Day_4_log.ct; y <- export_data$BT16_2nd_rep_Day_4_log.ct; fit <- lm(x~y)
 
@@ -355,7 +357,7 @@ plot(x,y,pch=16,col="#00000067",xlab="G401 1st rep Day 3 count log2",ylab="G401 
 
 
 
-tiff("RCRF1009T_Day14_counts.tiff", units="in", width=6, height=6, res=600)
+tiff("./plots/DMS_correlations/RCRF1009T_Day14_counts.tiff", units="in", width=6, height=6, res=600)
 
 x <- export_data$RCRF1009T_1st_rep_Day_14_log.ct; y <- export_data$RCRF1009T_2nd_rep_Day_14_log.ct; fit <- lm(x~y)
 
