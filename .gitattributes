@@ -1,1 +1,4 @@
 *.csv filter=lfs diff=lfs merge=lfs -text
+/Users/gwcoope/Documents/GitHub/SMARCB1_DMS/data/computational_predictors filter=lfs diff=lfs merge=lfs -text
+/Users/gwcoope/Documents/GitHub/SMARCB1_DMS/data/computational_predictors/ filter=lfs diff=lfs merge=lfs -text
+/Users/gwcoope/Documents/GitHub/SMARCB1_DMS/computational_predictors_heatmaps.ipynb filter=lfs diff=lfs merge=lfs -text
