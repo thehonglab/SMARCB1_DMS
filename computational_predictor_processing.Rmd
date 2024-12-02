@@ -104,7 +104,51 @@ cadd_data_exons <- cadd_data_exons %>%
          AA_Substitution = paste(Amino_Acid_Ref, Codon, Amino_Acid_Alt, sep=""))
 
 
+cadd_data_exons <- cadd_data_exons %>%
+  mutate(Mutation_type = case_when(
+    grepl("Stop", AA_Substitution) ~ "Stop",  # Contains 'Stop'
+    substr(AA_Substitution, 1, 1) == substr(AA_Substitution, nchar(AA_Substitution), nchar(AA_Substitution)) ~ "S", # Synonymous mutation
+    TRUE ~ "M"  # All others
+  ))
+
+#We also need to reformat the CADD data to match with the mitedata
+cadd_data_exons <- cadd_data_exons %>%
+  mutate(AA_Substitution = str_replace(AA_Substitution, "Stop", "X"))
+
+
 write.table(cadd_data_exons, file = "./data/computational_predictors/SMARCB1_CADD_v1.7_annotated.tsv", sep = "\t", row.names = FALSE, quote = FALSE)
+
+#CADD has duplicate rows where multiple nucleotide substitution lead to the same amino acid change. Here we will average the PHRED score across all duplicates and keep as one row.
+cadd_data_no_duplicates <- cadd_data_exons %>%
+  group_by(AA_Substitution) %>%
+  summarise(
+    across(-PHRED, ~ first(.), .names = "{.col}"), # Keep the first instance for all columns except PHRED
+    PHRED = mean(PHRED, na.rm = TRUE) # Calculate the average for PHRED
+  ) %>%
+  ungroup()
+
+
+#Write this to a tsv for plotting later in the heatmap and use for ROC curve predictions
+write_tsv(cadd_data_no_duplicates, "./data/computational_predictors/duplicates_averaged/SMARCB1_CADD_v1.7_duplicates_averaged.tsv")
+
+
+#Here we are going to average all mutations at each residue to get a metric of general mutational intolerance for each residue
+
+cadd_data_exons_missense <- cadd_data_no_duplicates %>%
+  filter(cadd_data_no_duplicates$Mutation_type == "M")
+ 
+
+cadd_average_residue <- cadd_data_exons_missense %>%
+  group_by(Codon) %>%
+  summarise(res_avg_PHRED = mean(PHRED, na.rm = TRUE))
+
+
+
+cadd_average_residue_sorted <- cadd_average_residue[order(-cadd_average_residue$res_avg_PHRED), ]
+
+cadd_average_residue_sorted$rank <- 1:nrow(cadd_average_residue_sorted)
+
+write_tsv(cadd_average_residue_sorted, "./data/computational_predictors/residue_averaged_zscores/CADD_SMARCB1_v1.7_res_avg.tsv")
 
 
 ```
@@ -215,6 +259,34 @@ revel_data_exons <- revel_data_exons %>%
 
 write.table(revel_data_exons, file = "./data/computational_predictors/SMARCB1_revel_v1.3_annotated.tsv", sep = "\t", row.names = FALSE, quote = FALSE)
 
+#REVEL has duplicate rows where multiple nucleotide substitution lead to the same amino acid change. Here we will average the REVEL score across all duplicates and keep as one row.
+revel_data_no_duplicates <- revel_data_exons %>%
+  group_by(AA_Substitution) %>%
+  summarise(
+    across(-REVEL, ~ first(.), .names = "{.col}"), # Keep the first instance of all columns
+    REVEL = mean(REVEL, na.rm = TRUE) # Replace REVEL with the average of duplicates
+  ) %>%
+  ungroup()
+
+#Save this later so we can plot this in a heatmap and use for ROC curve predictions
+
+write_tsv(revel_data_no_duplicates, "./data/computational_predictors/duplicates_averaged/SMARCB1_REVEL_v1.3_duplicates_averaged.tsv")
+
+ 
+
+revel_average_residue <- revel_data_no_duplicates %>%
+  group_by(Codon) %>%
+  summarise(res_avg_REVEL = mean(REVEL, na.rm = TRUE))
+
+
+
+revel_average_residue_sorted <- revel_average_residue[order(-revel_average_residue$res_avg_REVEL), ]
+
+revel_average_residue_sorted$rank <- 1:nrow(revel_average_residue_sorted)
+
+write_tsv(revel_average_residue_sorted, "./data/computational_predictors/residue_averaged_zscores/REVEL_SMARCB1_v1.3_res_avg.tsv")
+
+
 
 ```
 
@@ -233,6 +305,20 @@ alpha_missense <- alpha_missense %>%
     Amino_Acid_Alt = str_sub(protein_variant, start = -1)  # Extract the last letter
   )
 
+alpha_missense <- alpha_missense %>%
+  mutate(Residue = as.numeric(gsub("[^0-9]", "", protein_variant)))
+
 write.table(alpha_missense, file = "./data/computational_predictors/SMARCB1_AlphaMissense_annotated.tsv", sep = "\t", row.names = FALSE, quote = FALSE)
+
+alpha_missense_average_residue <- alpha_missense %>%
+  group_by(Residue) %>%
+  summarise(res_avg_AM_score = mean(am_pathogenicity, na.rm = TRUE))
+
+alpha_missense_average_residue_sorted <- alpha_missense_average_residue[order(-alpha_missense_average_residue$res_avg_AM_score), ]
+
+alpha_missense_average_residue_sorted$rank <- 1:nrow(alpha_missense_average_residue_sorted)
+
+write_tsv(alpha_missense_average_residue_sorted, "./data/computational_predictors/residue_averaged_zscores/AlphaMissense_SMARCB1_res_avg.tsv")
+
 ```
 

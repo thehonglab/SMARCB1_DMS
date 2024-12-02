@@ -4,12 +4,15 @@ analyze_satmut_data: ./data/counts/variant_counts.csv
 #Computational Predictors
 alphamissense_raw: ./data/computational_predictors/SMARCB1_AlphaMissense.tsv
 alphamissense: ./data/computational_predictors/SMARCB1_AlphaMissense_annotated.tsv
+alphamissense_res_avg: ./data/computational_predictors/residue_averaged_zscores/AlphaMissense_SMARCB1_res_avg.tsv
 cadd_raw: ./data/computational_predictors/SMARCB1_CADD_v1.7.tsv
 cadd: ./data/computational_predictors/SMARCB1_CADD_v1.7_annotated.tsv
 cadd_duplicate_avg: ./data/computational_predictors/duplicates_averaged/SMARCB1_CADD_v1.7_duplicates_averaged.tsv
+cadd_res_avg: ./data/computational_predictors/residue_averaged_zscores/CADD_SMARCB1_v1.7_res_avg.tsv
 revel_raw: ./data/computational_predictors/revel_chr22_v1.3.csv
 revel: ./data/computational_predictors/SMARCB1_REVEL_v1.3_annotated.tsv 
 revel_duplicate_avg: ./data/computational_predictors/duplicates_averaged/SMARCB1_REVEL_v1.3_duplicates_averaged.tsv
+revel_res_avg: ./data/computational_predictors/residue_averaged_zscores/REVEL_SMARCB1_v1.3_res_avg.tsv
 
 #ClinVar (data obtained -  November 22, 2024)
 clinvar_raw: ./data/clinvar/20241122_clinvar_data_SMARCB1.tsv
@@ -17,3 +20,4 @@ clinvar: ./data/clinvar/clinvar_SMARCB1_coding_variants.tsv
 
 #Screen Data
 mitedata: ./results/functional_scores/DMS_collapsed_data.csv 
+residue_averaged: ./results/functional_scores/mitedata_residues_averaged_missense.csv
