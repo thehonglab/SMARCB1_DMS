@@ -106,9 +106,14 @@ cadd_data_exons <- cadd_data_exons %>%
 
 cadd_data_exons <- cadd_data_exons %>%
   mutate(Mutation_type = case_when(
-    grepl("Stop", AA_Substitution) ~ "Stop",  # Contains 'Stop'
-    substr(AA_Substitution, 1, 1) == substr(AA_Substitution, nchar(AA_Substitution), nchar(AA_Substitution)) ~ "S", # Synonymous mutation
-    TRUE ~ "M"  # All others
+    # Stop codons (excluding stop codons replaced with an amino acid)
+    grepl("Stop", AA_Substitution) & !grepl("^X\\d+[A-Za-z]$", AA_Substitution) & !grepl("Stop\\d+[A-Za-z]$", AA_Substitution) ~ "Stop", 
+    # Special case: Stop codon replaced with an amino acid (e.g., X386Q, Stop386Q)
+    grepl("^X\\d+[A-Za-z]$", AA_Substitution) | grepl("Stop\\d+[A-Za-z]$", AA_Substitution) ~ "M",  
+    # Synonymous mutation (where first and last characters are the same)
+    substr(AA_Substitution, 1, 1) == substr(AA_Substitution, nchar(AA_Substitution), nchar(AA_Substitution)) ~ "S", 
+    # All others (non-synonymous)
+    TRUE ~ "M"
   ))
 
 #We also need to reformat the CADD data to match with the mitedata
@@ -132,10 +137,20 @@ cadd_data_no_duplicates <- cadd_data_exons %>%
 write_tsv(cadd_data_no_duplicates, "./data/computational_predictors/duplicates_averaged/SMARCB1_CADD_v1.7_duplicates_averaged.tsv")
 
 
+
 #Here we are going to average all mutations at each residue to get a metric of general mutational intolerance for each residue
 
 cadd_data_exons_missense <- cadd_data_no_duplicates %>%
   filter(cadd_data_no_duplicates$Mutation_type == "M")
+
+cadd_pathogenic <- cadd_data_exons_missense %>%
+  filter(cadd_data_exons_missense$PHRED > 20)
+
+cadd_ambiguous <- cadd_data_exons_missense %>%
+  filter(cadd_data_exons_missense$PHRED < 20 & cadd_data_exons_missense$PHRED > 10)
+
+cadd_benign <- cadd_data_exons_missense %>%
+  filter(cadd_data_exons_missense$PHRED < 10)
  
 
 cadd_average_residue <- cadd_data_exons_missense %>%
@@ -272,6 +287,16 @@ revel_data_no_duplicates <- revel_data_exons %>%
 
 write_tsv(revel_data_no_duplicates, "./data/computational_predictors/duplicates_averaged/SMARCB1_REVEL_v1.3_duplicates_averaged.tsv")
 
+
+revel_pathogenic <- revel_data_no_duplicates %>%
+  filter(revel_data_no_duplicates$REVEL > 0.75)
+
+revel_ambiguous <- revel_data_no_duplicates %>%
+  filter(revel_data_no_duplicates$REVEL > 0.5 & revel_data_no_duplicates$REVEL < 0.75)
+
+revel_benign <- revel_data_no_duplicates %>%
+  filter(revel_data_no_duplicates$REVEL < 0.5)
+
  
 
 revel_average_residue <- revel_data_no_duplicates %>%
@@ -309,6 +334,16 @@ alpha_missense <- alpha_missense %>%
   mutate(Residue = as.numeric(gsub("[^0-9]", "", protein_variant)))
 
 write.table(alpha_missense, file = "./data/computational_predictors/SMARCB1_AlphaMissense_annotated.tsv", sep = "\t", row.names = FALSE, quote = FALSE)
+
+
+pathogenic_alpha_missense <- alpha_missense %>%
+  filter(alpha_missense$am_class == "pathogenic")
+
+ambiguous_alpha_missense <- alpha_missense %>%
+  filter(alpha_missense$am_class == "ambiguous")
+
+benign_alpha_missense <- alpha_missense %>%
+  filter(alpha_missense$am_class == "benign")
 
 alpha_missense_average_residue <- alpha_missense %>%
   group_by(Residue) %>%
