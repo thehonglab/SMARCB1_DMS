@@ -1,0 +1,659 @@
+Name	Protein change	Condition(s)	Accession	GRCh38Chromosome	GRCh38Location	VariationID	dbSNP ID	Variant type	Molecular consequence	Germline classification	Residue
+NM_003073.5(SMARCB1):c.15G>T (p.Ala5=)	A5A	not provided	VCV001545418	22	23787184	1545418	rs747587445	single nucleotide variant	synonymous variant	Likely benign	5
+NM_003073.5(SMARCB1):c.16C>T (p.Leu6=)	L6L	Hereditary cancer-predisposing syndrome	VCV002452589	22	23787185	2452589	NA	single nucleotide variant	synonymous variant	Likely benign	6
+NM_003073.5(SMARCB1):c.18G>A (p.Leu6=)	L6L	not provided	VCV003239589	22	23787187	3239589	NA	single nucleotide variant	synonymous variant	Likely benign	6
+NM_003073.5(SMARCB1):c.18G>T (p.Leu6=)	L6L	not provided|Hereditary cancer-predisposing syndrome	VCV001605408	22	23787187	1605408	rs1381647379	single nucleotide variant	synonymous variant	Likely benign	6
+NM_003073.5(SMARCB1):c.21C>T (p.Ser7=)	S7S	Hereditary cancer-predisposing syndrome|not provided	VCV000820884	22	23787190	820884	rs771334931	single nucleotide variant	synonymous variant	Likely benign	7
+NM_003073.5(SMARCB1):c.24G>A (p.Lys8=)	K8K	not provided	VCV001550250	22	23787193	1550250	rs2145951974	single nucleotide variant	synonymous variant	Likely benign	8
+NM_003073.5(SMARCB1):c.27C>G (p.Thr9=)	T9T	not provided	VCV001662698	22	23787196	1662698	rs776259216	single nucleotide variant	synonymous variant	Likely benign	9
+NM_003073.5(SMARCB1):c.27C>T (p.Thr9=)	T9T	Hereditary cancer-predisposing syndrome|not provided	VCV000532987	22	23787196	532987	rs776259216	single nucleotide variant	synonymous variant	Likely benign	9
+NM_003073.5(SMARCB1):c.30C>T (p.Phe10=)	F10F	not provided|Hereditary cancer-predisposing syndrome	VCV000822894	22	23787199	822894	rs1247300129	single nucleotide variant	synonymous variant	Likely benign	10
+NM_003073.5(SMARCB1):c.33G>A (p.Gly11=)	G11G	Hereditary cancer-predisposing syndrome	VCV003223083	22	23787202	3223083	NA	single nucleotide variant	synonymous variant	Likely benign	11
+NM_003073.5(SMARCB1):c.39G>A (p.Lys13=)	K13K	not provided	VCV001107183	22	23787208	1107183	rs2145952009	single nucleotide variant	synonymous variant	Likely benign	13
+NM_003073.5(SMARCB1):c.42C>G (p.Pro14=)	P14P	not provided	VCV002005047	22	23787211	2005047	NA	single nucleotide variant	synonymous variant	Likely benign	14
+NM_003073.5(SMARCB1):c.42C>T (p.Pro14=)	P14P	Hereditary cancer-predisposing syndrome|not provided	VCV000464326	22	23787211	464326	rs1285048687	single nucleotide variant	synonymous variant	Likely benign	14
+NM_003073.5(SMARCB1):c.45G>A (p.Val15=)	V15V	not provided	VCV001138840	22	23787214	1138840	rs759056710	single nucleotide variant	synonymous variant	Likely benign	15
+NM_003073.5(SMARCB1):c.48G>A (p.Lys16=)	K16K	not provided	VCV001564388	22	23787217	1564388	rs2145952051	single nucleotide variant	synonymous variant	Likely benign	16
+NM_003073.5(SMARCB1):c.51C>T (p.Phe17=)	F17F	Hereditary cancer-predisposing syndrome	VCV002562339	22	23787220	2562339	NA	single nucleotide variant	synonymous variant	Likely benign	17
+NM_003073.5(SMARCB1):c.54G>A (p.Gln18=)	Q18Q	Hereditary cancer-predisposing syndrome	VCV002586913	22	23787223	2586913	NA	single nucleotide variant	synonymous variant	Likely benign	18
+NM_003073.5(SMARCB1):c.55C>T (p.Leu19=)	L19L	not provided	VCV000797925	22	23787224	797925	rs977028798	single nucleotide variant	synonymous variant	Likely benign	19
+NM_003073.5(SMARCB1):c.60G>A (p.Glu20=)	E20E	not provided	VCV002146449	22	23787229	2146449	NA	single nucleotide variant	synonymous variant	Likely benign	20
+NM_003073.5(SMARCB1):c.63C>T (p.Asp21=)	D21D	not provided	VCV002146450	22	23787232	2146450	NA	single nucleotide variant	synonymous variant	Likely benign	21
+NM_003073.5(SMARCB1):c.69C>A (p.Gly23=)	G23G	Hereditary cancer-predisposing syndrome	VCV001756551	22	23787238	1756551	NA	single nucleotide variant	synonymous variant	Likely benign	23
+NM_003073.5(SMARCB1):c.69C>G (p.Gly23=)	G23G	Hereditary cancer-predisposing syndrome|not provided	VCV000464335	22	23787238	464335	rs769604673	single nucleotide variant	synonymous variant	Likely benign	23
+NM_003073.5(SMARCB1):c.72G>A (p.Glu24=)	E24E	Hereditary cancer-predisposing syndrome|not provided	VCV001758199	22	23787241	1758199	NA	single nucleotide variant	synonymous variant	Likely benign	24
+NM_003073.5(SMARCB1):c.75C>T (p.Phe25=)	F25F	not provided	VCV002026503	22	23787244	2026503	NA	single nucleotide variant	synonymous variant	Likely benign	25
+NM_003073.5(SMARCB1):c.78C>T (p.Tyr26=)	Y26Y	Hereditary cancer-predisposing syndrome|not provided	VCV000532982	22	23787247	532982	rs374962941	single nucleotide variant	synonymous variant	Likely benign	26
+NM_003073.5(SMARCB1):c.84C>A (p.Ile28=)	I28I	Hereditary cancer-predisposing syndrome	VCV002447180	22	23787253	2447180	NA	single nucleotide variant	synonymous variant	Likely benign	28
+NM_003073.5(SMARCB1):c.87C>T (p.Gly29=)	G29G	not provided|Hereditary cancer-predisposing syndrome	VCV000822745	22	23787256	822745	rs1601382677	single nucleotide variant	synonymous variant	Likely benign	29
+NM_003073.5(SMARCB1):c.90C>T (p.Ser30=)	S30S	Hereditary cancer-predisposing syndrome|not provided	VCV000532978	22	23787259	532978	rs761868468	single nucleotide variant	synonymous variant	Conflicting classifications of pathogenicity	30
+NM_003073.5(SMARCB1):c.90C>G (p.Ser30=)	S30S	Hereditary cancer-predisposing syndrome|not provided	VCV000464340	22	23787259	464340	rs761868468	single nucleotide variant	synonymous variant	Likely benign	30
+NM_003073.5(SMARCB1):c.93G>A (p.Glu31=)	E31E	not provided	VCV002820911	22	23787262	2820911	NA	single nucleotide variant	synonymous variant	Uncertain significance	31
+NM_003073.5(SMARCB1):c.102C>T (p.Asn34=)	N34N	not provided	VCV002741295	22	23791764	2741295	NA	single nucleotide variant	synonymous variant	Likely benign	34
+NM_003073.5(SMARCB1):c.108C>G (p.Leu36=)	L36L	Hereditary cancer-predisposing syndrome	VCV001788761	22	23791770	1788761	NA	single nucleotide variant	synonymous variant	Likely benign	36
+NM_003073.5(SMARCB1):c.111T>G (p.Arg37=)	R37R	Hereditary cancer-predisposing syndrome	VCV003320822	22	23791773	3320822	NA	single nucleotide variant	synonymous variant	Likely benign	37
+NM_003073.5(SMARCB1):c.111T>A (p.Arg37=)	R37R	Hereditary cancer-predisposing syndrome	VCV001797441	22	23791773	1797441	NA	single nucleotide variant	synonymous variant	Likely benign	37
+NM_003073.5(SMARCB1):c.117C>T (p.Phe39=)	F39F	Hereditary cancer-predisposing syndrome|not provided	VCV000700724	22	23791779	700724	rs757517233	single nucleotide variant	synonymous variant	Conflicting classifications of pathogenicity	39
+NM_003073.5(SMARCB1):c.129G>A (p.Leu43=)	L43L	Hereditary cancer-predisposing syndrome	VCV001769323	22	23791791	1769323	NA	single nucleotide variant	synonymous variant	Likely benign	43
+NM_003073.5(SMARCB1):c.132C>T (p.Tyr44=)	Y44Y	Hereditary cancer-predisposing syndrome|not provided	VCV000532974	22	23791794	532974	rs370334151	single nucleotide variant	synonymous variant	Likely benign	44
+NM_003073.5(SMARCB1):c.141C>T (p.Tyr47=)	Y47Y	not provided	VCV000754683	22	23791803	754683	rs1601388576	single nucleotide variant	synonymous variant	Likely benign	47
+NM_003073.5(SMARCB1):c.144C>T (p.Pro48=)	P48P	Hereditary cancer-predisposing syndrome|not provided	VCV001546775	22	23791806	1546775	rs2145960150	single nucleotide variant	synonymous variant	Likely benign	48
+NM_003073.5(SMARCB1):c.147A>G (p.Ser49=)	S49S	Hereditary cancer-predisposing syndrome	VCV001773522	22	23791809	1773522	NA	single nucleotide variant	synonymous variant	Likely benign	49
+NM_003073.5(SMARCB1):c.150C>G (p.Leu50=)	L50L	not provided	VCV000754964	22	23791812	754964	rs756689642	single nucleotide variant	synonymous variant	Likely benign	50
+NM_003073.5(SMARCB1):c.159A>G (p.Arg53=)	R53R	Hereditary cancer-predisposing syndrome|not provided	VCV001776077	22	23791821	1776077	NA	single nucleotide variant	synonymous variant	Likely benign	53
+NM_003073.5(SMARCB1):c.162A>T (p.Leu54=)	L54L	Hereditary cancer-predisposing syndrome	VCV003320816	22	23791824	3320816	NA	single nucleotide variant	synonymous variant	Likely benign	54
+NM_003073.5(SMARCB1):c.162A>G (p.Leu54=)	L54L	Hereditary cancer-predisposing syndrome|not provided	VCV000704016	22	23791824	704016	rs1601388633	single nucleotide variant	synonymous variant	Likely benign	54
+NM_003073.5(SMARCB1):c.165C>A (p.Ala55=)	A55A	not provided	VCV001587919	22	23791827	1587919	rs2145960293	single nucleotide variant	synonymous variant	Likely benign	55
+NM_003073.5(SMARCB1):c.168T>A (p.Thr56=)	T56T	Hereditary cancer-predisposing syndrome	VCV003223079	22	23791830	3223079	NA	single nucleotide variant	synonymous variant	Likely benign	56
+NM_003073.5(SMARCB1):c.168T>G (p.Thr56=)	T56T	Hereditary cancer-predisposing syndrome	VCV002482341	22	23791830	2482341	NA	single nucleotide variant	synonymous variant	Likely benign	56
+NM_003073.5(SMARCB1):c.171G>A (p.Val57=)	V57V	not provided	VCV001555668	22	23791833	1555668	rs2145960327	single nucleotide variant	synonymous variant	Likely benign	57
+NM_003073.5(SMARCB1):c.174A>G (p.Glu58=)	E58E	Hereditary cancer-predisposing syndrome	VCV001779353	22	23791836	1779353	NA	single nucleotide variant	synonymous variant	Likely benign	58
+NM_003073.5(SMARCB1):c.180G>A (p.Arg60=)	R60R	not provided|Hereditary cancer-predisposing syndrome	VCV001080134	22	23791842	1080134	rs2145960388	single nucleotide variant	synonymous variant	Likely benign	60
+NM_003073.5(SMARCB1):c.189A>T (p.Ile63=)	I63I	Hereditary cancer-predisposing syndrome	VCV003320806	22	23791851	3320806	NA	single nucleotide variant	synonymous variant	Likely benign	63
+NM_003073.5(SMARCB1):c.192T>C (p.Val64=)	V64V	not provided	VCV002863377	22	23791854	2863377	NA	single nucleotide variant	synonymous variant	Likely benign	64
+NM_003073.5(SMARCB1):c.195A>C (p.Ala65=)	A65A	Hereditary cancer-predisposing syndrome	VCV003223080	22	23791857	3223080	NA	single nucleotide variant	synonymous variant	Likely benign	65
+NM_003073.5(SMARCB1):c.195A>G (p.Ala65=)	A65A	Hereditary cancer-predisposing syndrome|not provided	VCV001082905	22	23791857	1082905	rs748690005	single nucleotide variant	synonymous variant	Likely benign	65
+NM_003073.5(SMARCB1):c.198G>A (p.Ser66=)	S66S	not provided|Hereditary cancer-predisposing syndrome	VCV001109924	22	23791860	1109924	rs768360679	single nucleotide variant	synonymous variant	Likely benign	66
+NM_003073.5(SMARCB1):c.204T>C (p.His68=)	H68H	Hereditary cancer-predisposing syndrome	VCV002452591	22	23791866	2452591	NA	single nucleotide variant	synonymous variant	Likely benign	68
+NM_003073.5(SMARCB1):c.207T>A (p.Gly69=)	G69G	Hereditary cancer-predisposing syndrome	VCV003223081	22	23791869	3223081	NA	single nucleotide variant	synonymous variant|splice donor variant	Likely benign	69
+NM_003073.5(SMARCB1):c.237C>T (p.His79=)	H79H	Hereditary cancer-predisposing syndrome|not provided	VCV000416329	22	23793563	416329	rs200394488	single nucleotide variant	synonymous variant	Likely benign	79
+NM_003073.5(SMARCB1):c.240A>G (p.Gly80=)	G80G	not provided	VCV001435984	22	23793566	1435984	rs1363642431	single nucleotide variant	synonymous variant	Likely benign	80
+NM_003073.5(SMARCB1):c.246G>A (p.Thr82=)	T82T	not provided|Hereditary cancer-predisposing syndrome	VCV000821241	22	23793572	821241	rs367881615	single nucleotide variant	synonymous variant	Likely benign	82
+NM_003073.5(SMARCB1):c.258C>G (p.Thr86=)	T86T	Hereditary cancer-predisposing syndrome	VCV003223082	22	23793584	3223082	NA	single nucleotide variant	synonymous variant	Likely benign	86
+NM_003073.5(SMARCB1):c.261T>C (p.Ser87=)	S87S	not provided|Hereditary cancer-predisposing syndrome	VCV001128409	22	23793587	1128409	rs2145963809	single nucleotide variant	synonymous variant	Likely benign	87
+NM_003073.5(SMARCB1):c.264G>A (p.Val88=)	V88V	not provided	VCV002918653	22	23793590	2918653	NA	single nucleotide variant	synonymous variant	Likely benign	88
+NM_003073.5(SMARCB1):c.267C>A (p.Thr89=)	T89T	not provided	VCV001913370	22	23793593	1913370	NA	single nucleotide variant	synonymous variant	Likely benign	89
+NM_003073.5(SMARCB1):c.267C>T (p.Thr89=)	T89T	Hereditary cancer-predisposing syndrome|not specified|not provided	VCV000239482	22	23793593	239482	rs141275968	single nucleotide variant	synonymous variant	Benign/Likely benign	89
+NM_003073.5(SMARCB1):c.279C>T (p.Ala93=)	A93A	not provided	VCV001141178	22	23793605	1141178	rs770856466	single nucleotide variant	synonymous variant	Likely benign	93
+NM_003073.5(SMARCB1):c.282G>C (p.Ser94=)	S94S	Hereditary cancer-predisposing syndrome|not provided	VCV001646888	22	23793608	1646888	rs149773283	single nucleotide variant	synonymous variant	Likely benign	94
+NM_003073.5(SMARCB1):c.282G>A (p.Ser94=)	S94S	Hereditary cancer-predisposing syndrome|not provided	VCV000464325	22	23793608	464325	rs149773283	single nucleotide variant	synonymous variant	Likely benign	94
+NM_003073.5(SMARCB1):c.288G>A (p.Val96=)	V96V	Hereditary cancer-predisposing syndrome	VCV002452596	22	23793614	2452596	NA	single nucleotide variant	synonymous variant	Likely benign	96
+NM_003073.5(SMARCB1):c.291A>G (p.Glu97=)	E97E	not provided|Hereditary cancer-predisposing syndrome	VCV001797668	22	23793617	1797668	NA	single nucleotide variant	synonymous variant	Likely benign	97
+NM_003073.5(SMARCB1):c.294G>A (p.Glu98=)	E98E	not provided	VCV001636469	22	23793620	1636469	rs1928541984	single nucleotide variant	synonymous variant	Likely benign	98
+NM_003073.5(SMARCB1):c.297T>C (p.Ile99=)	I99I	Hereditary cancer-predisposing syndrome	VCV002586914	22	23793623	2586914	NA	single nucleotide variant	synonymous variant	Likely benign	99
+NM_003073.5(SMARCB1):c.300G>A (p.Leu100=)	L100L	not provided|Hereditary cancer-predisposing syndrome	VCV001539793	22	23793626	1539793	rs768661574	single nucleotide variant	synonymous variant	Likely benign	100
+NM_003073.5(SMARCB1):c.309C>T (p.Asn103=)	N103N	Hereditary cancer-predisposing syndrome|Rhabdoid tumor predisposition syndrome 1|Schwannomatosis 1|not provided	VCV000532975	22	23793635	532975	rs145695677	single nucleotide variant	synonymous variant	Conflicting classifications of pathogenicity	103
+NM_003073.5(SMARCB1):c.315G>A (p.Glu105=)	E105E	not provided|Hereditary cancer-predisposing syndrome	VCV001156866	22	23793641	1156866	rs2145964188	single nucleotide variant	synonymous variant	Likely benign	105
+NM_003073.5(SMARCB1):c.321C>T (p.Tyr107=)	Y107Y	not provided	VCV002015232	22	23793647	2015232	NA	single nucleotide variant	synonymous variant	Likely benign	107
+NM_003073.5(SMARCB1):c.324G>A (p.Lys108=)	K108K	not provided|Hereditary cancer-predisposing syndrome	VCV001729401	22	23793650	1729401	NA	single nucleotide variant	synonymous variant	Likely benign	108
+NM_003073.5(SMARCB1):c.327T>C (p.Ala109=)	A109A	not provided	VCV001143114	22	23793653	1143114	rs1445015081	single nucleotide variant	synonymous variant	Likely benign	109
+NM_003073.5(SMARCB1):c.333C>T (p.Ser111=)	S111S	Hereditary cancer-predisposing syndrome|not provided	VCV000823632	22	23793659	823632	rs1601391182	single nucleotide variant	synonymous variant	Likely benign	111
+NM_003073.5(SMARCB1):c.333C>G (p.Ser111=)	S111S	Hereditary cancer-predisposing syndrome	VCV000823630	22	23793659	823630	rs1601391182	single nucleotide variant	synonymous variant	Likely benign	111
+NM_003073.5(SMARCB1):c.336C>T (p.Ile112=)	I112I	Hereditary cancer-predisposing syndrome	VCV001692745	22	23793662	1692745	rs2145964352	single nucleotide variant	synonymous variant	Conflicting classifications of pathogenicity	112
+NM_003073.5(SMARCB1):c.345G>A (p.Glu115=)	E115E	not provided|Hereditary cancer-predisposing syndrome	VCV001731630	22	23793671	1731630	NA	single nucleotide variant	synonymous variant	Likely benign	115
+NM_003073.5(SMARCB1):c.348C>A (p.Pro116=)	P116P	Hereditary cancer-predisposing syndrome	VCV001731910	22	23793674	1731910	NA	single nucleotide variant	synonymous variant	Likely benign	116
+NM_003073.5(SMARCB1):c.348C>T (p.Pro116=)	P116P	not provided|Hereditary cancer-predisposing syndrome	VCV001133056	22	23793674	1133056	rs888616162	single nucleotide variant	synonymous variant	Likely benign	116
+NM_003073.5(SMARCB1):c.351C>A (p.Pro117=)	P117P	not provided|Hereditary cancer-predisposing syndrome	VCV001579740	22	23793677	1579740	rs2145964502	single nucleotide variant	synonymous variant	Likely benign	117
+NM_003073.5(SMARCB1):c.360C>T (p.Leu120=)	L120L	not provided	VCV003003694	22	23793686	3003694	NA	single nucleotide variant	synonymous variant	Likely benign	120
+NM_003073.5(SMARCB1):c.360C>A (p.Leu120=)	L120L	not provided	VCV001999776	22	23793686	1999776	NA	single nucleotide variant	synonymous variant	Likely benign	120
+NM_003073.5(SMARCB1):c.360C>G (p.Leu120=)	L120L	not provided	VCV001639118	22	23793686	1639118	rs1318939222	single nucleotide variant	synonymous variant	Likely benign	120
+NM_003073.5(SMARCB1):c.361A>C (p.Arg121=)	R121R	Hereditary cancer-predisposing syndrome	VCV003320810	22	23793687	3320810	NA	single nucleotide variant	synonymous variant	Likely benign	121
+NM_003073.5(SMARCB1):c.369G>A (p.Gln123=)	Q123Q	Hereditary cancer-predisposing syndrome|not provided	VCV000532979	22	23800950	532979	rs760015392	single nucleotide variant	synonymous variant	Likely benign	123
+NM_003073.5(SMARCB1):c.372G>A (p.Lys124=)	K124K	Hereditary cancer-predisposing syndrome|not provided	VCV001154283	22	23800953	1154283	rs1929107625	single nucleotide variant	synonymous variant	Likely benign	124
+NM_003073.5(SMARCB1):c.375C>T (p.Ala125=)	A125A	Hereditary cancer-predisposing syndrome	VCV001734645	22	23800956	1734645	NA	single nucleotide variant	synonymous variant	Likely benign	125
+NM_003073.5(SMARCB1):c.387C>T (p.Ser129=)	S129S	Hereditary cancer-predisposing syndrome	VCV003320815	22	23800968	3320815	NA	single nucleotide variant	synonymous variant	Likely benign	129
+NM_003073.5(SMARCB1):c.399C>T (p.Pro133=)	P133P	Hereditary cancer-predisposing syndrome|not provided	VCV000532984	22	23800980	532984	rs1555877017	single nucleotide variant	synonymous variant	Likely benign	133
+NM_003073.5(SMARCB1):c.403C>T (p.Leu135=)	L135L	not provided	VCV002147014	22	23800984	2147014	NA	single nucleotide variant	synonymous variant	Likely benign	135
+NM_003073.5(SMARCB1):c.405G>T (p.Leu135=)	L135L	not provided	VCV002740147	22	23800986	2740147	NA	single nucleotide variant	synonymous variant	Likely benign	135
+NM_003073.5(SMARCB1):c.408C>T (p.Pro136=)	P136P	Hereditary cancer-predisposing syndrome	VCV000824582	22	23800989	824582	rs1601401844	single nucleotide variant	synonymous variant	Likely benign	136
+NM_003073.5(SMARCB1):c.417C>T (p.Ser139=)	S139S	not provided	VCV002725500	22	23800998	2725500	NA	single nucleotide variant	synonymous variant	Likely benign	139
+NM_003073.5(SMARCB1):c.420C>T (p.His140=)	H140H	Hereditary cancer-predisposing syndrome|not provided	VCV001738732	22	23801001	1738732	NA	single nucleotide variant	synonymous variant	Likely benign	140
+NM_003073.5(SMARCB1):c.423C>T (p.His141=)	H141H	Hereditary cancer-predisposing syndrome|not provided	VCV001545890	22	23801004	1545890	rs2145978409	single nucleotide variant	synonymous variant	Likely benign	141
+NM_003073.5(SMARCB1):c.432C>A (p.Ala144=)	A144A	Hereditary cancer-predisposing syndrome|not provided	VCV001926593	22	23801013	1926593	NA	single nucleotide variant	synonymous variant	Likely benign	144
+NM_003073.5(SMARCB1):c.432C>T (p.Ala144=)	A144A	not specified|Hereditary cancer-predisposing syndrome|not provided	VCV000757027	22	23801013	757027	rs1601401868	single nucleotide variant	synonymous variant	Likely benign	144
+NM_003073.5(SMARCB1):c.438A>G (p.Pro146=)	P146P	Rhabdoid tumor predisposition syndrome 1|Schwannomatosis 1|not specified|Hereditary cancer-predisposing syndrome|not provided	VCV000239484	22	23801019	239484	rs35105793	single nucleotide variant	synonymous variant	Benign/Likely benign	146
+NM_003073.5(SMARCB1):c.441C>T (p.Cys147=)	C147C	Hereditary cancer-predisposing syndrome|not provided	VCV001740462	22	23801022	1740462	NA	single nucleotide variant	synonymous variant	Likely benign	147
+NM_003073.5(SMARCB1):c.444C>G (p.Ser148=)	S148S	not provided	VCV000532981	22	23801025	532981	rs138184483	single nucleotide variant	synonymous variant	Likely benign	148
+NM_003073.5(SMARCB1):c.444C>T (p.Ser148=)	S148S	not provided|Hereditary cancer-predisposing syndrome	VCV000416324	22	23801025	416324	rs138184483	single nucleotide variant	synonymous variant	Conflicting classifications of pathogenicity	148
+NM_003073.5(SMARCB1):c.447A>G (p.Thr149=)	T149T	not provided|Hereditary cancer-predisposing syndrome	VCV001156350	22	23801028	1156350	rs780907377	single nucleotide variant	synonymous variant	Likely benign	149
+NM_003073.5(SMARCB1):c.447A>C (p.Thr149=)	T149T	not provided	VCV001105704	22	23801028	1105704	rs780907377	single nucleotide variant	synonymous variant	Likely benign	149
+NM_003073.5(SMARCB1):c.462C>T (p.Asn154=)	N154N	Hereditary cancer-predisposing syndrome	VCV001742014	22	23801043	1742014	NA	single nucleotide variant	synonymous variant	Likely benign	154
+NM_003073.5(SMARCB1):c.489C>T (p.Thr163=)	T163T	Hereditary cancer-predisposing syndrome|not provided	VCV001970203	22	23801070	1970203	NA	single nucleotide variant	synonymous variant	Likely benign	163
+NM_003073.5(SMARCB1):c.492C>T (p.Phe164=)	F164F	not provided|Hereditary cancer-predisposing syndrome	VCV000702401	22	23801073	702401	rs780005225	single nucleotide variant	synonymous variant	Likely benign	164
+NM_003073.5(SMARCB1):c.495C>A (p.Pro165=)	P165P	not provided	VCV002826991	22	23801076	2826991	NA	single nucleotide variant	synonymous variant	Likely benign	165
+NM_003073.5(SMARCB1):c.495C>T (p.Pro165=)	P165P	not provided	VCV001095612	22	23801076	1095612	rs972863493	single nucleotide variant	synonymous variant	Likely benign	165
+NM_003073.5(SMARCB1):c.495C>G (p.Pro165=)	P165P	Hereditary cancer-predisposing syndrome|not provided	VCV000464327	22	23801076	464327	rs972863493	single nucleotide variant	synonymous variant	Likely benign	165
+NM_003073.5(SMARCB1):c.498T>C (p.Leu166=)	L166L	not provided|Hereditary cancer-predisposing syndrome	VCV000734300	22	23801079	734300	rs748263509	single nucleotide variant	synonymous variant	Likely benign	166
+NM_003073.5(SMARCB1):c.501C>T (p.Cys167=)	C167C	Hereditary cancer-predisposing syndrome|not provided	VCV000943410	22	23803295	943410	rs779221331	single nucleotide variant	synonymous variant	Likely benign	167
+NM_003073.5(SMARCB1):c.510C>T (p.Asp170=)	D170D	Hereditary cancer-predisposing syndrome|not provided	VCV000486501	22	23803304	486501	rs762656012	single nucleotide variant	synonymous variant	Likely benign	170
+NM_003073.5(SMARCB1):c.513T>C (p.His171=)	H171H	not provided	VCV002003005	22	23803307	2003005	NA	single nucleotide variant	synonymous variant	Likely benign	171
+NM_003073.5(SMARCB1):c.519A>T (p.Pro173=)	P173P	Hereditary cancer-predisposing syndrome	VCV001745963	22	23803313	1745963	NA	single nucleotide variant	synonymous variant	Likely benign	173
+NM_003073.5(SMARCB1):c.519A>G (p.Pro173=)	P173P	Hereditary cancer-predisposing syndrome|not provided	VCV001745960	22	23803313	1745960	NA	single nucleotide variant	synonymous variant	Likely benign	173
+NM_003073.5(SMARCB1):c.525G>A (p.Val175=)	V175V	Hereditary cancer-predisposing syndrome	VCV002452594	22	23803319	2452594	NA	single nucleotide variant	synonymous variant	Likely benign	175
+NM_003073.5(SMARCB1):c.528C>T (p.Ile176=)	I176I	Hereditary cancer-predisposing syndrome|not provided	VCV002106221	22	23803322	2106221	NA	single nucleotide variant	synonymous variant	Likely benign	176
+NM_003073.5(SMARCB1):c.528C>A (p.Ile176=)	I176I	Hereditary cancer-predisposing syndrome|not provided	VCV000532983	22	23803322	532983	rs1031967752	single nucleotide variant	synonymous variant	Likely benign	176
+NM_003073.5(SMARCB1):c.531T>C (p.His177=)	H177H	not provided	VCV000798337	22	23803325	798337	rs1601404974	single nucleotide variant	synonymous variant	Likely benign	177
+NM_003073.5(SMARCB1):c.534G>A (p.Glu178=)	E178E	Hereditary cancer-predisposing syndrome	VCV002586915	22	23803328	2586915	NA	single nucleotide variant	synonymous variant	Likely benign	178
+NM_003073.5(SMARCB1):c.537C>T (p.Asn179=)	N179N	Hereditary cancer-predisposing syndrome|not provided	VCV000589365	22	23803331	589365	rs533184210	single nucleotide variant	synonymous variant	Likely benign	179
+NM_003073.5(SMARCB1):c.540A>G (p.Ala180=)	A180A	not provided	VCV001079938	22	23803334	1079938	rs1295919219	single nucleotide variant	synonymous variant	Likely benign	180
+NM_003073.5(SMARCB1):c.549C>T (p.Pro183=)	P183P	not provided|Hereditary cancer-predisposing syndrome	VCV000072905	22	23803343	72905	rs141579402	single nucleotide variant	synonymous variant	Likely benign	183
+NM_003073.5(SMARCB1):c.552G>A (p.Glu184=)	E184E	not provided	VCV001133435	22	23803346	1133435	rs2145982835	single nucleotide variant	synonymous variant	Likely benign	184
+NM_003073.5(SMARCB1):c.555G>A (p.Val185=)	V185V	Hereditary cancer-predisposing syndrome|not provided	VCV001092753	22	23803349	1092753	rs2145982846	single nucleotide variant	synonymous variant	Likely benign	185
+NM_003073.5(SMARCB1):c.558G>A (p.Leu186=)	L186L	not provided	VCV002778096	22	23803352	2778096	NA	single nucleotide variant	synonymous variant	Likely benign	186
+NM_003073.5(SMARCB1):c.558G>T (p.Leu186=)	L186L	not provided	VCV001673875	22	23803352	1673875	rs751914353	single nucleotide variant	synonymous variant	Likely benign	186
+NM_003073.5(SMARCB1):c.558G>C (p.Leu186=)	L186L	not provided|Hereditary cancer-predisposing syndrome	VCV001077882	22	23803352	1077882	rs751914353	single nucleotide variant	synonymous variant	Conflicting classifications of pathogenicity	186
+NM_003073.5(SMARCB1):c.561C>A (p.Val187=)	V187V	not provided	VCV002837347	22	23803355	2837347	NA	single nucleotide variant	synonymous variant	Likely benign	187
+NM_003073.5(SMARCB1):c.564C>T (p.Pro188=)	P188P	not provided	VCV001587584	22	23803358	1587584	rs2145982887	single nucleotide variant	synonymous variant	Likely benign	188
+NM_003073.5(SMARCB1):c.567C>T (p.Ile189=)	I189I	not provided	VCV001089339	22	23803361	1089339	rs2145982901	single nucleotide variant	synonymous variant	Likely benign	189
+NM_003073.5(SMARCB1):c.570G>A (p.Arg190=)	R190R	Hereditary cancer-predisposing syndrome	VCV001749219	22	23803364	1749219	NA	single nucleotide variant	synonymous variant	Likely benign	190
+NM_003073.5(SMARCB1):c.570G>T (p.Arg190=)	R190R	Hereditary cancer-predisposing syndrome|not provided	VCV001149197	22	23803364	1149197	rs2145982914	single nucleotide variant	synonymous variant	Likely benign	190
+NM_003073.5(SMARCB1):c.576C>T (p.Asp192=)	D192D	not provided	VCV001617963	22	23803370	1617963	rs1490990033	single nucleotide variant	synonymous variant	Likely benign	192
+NM_003073.5(SMARCB1):c.582G>A (p.Glu194=)	E194E	Hereditary cancer-predisposing syndrome|not provided	VCV000464330	22	23803376	464330	rs759241720	single nucleotide variant	synonymous variant	Likely benign	194
+NM_003073.5(SMARCB1):c.585C>A (p.Ile195=)	I195I	not provided|Hereditary cancer-predisposing syndrome	VCV001750114	22	23803379	1750114	NA	single nucleotide variant	synonymous variant	Likely benign	195
+NM_003073.5(SMARCB1):c.585C>T (p.Ile195=)	I195I	Hereditary cancer-predisposing syndrome|not provided	VCV000197749	22	23803379	197749	rs757546528	single nucleotide variant	synonymous variant	Conflicting classifications of pathogenicity	195
+NM_003073.5(SMARCB1):c.588T>C (p.Asp196=)	D196D	not provided	VCV001544623	22	23803382	1544623	rs2145982978	single nucleotide variant	synonymous variant	Likely benign	196
+NM_003073.5(SMARCB1):c.591G>A (p.Gly197=)	G197G	Hereditary cancer-predisposing syndrome	VCV001750499	22	23803385	1750499	NA	single nucleotide variant	synonymous variant	Likely benign	197
+NM_003073.5(SMARCB1):c.597G>A (p.Lys199=)	K199K	Hereditary cancer-predisposing syndrome	VCV002566865	22	23803391	2566865	NA	single nucleotide variant	synonymous variant	Likely benign	199
+NM_003073.5(SMARCB1):c.598C>T (p.Leu200=)	L200L	not provided	VCV002116751	22	23803392	2116751	NA	single nucleotide variant	synonymous variant	Likely benign	200
+NM_003073.5(SMARCB1):c.600G>A (p.Leu200=)	L200L	not provided	VCV001608819	22	23803394	1608819	rs2145983026	single nucleotide variant	synonymous variant	Likely benign	200
+NM_003073.5(SMARCB1):c.606C>T (p.Asp202=)	D202D	Hereditary cancer-predisposing syndrome|not specified|not provided	VCV000167704	22	23803400	167704	rs727504163	single nucleotide variant	synonymous variant	Likely benign	202
+NM_003073.5(SMARCB1):c.609C>T (p.Ala203=)	A203A	not provided|Hereditary cancer-predisposing syndrome	VCV000754141	22	23803403	754141	rs1601405156	single nucleotide variant	synonymous variant	Likely benign	203
+NM_003073.5(SMARCB1):c.612C>T (p.Phe204=)	F204F	Hereditary cancer-predisposing syndrome	VCV001751778	22	23803406	1751778	NA	single nucleotide variant	synonymous variant	Likely benign	204
+NM_003073.5(SMARCB1):c.615C>T (p.Thr205=)	T205T	Hereditary cancer-predisposing syndrome	VCV001751933	22	23803409	1751933	NA	single nucleotide variant	synonymous variant	Likely benign	205
+NM_003073.5(SMARCB1):c.615C>G (p.Thr205=)	T205T	Hereditary cancer-predisposing syndrome	VCV001751925	22	23803409	1751925	NA	single nucleotide variant	synonymous variant	Likely benign	205
+NM_003073.5(SMARCB1):c.633G>A (p.Lys211=)	K211K	Rhabdoid tumor predisposition syndrome 1|Schwannomatosis 1|not provided	VCV000900547	22	23816774	900547	rs1930218305	single nucleotide variant	synonymous variant	Conflicting classifications of pathogenicity	211
+NM_003073.5(SMARCB1):c.634T>C (p.Leu212=)	L212L	not provided	VCV000799933	22	23816775	799933	rs1601422533	single nucleotide variant	synonymous variant	Likely benign	212
+NM_003073.5(SMARCB1):c.642G>A (p.Thr214=)	T214T	Hereditary cancer-predisposing syndrome|not provided	VCV001156556	22	23816783	1156556	rs745315386	single nucleotide variant	synonymous variant	Conflicting classifications of pathogenicity	214
+NM_003073.5(SMARCB1):c.642G>T (p.Thr214=)	T214T	Hereditary cancer-predisposing syndrome|not provided	VCV000826398	22	23816783	826398	rs745315386	single nucleotide variant	synonymous variant	Likely benign	214
+NM_003073.5(SMARCB1):c.645T>G (p.Pro215=)	P215P	Hereditary cancer-predisposing syndrome|not provided	VCV001160752	22	23816786	1160752	rs917531532	single nucleotide variant	synonymous variant	Likely benign	215
+NM_003073.5(SMARCB1):c.663C>T (p.Ile221=)	I221I	not provided	VCV001113243	22	23816804	1113243	rs1406367876	single nucleotide variant	synonymous variant	Likely benign	221
+NM_003073.5(SMARCB1):c.669T>C (p.Cys223=)	C223C	not specified	VCV001301346	22	23816810	1301346	rs2146009569	single nucleotide variant	synonymous variant	Likely benign	223
+NM_003073.5(SMARCB1):c.672C>T (p.Asp224=)	D224D	not specified|not provided|Hereditary cancer-predisposing syndrome	VCV000436814	22	23816813	436814	rs748952582	single nucleotide variant	synonymous variant	Likely benign	224
+NM_003073.5(SMARCB1):c.678G>A (p.Leu226=)	L226L	not provided	VCV003023466	22	23816819	3023466	NA	single nucleotide variant	synonymous variant	Likely benign	226
+NM_003073.5(SMARCB1):c.684G>A (p.Leu228=)	L228L	Hereditary cancer-predisposing syndrome|not provided	VCV001621353	22	23816825	1621353	rs2146009711	single nucleotide variant	synonymous variant	Likely benign	228
+NM_003073.5(SMARCB1):c.687C>T (p.Asn229=)	N229N	Hereditary cancer-predisposing syndrome|not provided	VCV002724191	22	23816828	2724191	NA	single nucleotide variant	synonymous variant	Likely benign	229
+NM_003073.5(SMARCB1):c.690G>T (p.Pro230=)	P230P	not provided	VCV002790957	22	23816831	2790957	NA	single nucleotide variant	synonymous variant	Likely benign	230
+NM_003073.5(SMARCB1):c.690G>A (p.Pro230=)	P230P	Hereditary cancer-predisposing syndrome|not provided	VCV000464333	22	23816831	464333	rs761800288	single nucleotide variant	synonymous variant	Likely benign	230
+NM_003073.5(SMARCB1):c.691C>T (p.Leu231=)	L231L	Hereditary cancer-predisposing syndrome	VCV003320803	22	23816832	3320803	NA	single nucleotide variant	synonymous variant	Likely benign	231
+NM_003073.5(SMARCB1):c.693G>A (p.Leu231=)	L231L	not provided|Hereditary cancer-predisposing syndrome	VCV002720132	22	23816834	2720132	NA	single nucleotide variant	synonymous variant	Likely benign	231
+NM_003073.5(SMARCB1):c.696G>T (p.Thr232=)	T232T	Hereditary cancer-predisposing syndrome|not provided	VCV000532964	22	23816837	532964	rs145934279	single nucleotide variant	synonymous variant	Likely benign	232
+NM_003073.5(SMARCB1):c.696G>A (p.Thr232=)	T232T	not provided|Rhabdoid tumor predisposition syndrome 1|Schwannomatosis 1|Hereditary cancer-predisposing syndrome	VCV000416321	22	23816837	416321	rs145934279	single nucleotide variant	synonymous variant	Benign/Likely benign	232
+NM_003073.5(SMARCB1):c.699T>C (p.Phe233=)	F233F	not provided	VCV001627876	22	23816840	1627876	rs1930223074	single nucleotide variant	synonymous variant	Likely benign	233
+NM_003073.5(SMARCB1):c.702G>T (p.Val234=)	V234V	not provided	VCV002918748	22	23816843	2918748	NA	single nucleotide variant	synonymous variant	Uncertain significance	234
+NM_003073.5(SMARCB1):c.702G>A (p.Val234=)	V234V	Hereditary cancer-predisposing syndrome|not provided	VCV001756781	22	23816843	1756781	NA	single nucleotide variant	synonymous variant	Likely benign	234
+NM_003073.5(SMARCB1):c.705A>G (p.Pro235=)	P235P	Hereditary cancer-predisposing syndrome	VCV001756915	22	23816846	1756915	NA	single nucleotide variant	synonymous variant	Likely benign	235
+NM_003073.5(SMARCB1):c.711C>T (p.Ile237=)	I237I	Hereditary cancer-predisposing syndrome|not provided	VCV001085742	22	23816852	1085742	rs1178245388	single nucleotide variant	synonymous variant	Likely benign	237
+NM_003073.5(SMARCB1):c.720C>T (p.Ala240=)	A240A	not provided	VCV001131136	22	23816861	1131136	rs2146010010	single nucleotide variant	synonymous variant	Likely benign	240
+NM_003073.5(SMARCB1):c.723C>T (p.Ile241=)	I241I	Schwannomatosis|Coffin-Siris syndrome|Rhabdoid tumor predisposition syndrome|not provided|Hereditary cancer-predisposing syndrome	VCV000340914	22	23816864	340914	rs752910574	single nucleotide variant	synonymous variant	Conflicting classifications of pathogenicity	241
+NM_003073.5(SMARCB1):c.735C>T (p.Ile245=)	I245I	Hereditary cancer-predisposing syndrome|not provided	VCV000826985	22	23816876	826985	rs570024912	single nucleotide variant	synonymous variant	Likely benign	245
+NM_003073.5(SMARCB1):c.735C>A (p.Ile245=)	I245I	Hereditary cancer-predisposing syndrome|not provided	VCV000783261	22	23816876	783261	rs570024912	single nucleotide variant	synonymous variant	Likely benign	245
+NM_003073.5(SMARCB1):c.741C>G (p.Ser247=)	S247S	not specified|Hereditary cancer-predisposing syndrome|not provided	VCV000436815	22	23816882	436815	rs534183354	single nucleotide variant	synonymous variant	Likely benign	247
+NM_003073.5(SMARCB1):c.744C>T (p.Tyr248=)	Y248Y	not provided|Hereditary cancer-predisposing syndrome	VCV000464336	22	23816885	464336	rs994927607	single nucleotide variant	synonymous variant	Likely benign	248
+NM_003073.5(SMARCB1):c.747C>T (p.Pro249=)	P249P	Hereditary cancer-predisposing syndrome|not provided	VCV000486499	22	23816888	486499	rs1555879356	single nucleotide variant	synonymous variant	Likely benign	249
+NM_003073.5(SMARCB1):c.750G>A (p.Thr250=)	T250T	Hereditary cancer-predisposing syndrome|not provided	VCV000410702	22	23816891	410702	rs1049144154	single nucleotide variant	synonymous variant	Conflicting classifications of pathogenicity	250
+NM_003073.5(SMARCB1):c.756C>T (p.Ser252=)	S252S	Hereditary cancer-predisposing syndrome|not provided	VCV001759575	22	23816897	1759575	NA	single nucleotide variant	synonymous variant	Likely benign	252
+NM_003073.5(SMARCB1):c.759C>T (p.Ile253=)	I253I	Hereditary cancer-predisposing syndrome	VCV003223086	22	23816900	3223086	NA	single nucleotide variant	synonymous variant	Likely benign	253
+NM_003073.5(SMARCB1):c.762G>C (p.Leu254=)	L254L	Hereditary cancer-predisposing syndrome	VCV001759891	22	23816903	1759891	NA	single nucleotide variant	synonymous variant	Likely benign	254
+NM_003073.5(SMARCB1):c.765G>A (p.Glu255=)	E255E	not provided|Hereditary cancer-predisposing syndrome	VCV000416326	22	23816906	416326	rs1060504799	single nucleotide variant	synonymous variant	Likely benign	255
+NM_003073.5(SMARCB1):c.768C>T (p.Asp256=)	D256D	not provided	VCV001112183	22	23816909	1112183	rs755629084	single nucleotide variant	synonymous variant	Likely benign	256
+NM_003073.5(SMARCB1):c.774A>G (p.Ser258=)	S258S	Hereditary cancer-predisposing syndrome	VCV001760432	22	23816915	1760432	NA	single nucleotide variant	synonymous variant	Likely benign	258
+NM_003073.5(SMARCB1):c.783C>A (p.Arg261=)	R261R	Hereditary cancer-predisposing syndrome|not provided	VCV001103902	22	23816924	1103902	rs748964274	single nucleotide variant	synonymous variant	Likely benign	261
+NM_003073.5(SMARCB1):c.783C>T (p.Arg261=)	R261R	Hereditary cancer-predisposing syndrome|not provided	VCV000701842	22	23816924	701842	rs748964274	single nucleotide variant	synonymous variant	Likely benign	261
+NM_003073.5(SMARCB1):c.798G>A (p.Leu266=)	L266L	not provided	VCV001125357	22	23825227	1125357	rs2030317523	single nucleotide variant	synonymous variant	Likely benign	266
+NM_003073.5(SMARCB1):c.801C>T (p.Asn267=)	N267N	Hereditary cancer-predisposing syndrome|not provided	VCV001761688	22	23825230	1761688	NA	single nucleotide variant	synonymous variant	Likely benign	267
+NM_003073.5(SMARCB1):c.804C>T (p.Ile268=)	I268I	Hereditary cancer-predisposing syndrome|not provided	VCV002996952	22	23825233	2996952	NA	single nucleotide variant	synonymous variant	Likely benign	268
+NM_003073.5(SMARCB1):c.804C>A (p.Ile268=)	I268I	Hereditary cancer-predisposing syndrome	VCV001692747	22	23825233	1692747	rs1448111718	single nucleotide variant	synonymous variant	Uncertain significance	268
+NM_003073.5(SMARCB1):c.807T>C (p.His269=)	H269H	Hereditary cancer-predisposing syndrome|not provided	VCV001156799	22	23825236	1156799	rs1185957677	single nucleotide variant	synonymous variant	Likely benign	269
+NM_003073.5(SMARCB1):c.810G>A (p.Val270=)	V270V	not provided	VCV001402957	22	23825239	1402957	rs1601433312	single nucleotide variant	synonymous variant	Uncertain significance	270
+NM_003073.5(SMARCB1):c.822C>T (p.Ser274=)	S274S	Hereditary cancer-predisposing syndrome	VCV001762544	22	23825251	1762544	NA	single nucleotide variant	synonymous variant	Likely benign	274
+NM_003073.5(SMARCB1):c.822C>G (p.Ser274=)	S274S	Hereditary cancer-predisposing syndrome|not provided	VCV000532986	22	23825251	532986	rs1386414055	single nucleotide variant	synonymous variant	Likely benign	274
+NM_003073.5(SMARCB1):c.823C>T (p.Leu275=)	L275L	not provided	VCV001619146	22	23825252	1619146	rs2146026694	single nucleotide variant	synonymous variant	Likely benign	275
+NM_003073.5(SMARCB1):c.825G>A (p.Leu275=)	L275L	not provided|Hereditary cancer-predisposing syndrome	VCV001488334	22	23825254	1488334	rs2146026700	single nucleotide variant	synonymous variant	Conflicting classifications of pathogenicity	275
+NM_003073.5(SMARCB1):c.828G>A (p.Val276=)	V276V	not provided	VCV000574884	22	23825257	574884	rs1568957579	single nucleotide variant	synonymous variant	Uncertain significance	276
+NM_003073.5(SMARCB1):c.831C>T (p.Asp277=)	D277D	not provided|Hereditary cancer-predisposing syndrome	VCV000699758	22	23825260	699758	rs1601433351	single nucleotide variant	synonymous variant	Likely benign	277
+NM_003073.5(SMARCB1):c.840G>A (p.Glu280=)	E280E	Hereditary cancer-predisposing syndrome|not provided	VCV001625587	22	23825269	1625587	rs753334172	single nucleotide variant	synonymous variant	Likely benign	280
+NM_003073.5(SMARCB1):c.846C>T (p.Asp282=)	D282D	Hereditary cancer-predisposing syndrome|not provided	VCV001635605	22	23825275	1635605	rs2030320710	single nucleotide variant	synonymous variant	Likely benign	282
+NM_003073.5(SMARCB1):c.852A>G (p.Ser284=)	S284S	Hereditary cancer-predisposing syndrome|not provided	VCV001130761	22	23825281	1130761	rs138735048	single nucleotide variant	synonymous variant	Likely benign	284
+NM_003073.5(SMARCB1):c.852A>C (p.Ser284=)	S284S	not provided|Hereditary cancer-predisposing syndrome	VCV000822536	22	23825281	822536	rs138735048	single nucleotide variant	synonymous variant	Likely benign	284
+NM_003073.5(SMARCB1):c.855G>A (p.Glu285=)	E285E	Hereditary cancer-predisposing syndrome|not provided	VCV001103958	22	23825284	1103958	rs754587817	single nucleotide variant	synonymous variant	Likely benign	285
+NM_003073.5(SMARCB1):c.861G>A (p.Glu287=)	E287E	not provided	VCV001149026	22	23825290	1149026	rs2146026838	single nucleotide variant	synonymous variant	Likely benign	287
+NM_003073.5(SMARCB1):c.867A>C (p.Ser289=)	S289S	not provided|Hereditary cancer-predisposing syndrome	VCV001764258	22	23825296	1764258	NA	single nucleotide variant	synonymous variant	Likely benign	289
+NM_003073.5(SMARCB1):c.867A>G (p.Ser289=)	S289S	Hereditary cancer-predisposing syndrome|not provided	VCV001626384	22	23825296	1626384	rs1401472509	single nucleotide variant	synonymous variant	Likely benign	289
+NM_003073.5(SMARCB1):c.873G>A (p.Glu291=)	E291E	Hereditary cancer-predisposing syndrome	VCV003320793	22	23825302	3320793	NA	single nucleotide variant	synonymous variant	Likely benign	291
+NM_003073.5(SMARCB1):c.876G>A (p.Lys292=)	K292K	not provided	VCV001533982	22	23825305	1533982	rs2030323037	single nucleotide variant	synonymous variant	Likely benign	292
+NM_003073.5(SMARCB1):c.882C>G (p.Ala294=)	A294A	not provided	VCV002721778	22	23825311	2721778	NA	single nucleotide variant	synonymous variant	Likely benign	294
+NM_003073.5(SMARCB1):c.888G>A (p.Lys296=)	K296K	not provided	VCV000767564	22	23825317	767564	rs769322487	single nucleotide variant	synonymous variant	Likely benign	296
+NM_003073.5(SMARCB1):c.889C>T (p.Leu297=)	L297L	Hereditary cancer-predisposing syndrome|not provided	VCV000532985	22	23825318	532985	rs370768337	single nucleotide variant	synonymous variant	Likely benign	297
+NM_003073.5(SMARCB1):c.897G>T (p.Ser299=)	S299S	not provided|Hereditary cancer-predisposing syndrome	VCV000239485	22	23825326	239485	rs2229354	single nucleotide variant	synonymous variant	Likely benign	299
+NM_003073.5(SMARCB1):c.897G>A (p.Ser299=)	S299S	Schwannomatosis 1|Rhabdoid tumor predisposition syndrome 1|not provided|not specified|Hereditary cancer-predisposing syndrome	VCV000126368	22	23825326	126368	rs2229354	single nucleotide variant	synonymous variant	Benign	299
+NM_003073.5(SMARCB1):c.901C>T (p.Leu301=)	L301L	Hereditary cancer-predisposing syndrome|not provided	VCV001553949	22	23825330	1553949	rs1184401758	single nucleotide variant	synonymous variant	Likely benign	301
+NM_003073.5(SMARCB1):c.906G>A (p.Gly302=)	G302G	Hereditary cancer-predisposing syndrome	VCV001765664	22	23825335	1765664	NA	single nucleotide variant	synonymous variant	Likely benign	302
+NM_003073.5(SMARCB1):c.907T>C (p.Leu303=)	L303L	not provided	VCV001093504	22	23825336	1093504	rs2146026977	single nucleotide variant	synonymous variant	Likely benign	303
+NM_003073.5(SMARCB1):c.912C>G (p.Gly304=)	G304G	not provided|Hereditary cancer-predisposing syndrome	VCV001606160	22	23825341	1606160	rs374509291	single nucleotide variant	synonymous variant	Likely benign	304
+NM_003073.5(SMARCB1):c.912C>T (p.Gly304=)	G304G	Hereditary cancer-predisposing syndrome|not provided	VCV000532970	22	23825341	532970	rs374509291	single nucleotide variant	synonymous variant	Likely benign	304
+NM_003073.5(SMARCB1):c.918G>A (p.Glu306=)	E306E	not provided|Hereditary cancer-predisposing syndrome	VCV001116621	22	23825347	1116621	rs2146027021	single nucleotide variant	synonymous variant	Likely benign	306
+NM_003073.5(SMARCB1):c.921T>C (p.Phe307=)	F307F	Hereditary cancer-predisposing syndrome	VCV002566866	22	23825350	2566866	NA	single nucleotide variant	synonymous variant	Likely benign	307
+NM_003073.5(SMARCB1):c.924C>T (p.Val308=)	V308V	Hereditary cancer-predisposing syndrome|not provided	VCV001583671	22	23825353	1583671	rs770886017	single nucleotide variant	synonymous variant	Likely benign	308
+NM_003073.5(SMARCB1):c.927C>T (p.Thr309=)	T309T	not provided	VCV002193623	22	23825356	2193623	NA	single nucleotide variant	synonymous variant	Likely benign	309
+NM_003073.5(SMARCB1):c.930C>G (p.Thr310=)	T310T	Hereditary cancer-predisposing syndrome	VCV002586912	22	23825359	2586912	NA	single nucleotide variant	synonymous variant	Likely benign	310
+NM_003073.5(SMARCB1):c.933C>T (p.Ile311=)	I311I	not provided|Hereditary cancer-predisposing syndrome	VCV000735216	22	23825362	735216	rs150722737	single nucleotide variant	synonymous variant	Likely benign	311
+NM_003073.5(SMARCB1):c.936A>G (p.Ala312=)	A312A	Hereditary cancer-predisposing syndrome|not provided	VCV001145848	22	23825365	1145848	rs1053215058	single nucleotide variant	synonymous variant	Likely benign	312
+NM_003073.5(SMARCB1):c.939C>T (p.Tyr313=)	Y313Y	Hereditary cancer-predisposing syndrome	VCV002447181	22	23825368	2447181	NA	single nucleotide variant	synonymous variant	Likely benign	313
+NM_003073.5(SMARCB1):c.945C>T (p.Ile315=)	I315I	not provided	VCV002812500	22	23825374	2812500	NA	single nucleotide variant	synonymous variant	Likely benign	315
+NM_003073.5(SMARCB1):c.957G>A (p.Leu319=)	L319L	not provided|Hereditary cancer-predisposing syndrome	VCV001767450	22	23825386	1767450	NA	single nucleotide variant	synonymous variant	Likely benign	319
+NM_003073.5(SMARCB1):c.972G>A (p.Lys324=)	K324K	not provided|Hereditary cancer-predisposing syndrome	VCV000823441	22	23825401	823441	rs1601433555	single nucleotide variant	synonymous variant	Likely benign	324
+NM_003073.5(SMARCB1):c.975C>T (p.Thr325=)	T325T	Hereditary cancer-predisposing syndrome|not provided	VCV001103199	22	23825404	1103199	rs774763517	single nucleotide variant	synonymous variant	Likely benign	325
+NM_003073.5(SMARCB1):c.975C>G (p.Thr325=)	T325T	Hereditary cancer-predisposing syndrome|not provided	VCV000949074	22	23825404	949074	rs774763517	single nucleotide variant	synonymous variant	Conflicting classifications of pathogenicity	325
+NM_003073.5(SMARCB1):c.975C>A (p.Thr325=)	T325T	not provided	VCV000766552	22	23825404	766552	rs774763517	single nucleotide variant	synonymous variant	Likely benign	325
+NM_003073.5(SMARCB1):c.978C>T (p.Tyr326=)	Y326Y	not provided|not specified|Rhabdoid tumor predisposition syndrome 1|Schwannomatosis 1|Hereditary cancer-predisposing syndrome	VCV000388704	22	23825407	388704	rs187488637	single nucleotide variant	synonymous variant	Benign/Likely benign	326
+NM_003073.5(SMARCB1):c.987C>T (p.Ser329=)	S329S	not provided|Hereditary cancer-predisposing syndrome	VCV000416330	22	23833572	416330	rs137942040	single nucleotide variant	synonymous variant	Benign/Likely benign	329
+NM_003073.5(SMARCB1):c.997C>T (p.Leu333=)	L333L	Hereditary cancer-predisposing syndrome|not provided	VCV000701928	22	23833582	701928	rs542096454	single nucleotide variant	synonymous variant	Likely benign	333
+NM_003073.5(SMARCB1):c.999G>A (p.Leu333=)	L333L	not provided	VCV003022137	22	23833584	3022137	NA	single nucleotide variant	synonymous variant	Likely benign	333
+NM_003073.5(SMARCB1):c.1002C>T (p.Pro334=)	P334P	Hereditary cancer-predisposing syndrome|not provided	VCV001098201	22	23833587	1098201	rs908371998	single nucleotide variant	synonymous variant	Likely benign	334
+NM_003073.5(SMARCB1):c.1005A>G (p.Thr335=)	T335T	Hereditary cancer-predisposing syndrome	VCV001780724	22	23833590	1780724	NA	single nucleotide variant	synonymous variant	Likely benign	335
+NM_003073.5(SMARCB1):c.1005A>C (p.Thr335=)	T335T	not provided|Hereditary cancer-predisposing syndrome	VCV001780379	22	23833590	1780379	NA	single nucleotide variant	synonymous variant	Likely benign	335
+NM_003073.5(SMARCB1):c.1008G>A (p.Val336=)	V336V	not provided|Hereditary cancer-predisposing syndrome	VCV002891839	22	23833593	2891839	NA	single nucleotide variant	synonymous variant	Likely benign	336
+NM_003073.5(SMARCB1):c.1017C>T (p.Ala339=)	A339A	Hereditary cancer-predisposing syndrome|not provided	VCV000532977	22	23833602	532977	rs1397141146	single nucleotide variant	synonymous variant	Likely benign	339
+NM_003073.5(SMARCB1):c.1029G>A (p.Thr343=)	T343T	not provided|Hereditary cancer-predisposing syndrome	VCV000568341	22	23833614	568341	rs761056928	single nucleotide variant	synonymous variant	Likely benign	343
+NM_003073.5(SMARCB1):c.1029G>T (p.Thr343=)	T343T	Hereditary cancer-predisposing syndrome|not provided	VCV000532980	22	23833614	532980	rs761056928	single nucleotide variant	synonymous variant	Likely benign	343
+NM_003073.5(SMARCB1):c.1032C>T (p.Gly344=)	G344G	Hereditary cancer-predisposing syndrome|not provided|Schwannomatosis 1|Rhabdoid tumor predisposition syndrome 1	VCV000416325	22	23833617	416325	rs149451748	single nucleotide variant	synonymous variant	Benign/Likely benign	344
+NM_003073.5(SMARCB1):c.1035T>C (p.Asp345=)	D345D	not provided|Hereditary cancer-predisposing syndrome	VCV000822055	22	23833620	822055	rs1311972935	single nucleotide variant	synonymous variant	Likely benign	345
+NM_003073.5(SMARCB1):c.1038G>A (p.Ala346=)	A346A	Hereditary cancer-predisposing syndrome|not provided	VCV000486498	22	23833623	486498	rs777241431	single nucleotide variant	synonymous variant	Likely benign	346
+NM_003073.5(SMARCB1):c.1059G>A (p.Leu353=)	L353L	not provided|Hereditary cancer-predisposing syndrome	VCV000578275	22	23833644	578275	rs1568962989	single nucleotide variant	synonymous variant	Likely benign	353
+NM_003073.5(SMARCB1):c.1062G>A (p.Glu354=)	E354E	not provided|Hereditary cancer-predisposing syndrome	VCV001908843	22	23833647	1908843	NA	single nucleotide variant	synonymous variant	Likely benign	354
+NM_003073.5(SMARCB1):c.1071A>C (p.Thr357=)	T357T	Hereditary cancer-predisposing syndrome	VCV001783425	22	23833656	1783425	NA	single nucleotide variant	synonymous variant	Likely benign	357
+NM_003073.5(SMARCB1):c.1074C>T (p.Asp358=)	D358D	Hereditary cancer-predisposing syndrome|not provided	VCV000532976	22	23833659	532976	rs1205121674	single nucleotide variant	synonymous variant	Likely benign	358
+NM_003073.5(SMARCB1):c.1077T>C (p.Ala359=)	A359A	Hereditary cancer-predisposing syndrome|not provided	VCV002857151	22	23833662	2857151	NA	single nucleotide variant	synonymous variant	Likely benign	359
+NM_003073.5(SMARCB1):c.1086G>A (p.Glu362=)	E362E	not provided	VCV001567627	22	23833671	1567627	rs2146042601	single nucleotide variant	synonymous variant	Likely benign	362
+NM_003073.5(SMARCB1):c.1095C>A (p.Ile365=)	I365I	not provided	VCV000759224	22	23833680	759224	rs1601445449	single nucleotide variant	synonymous variant	Likely benign	365
+NM_003073.5(SMARCB1):c.1098C>T (p.Arg366=)	R366R	Hereditary cancer-predisposing syndrome|not specified|not provided	VCV000703275	22	23833683	703275	rs562018506	single nucleotide variant	synonymous variant	Benign/Likely benign	366
+NM_003073.5(SMARCB1):c.1107C>T (p.Asp369=)	D369D	not provided|Hereditary cancer-predisposing syndrome	VCV000756409	22	23833692	756409	rs770611444	single nucleotide variant	synonymous variant	Likely benign	369
+NM_003073.5(SMARCB1):c.1110G>A (p.Arg370=)	R370R	Hereditary cancer-predisposing syndrome	VCV002566867	22	23833695	2566867	NA	single nucleotide variant	synonymous variant	Likely benign	370
+NM_003073.5(SMARCB1):c.1113C>T (p.Asn371=)	N371N	not provided	VCV002197593	22	23833698	2197593	NA	single nucleotide variant	synonymous variant	Likely benign	371
+NM_003073.5(SMARCB1):c.1116G>A (p.Thr372=)	T372T	not specified|not provided|Hereditary cancer-predisposing syndrome	VCV000416328	22	23833701	416328	rs117084604	single nucleotide variant	synonymous variant	Benign/Likely benign	372
+NM_003073.5(SMARCB1):c.1120C>A (p.Arg374=)	R374R	Hereditary cancer-predisposing syndrome|not provided	VCV000818378	22	23834142	818378	rs1568963596	single nucleotide variant	synonymous variant	Likely benign	374
+NM_003073.5(SMARCB1):c.1122G>A (p.Arg374=)	R374R	Hereditary cancer-predisposing syndrome	VCV003223077	22	23834144	3223077	NA	single nucleotide variant	synonymous variant	Likely benign	374
+NM_003073.5(SMARCB1):c.1128G>A (p.Arg376=)	R376R	not provided	VCV003013122	22	23834150	3013122	NA	single nucleotide variant	synonymous variant	Likely benign	376
+NM_003073.5(SMARCB1):c.1131T>C (p.Arg377=)	R377R	not provided|Hereditary cancer-predisposing syndrome|not specified|Rhabdoid tumor predisposition syndrome 1	VCV000281915	22	23834153	281915	rs144863210	single nucleotide variant	synonymous variant	Benign/Likely benign	377
+NM_003073.5(SMARCB1):c.1137C>T (p.Ala379=)	A379A	Hereditary cancer-predisposing syndrome	VCV001730053	22	23834159	1730053	NA	single nucleotide variant	synonymous variant	Likely benign	379
+NM_003073.5(SMARCB1):c.1140C>T (p.Asn380=)	N380N	not provided	VCV002966520	22	23834162	2966520	NA	single nucleotide variant	synonymous variant	Likely benign	380
+NM_003073.5(SMARCB1):c.1143G>A (p.Thr381=)	T381T	not provided|Hereditary cancer-predisposing syndrome	VCV000486497	22	23834165	486497	rs750187119	single nucleotide variant	synonymous variant	Likely benign	381
+NM_003073.5(SMARCB1):c.1143G>C (p.Thr381=)	T381T	not provided|Hereditary cancer-predisposing syndrome	VCV000416327	22	23834165	416327	rs750187119	single nucleotide variant	synonymous variant	Likely benign	381
+NM_003073.5(SMARCB1):c.1146C>T (p.Ala382=)	A382A	not provided	VCV002984809	22	23834168	2984809	NA	single nucleotide variant	synonymous variant	Likely benign	382
+NM_003073.5(SMARCB1):c.1149G>C (p.Pro383=)	P383P	Hereditary cancer-predisposing syndrome	VCV003223078	22	23834171	3223078	NA	single nucleotide variant	synonymous variant	Likely benign	383
+NM_003073.5(SMARCB1):c.1149G>A (p.Pro383=)	P383P	Hereditary cancer-predisposing syndrome|not provided	VCV000410707	22	23834171	410707	rs780103418	single nucleotide variant	synonymous variant	Likely benign	383
+NM_003073.5(SMARCB1):c.205G>A (p.Gly69Ser)	G69S	not provided	VCV001471392	22	23791867	1471392	rs2145960551	single nucleotide variant	missense variant	Uncertain significance	69
+NM_003073.5(SMARCB1):c.1A>C (p.Met1Leu)	M1L	not provided	VCV002712544	22	23787170	2712544	NA	single nucleotide variant	missense variant|initiator_codon_variant	Uncertain significance	1
+NM_003073.5(SMARCB1):c.1A>G (p.Met1Val)	M1V	Hereditary cancer-predisposing syndrome|Rhabdoid tumor predisposition syndrome 1|Schwannomatosis 1|not provided	VCV000135257	22	23787170	135257	rs367768260	single nucleotide variant	missense variant|initiator_codon_variant	Benign/Likely benign	1
+NM_003073.5(SMARCB1):c.2T>C (p.Met1Thr)	M1T	Hereditary cancer-predisposing syndrome	VCV003320807	22	23787171	3320807	NA	single nucleotide variant	missense variant|initiator_codon_variant	Uncertain significance	1
+NM_003073.5(SMARCB1):c.4A>G (p.Met2Val)	M2V	not provided	VCV001507035	22	23787173	1507035	rs2145951889	single nucleotide variant	missense variant	Uncertain significance	2
+NM_003073.5(SMARCB1):c.5T>G (p.Met2Arg)	M2R	not provided	VCV001720691	22	23787174	1720691	NA	single nucleotide variant	missense variant	Uncertain significance	2
+NM_003073.5(SMARCB1):c.6G>A (p.Met2Ile)	M2I	not provided	VCV002728217	22	23787175	2728217	NA	single nucleotide variant	missense variant	Uncertain significance	2
+NM_003073.5(SMARCB1):c.8T>A (p.Met3Lys)	M3K	not provided	VCV002736303	22	23787177	2736303	NA	single nucleotide variant	missense variant	Uncertain significance	3
+NM_003073.5(SMARCB1):c.9G>T (p.Met3Ile)	M3I	Hereditary cancer-predisposing syndrome	VCV003320795	22	23787178	3320795	NA	single nucleotide variant	missense variant	Uncertain significance	3
+NM_003073.5(SMARCB1):c.10del (p.Met4fs)	M4Fs	Schwannomatosis 1	VCV002664995	22	23787179	2664995	NA	Deletion	frameshift variant	Likely pathogenic	4
+NM_003073.5(SMARCB1):c.10A>T (p.Met4Leu)	M4L	not provided	VCV002113167	22	23787179	2113167	NA	single nucleotide variant	missense variant	Uncertain significance	4
+NM_003073.5(SMARCB1):c.11T>C (p.Met4Thr)	M4T	not provided|Hereditary cancer-predisposing syndrome	VCV001045351	22	23787180	1045351	rs371477865	single nucleotide variant	missense variant	Uncertain significance	4
+NM_003073.5(SMARCB1):c.13G>T (p.Ala5Ser)	A5S	not provided	VCV002829104	22	23787182	2829104	NA	single nucleotide variant	missense variant	Uncertain significance	5
+NM_003073.5(SMARCB1):c.13G>C (p.Ala5Pro)	A5P	not provided	VCV001313737	22	23787182	1313737	rs1928040877	single nucleotide variant	missense variant	Uncertain significance	5
+NM_003073.5(SMARCB1):c.14C>T (p.Ala5Val)	A5V	not provided|Hereditary cancer-predisposing syndrome	VCV000577312	22	23787183	577312	rs1568933235	single nucleotide variant	missense variant	Uncertain significance	5
+NM_003073.5(SMARCB1):c.16C>G (p.Leu6Val)	L6V	Hereditary cancer-predisposing syndrome	VCV002482351	22	23787185	2482351	NA	single nucleotide variant	missense variant	Uncertain significance	6
+NM_003073.5(SMARCB1):c.20G>T (p.Ser7Ile)	S7I	Hereditary cancer-predisposing syndrome	VCV001785888	22	23787189	1785888	NA	single nucleotide variant	missense variant	Uncertain significance	7
+NM_003073.5(SMARCB1):c.20G>A (p.Ser7Asn)	S7N	not provided	VCV001037645	22	23787189	1037645	rs1928042033	single nucleotide variant	missense variant	Uncertain significance	7
+NM_003073.5(SMARCB1):c.22A>G (p.Lys8Glu)	K8E	not provided	VCV001379500	22	23787191	1379500	rs2145951968	single nucleotide variant	missense variant	Uncertain significance	8
+NM_003073.5(SMARCB1):c.23A>G (p.Lys8Arg)	K8R	not provided|Hereditary cancer-predisposing syndrome	VCV001790699	22	23787192	1790699	NA	single nucleotide variant	missense variant	Uncertain significance	8
+NM_003073.5(SMARCB1):c.26C>G (p.Thr9Ser)	T9S	Rhabdoid tumor predisposition syndrome 1	VCV003240533	22	23787195	3240533	NA	single nucleotide variant	missense variant	Uncertain significance	9
+NM_003073.5(SMARCB1):c.31G>A (p.Gly11Arg)	G11R	Intellectual disability|not provided	VCV000451032	22	23787200	451032	rs1555875308	single nucleotide variant	missense variant	Conflicting classifications of pathogenicity	11
+NM_003073.5(SMARCB1):c.34C>T (p.Gln12Ter)	Q12X	not provided|Hereditary cancer-predisposing syndrome	VCV000008026	22	23787203	8026	rs74315513	single nucleotide variant	nonsense	Pathogenic	12
+NM_003073.5(SMARCB1):c.35A>G (p.Gln12Arg)	Q12R	not provided|Hereditary cancer-predisposing syndrome	VCV001733063	22	23787204	1733063	NA	single nucleotide variant	missense variant	Uncertain significance	12
+NM_003073.5(SMARCB1):c.35A>C (p.Gln12Pro)	Q12P	Hereditary cancer-predisposing syndrome	VCV001733059	22	23787204	1733059	NA	single nucleotide variant	missense variant	Uncertain significance	12
+NM_003073.5(SMARCB1):c.41C>A (p.Pro14His)	P14H	Hereditary cancer-predisposing syndrome|not provided	VCV001738639	22	23787210	1738639	NA	single nucleotide variant	missense variant	Pathogenic/Likely pathogenic	14
+NM_003073.5(SMARCB1):c.43G>A (p.Val15Met)	V15M	not provided	VCV002882485	22	23787212	2882485	NA	single nucleotide variant	missense variant	Uncertain significance	15
+NM_003073.5(SMARCB1):c.43G>T (p.Val15Leu)	V15L	Hereditary cancer-predisposing syndrome	VCV001740321	22	23787212	1740321	NA	single nucleotide variant	missense variant	Uncertain significance	15
+NM_003073.5(SMARCB1):c.44T>C (p.Val15Ala)	V15A	not provided	VCV000861317	22	23787213	861317	rs1928044034	single nucleotide variant	missense variant	Uncertain significance	15
+NM_003073.5(SMARCB1):c.52C>T (p.Gln18Ter)	Q18X	not provided	VCV000872341	22	23787221	872341	rs1928044707	single nucleotide variant	nonsense	Pathogenic	18
+NM_003073.5(SMARCB1):c.54G>C (p.Gln18His)	Q18H	not provided	VCV001511951	22	23787223	1511951	rs1220062951	single nucleotide variant	missense variant	Uncertain significance	18
+NM_003073.5(SMARCB1):c.56T>A (p.Leu19Gln)	L19Q	Hereditary cancer-predisposing syndrome	VCV003320799	22	23787225	3320799	NA	single nucleotide variant	missense variant	Uncertain significance	19
+NM_003073.5(SMARCB1):c.59A>C (p.Glu20Ala)	E20A	not provided	VCV001486330	22	23787228	1486330	rs2145952083	single nucleotide variant	missense variant	Uncertain significance	20
+NM_003073.5(SMARCB1):c.61G>A (p.Asp21Asn)	D21N	Hereditary cancer-predisposing syndrome|not provided	VCV000826242	22	23787230	826242	rs1601382598	single nucleotide variant	missense variant	Uncertain significance	21
+NM_003073.5(SMARCB1):c.62A>G (p.Asp21Gly)	D21G	not provided	VCV001218089	22	23787231	1218089	rs2145952092	single nucleotide variant	missense variant	Uncertain significance	21
+NM_003073.5(SMARCB1):c.64G>A (p.Asp22Asn)	D22N	not provided|Hereditary cancer-predisposing syndrome	VCV000646013	22	23787233	646013	rs1417899723	single nucleotide variant	missense variant	Uncertain significance	22
+NM_003073.5(SMARCB1):c.67G>A (p.Gly23Ser)	G23S	not provided|Hereditary cancer-predisposing syndrome|SMARCB1-related disorder	VCV000840331	22	23787236	840331	rs1287987691	single nucleotide variant	missense variant	Uncertain significance	23
+NM_003073.5(SMARCB1):c.68G>A (p.Gly23Asp)	G23D	Hereditary cancer-predisposing syndrome|not provided	VCV000826695	22	23787237	826695	rs1601382621	single nucleotide variant	missense variant	Uncertain significance	23
+NM_003073.5(SMARCB1):c.70G>A (p.Glu24Lys)	E24K	Hereditary cancer-predisposing syndrome|not provided	VCV000826836	22	23787239	826836	rs1601382640	single nucleotide variant	missense variant	Uncertain significance	24
+NM_003073.5(SMARCB1):c.71A>C (p.Glu24Ala)	E24A	Hereditary cancer-predisposing syndrome|not provided	VCV001059096	22	23787240	1059096	rs2145952118	single nucleotide variant	missense variant	Uncertain significance	24
+NM_003073.5(SMARCB1):c.73T>G (p.Phe25Val)	F25V	Hereditary cancer-predisposing syndrome	VCV001758743	22	23787242	1758743	NA	single nucleotide variant	missense variant	Uncertain significance	25
+NM_003073.5(SMARCB1):c.74T>C (p.Phe25Ser)	F25S	not provided|Hereditary cancer-predisposing syndrome	VCV001514377	22	23787243	1514377	rs2145952130	single nucleotide variant	missense variant	Uncertain significance	25
+NM_003073.5(SMARCB1):c.79A>G (p.Met27Val)	M27V	Rhabdoid tumor predisposition syndrome 1|Hereditary cancer-predisposing syndrome|not provided	VCV000941247	22	23787248	941247	rs762676176	single nucleotide variant	missense variant	Uncertain significance	27
+NM_003073.5(SMARCB1):c.79A>C (p.Met27Leu)	M27L	Rhabdoid tumor predisposition syndrome 1|not provided|Intellectual disability, autosomal dominant 15|Hereditary cancer-predisposing syndrome	VCV000464339	22	23787248	464339	rs762676176	single nucleotide variant	missense variant	Uncertain significance	27
+NM_003073.5(SMARCB1):c.80T>G (p.Met27Arg)	M27R	not provided	VCV000838596	22	23787249	838596	rs763994045	single nucleotide variant	missense variant	Conflicting classifications of pathogenicity	27
+NM_003073.5(SMARCB1):c.82A>T (p.Ile28Phe)	I28F	Hereditary cancer-predisposing syndrome	VCV003223089	22	23787251	3223089	NA	single nucleotide variant	missense variant	Uncertain significance	28
+NM_003073.5(SMARCB1):c.82A>G (p.Ile28Val)	I28V	not provided|SMARCB1-related disorder	VCV002630806	22	23787251	2630806	NA	single nucleotide variant	missense variant	Uncertain significance	28
+NM_003073.5(SMARCB1):c.83_84delinsAA (p.Ile28Lys)	I28K	not provided	VCV001061593	22	23787252 - 23787253	1061593	rs2145952163	Indel	missense variant	Uncertain significance	28
+NM_003073.5(SMARCB1):c.84C>G (p.Ile28Met)	I28M	Intellectual disability, autosomal dominant 15	VCV001709002	22	23787253	1709002	NA	single nucleotide variant	missense variant	Uncertain significance	28
+NM_003073.5(SMARCB1):c.85G>A (p.Gly29Ser)	G29S	not provided	VCV001507853	22	23787254	1507853	rs774011967	single nucleotide variant	missense variant	Uncertain significance	29
+NM_003073.5(SMARCB1):c.85G>C (p.Gly29Arg)	G29R	not provided	VCV000948259	22	23787254	948259	rs774011967	single nucleotide variant	missense variant	Uncertain significance	29
+NM_003073.5(SMARCB1):c.91G>T (p.Glu31Ter)	E31X	not provided	VCV001430166	22	23787260	1430166	rs2145952184	single nucleotide variant	nonsense	Pathogenic	31
+NM_003073.5(SMARCB1):c.92_93del (p.Glu31fs)	E31Fs	not provided	VCV001074512	22	23787260 - 23787261	1074512	rs2145952190	Deletion	frameshift variant	Pathogenic	31
+NM_003073.5(SMARCB1):c.92A>G (p.Glu31Gly)	E31G	not provided	VCV002764125	22	23787261	2764125	NA	single nucleotide variant	missense variant	Uncertain significance	31
+NM_003073.5(SMARCB1):c.92A>T (p.Glu31Val)	E31V	not provided	VCV000008031	22	23787261	8031	rs267607072	single nucleotide variant	missense variant	Conflicting classifications of pathogenicity	31
+NM_003073.5(SMARCB1):c.101A>G (p.Asn34Ser)	N34S	not provided|Hereditary cancer-predisposing syndrome	VCV001357192	22	23791763	1357192	rs2145959891	single nucleotide variant	missense variant	Uncertain significance	34
+NM_003073.5(SMARCB1):c.106C>T (p.Leu36Phe)	L36F	not provided	VCV001434297	22	23791768	1434297	rs2145959920	single nucleotide variant	missense variant	Uncertain significance	36
+NM_003073.5(SMARCB1):c.109C>T (p.Arg37Cys)	R37C	not provided	VCV003363753	22	23791771	3363753	NA	single nucleotide variant	missense variant	Pathogenic	37
+NM_003073.5(SMARCB1):c.110G>T (p.Arg37Leu)	R37L	Developmental disorder	VCV002920689	22	23791772	2920689	NA	single nucleotide variant	missense variant	Uncertain significance	37
+NM_003073.5(SMARCB1):c.110G>C (p.Arg37Pro)	R37P	Adenoid cystic carcinoma	VCV000495134	22	23791772	495134	rs398122368	single nucleotide variant	missense variant	Uncertain significance	37
+NM_003073.5(SMARCB1):c.110G>A (p.Arg37His)	R37H	Coffin-Siris syndrome|Intellectual disability, autosomal dominant 15|not provided|SMARCB1-related BAFopathy	VCV000088893	22	23791772	88893	rs398122368	single nucleotide variant	missense variant	Conflicting classifications of pathogenicity	37
+NM_003073.5(SMARCB1):c.118C>T (p.Arg40Ter)	R40X	not provided	VCV000410698	22	23791780	410698	rs1060503015	single nucleotide variant	nonsense	Pathogenic	40
+NM_003073.5(SMARCB1):c.119G>A (p.Arg40Gln)	R40Q	not provided	VCV000934572	22	23791781	934572	rs1928397102	single nucleotide variant	missense variant	Uncertain significance	40
+NM_003073.5(SMARCB1):c.128T>G (p.Leu43Arg)	L43R	not provided	VCV001021181	22	23791790	1021181	rs1928397303	single nucleotide variant	missense variant	Uncertain significance	43
+NM_003073.5(SMARCB1):c.141C>A (p.Tyr47Ter)	Y47X	not provided	VCV001073885	22	23791803	1073885	rs1601388576	single nucleotide variant	nonsense	Pathogenic	47
+NM_003073.5(SMARCB1):c.142C>T (p.Pro48Ser)	P48S	Hereditary cancer-predisposing syndrome	VCV001772465	22	23791804	1772465	NA	single nucleotide variant	missense variant	Uncertain significance	48
+NM_003073.5(SMARCB1):c.143C>T (p.Pro48Leu)	P48L	not provided	VCV000030202	22	23791805	30202	rs387906811	single nucleotide variant	missense variant	Uncertain significance	48
+NM_003073.5(SMARCB1):c.146C>T (p.Ser49Leu)	S49L	not provided	VCV002011738	22	23791808	2011738	NA	single nucleotide variant	missense variant	Uncertain significance	49
+NM_003073.5(SMARCB1):c.148C>G (p.Leu50Val)	L50V	not provided	VCV002131004	22	23791810	2131004	NA	single nucleotide variant	missense variant	Uncertain significance	50
+NM_003073.5(SMARCB1):c.152G>A (p.Trp51Ter)	W51X	not provided	VCV000410703	22	23791814	410703	rs1060503016	single nucleotide variant	nonsense	Pathogenic	51
+NM_003073.5(SMARCB1):c.153G>C (p.Trp51Cys)	W51C	not provided	VCV001405975	22	23791815	1405975	rs2145960213	single nucleotide variant	missense variant	Uncertain significance	51
+NM_003073.5(SMARCB1):c.153G>A (p.Trp51Ter)	W51X	not provided	VCV001071772	22	23791815	1071772	rs2145960213	single nucleotide variant	nonsense	Pathogenic	51
+NM_003073.5(SMARCB1):c.157C>T (p.Arg53Ter)	R53X	Hereditary cancer-predisposing syndrome|not provided	VCV000944246	22	23791819	944246	rs1928400256	single nucleotide variant	nonsense	Pathogenic	53
+NM_003073.5(SMARCB1):c.158G>A (p.Arg53Gln)	R53Q	not provided|Hereditary cancer-predisposing syndrome	VCV002184420	22	23791820	2184420	NA	single nucleotide variant	missense variant	Uncertain significance	53
+NM_003073.5(SMARCB1):c.158G>T (p.Arg53Leu)	R53L	Hereditary cancer-predisposing syndrome|not provided	VCV000410706	22	23791820	410706	rs779769475	single nucleotide variant	missense variant	Pathogenic/Likely pathogenic	53
+NM_003073.5(SMARCB1):c.159_160delinsTATCTGGAGGCG (p.Leu54fs)	L54Fs	not provided	VCV000970131	22	23791821 - 23791822	970131	rs1928400754	Indel	frameshift variant	Pathogenic	54
+NM_003073.5(SMARCB1):c.166A>T (p.Thr56Ser)	T56S	not provided|Hereditary cancer-predisposing syndrome	VCV000573208	22	23791828	573208	rs1568936098	single nucleotide variant	missense variant	Uncertain significance	56
+NM_003073.5(SMARCB1):c.169G>A (p.Val57Met)	V57M	Hereditary cancer-predisposing syndrome|Rhabdoid tumor predisposition syndrome 1|not provided	VCV000532973	22	23791831	532973	rs922052006	single nucleotide variant	missense variant	Conflicting classifications of pathogenicity	57
+NM_003073.5(SMARCB1):c.170T>C (p.Val57Ala)	V57A	not provided	VCV002880616	22	23791832	2880616	NA	single nucleotide variant	missense variant	Uncertain significance	57
+NM_003073.5(SMARCB1):c.178_179del (p.Arg60fs)	R60Fs	Hereditary cancer-predisposing syndrome	VCV000486500	22	23791836 - 23791837	486500	rs1555875915	Microsatellite	frameshift variant	Pathogenic	60
+NM_003073.5(SMARCB1):c.184A>T (p.Lys62Ter)	K62X	Rhabdoid tumor predisposition syndrome 1	VCV000464323	22	23791846	464323	rs1555875917	single nucleotide variant	nonsense	Pathogenic	62
+NM_003073.5(SMARCB1):c.185A>C (p.Lys62Thr)	K62T	Hereditary cancer-predisposing syndrome	VCV001692744	22	23791847	1692744	rs1928402357	single nucleotide variant	missense variant	Uncertain significance	62
+NM_003073.5(SMARCB1):c.185A>T (p.Lys62Ile)	K62I	not provided	VCV000950406	22	23791847	950406	rs1928402357	single nucleotide variant	missense variant	Uncertain significance	62
+NM_003073.5(SMARCB1):c.193G>T (p.Ala65Ser)	A65S	not provided	VCV000532965	22	23791855	532965	rs1555875920	single nucleotide variant	missense variant	Uncertain significance	65
+NM_003073.5(SMARCB1):c.196T>G (p.Ser66Ala)	S66A	Hereditary cancer-predisposing syndrome|not provided	VCV000656232	22	23791858	656232	rs1601388691	single nucleotide variant	missense variant	Uncertain significance	66
+NM_003073.5(SMARCB1):c.197C>T (p.Ser66Leu)	S66L	not provided|Hereditary cancer-predisposing syndrome	VCV002730811	22	23791859	2730811	NA	single nucleotide variant	missense variant	Uncertain significance	66
+NM_003073.5(SMARCB1):c.202C>T (p.His68Tyr)	H68Y	not provided	VCV002013202	22	23791864	2013202	NA	single nucleotide variant	missense variant	Uncertain significance	68
+NM_003073.5(SMARCB1):c.203A>T (p.His68Leu)	H68L	not provided	VCV000934285	22	23791865	934285	rs1928403840	single nucleotide variant	missense variant	Uncertain significance	68
+NM_003073.5(SMARCB1):c.203_216delinsTACC (p.His68fs)	H68Fs	Schwannomatosis 1	VCV000008028	22	23791865 - 23791878	8028	rs587776679	Indel	frameshift variant|splice donor variant	Pathogenic	68
+NM_003073.5(SMARCB1):c.233A>G (p.Asp78Gly)	D78G	not provided	VCV002196238	22	23793559	2196238	NA	single nucleotide variant	missense variant	Uncertain significance	78
+NM_003073.5(SMARCB1):c.235C>A (p.His79Asn)	H79N	Hereditary cancer-predisposing syndrome	VCV003320818	22	23793561	3320818	NA	single nucleotide variant	missense variant	Uncertain significance	79
+NM_003073.5(SMARCB1):c.238G>A (p.Gly80Arg)	G80R	not provided|Hereditary cancer-predisposing syndrome	VCV001790550	22	23793564	1790550	NA	single nucleotide variant	missense variant	Uncertain significance	80
+NM_003073.5(SMARCB1):c.242A>G (p.Tyr81Cys)	Y81C	not provided|Hereditary cancer-predisposing syndrome	VCV001435705	22	23793568	1435705	rs2145963676	single nucleotide variant	missense variant	Uncertain significance	81
+NM_003073.5(SMARCB1):c.244A>C (p.Thr82Pro)	T82P	not provided	VCV001475407	22	23793570	1475407	rs1053189632	single nucleotide variant	missense variant	Uncertain significance	82
+NM_003073.5(SMARCB1):c.244A>G (p.Thr82Ala)	T82A	not provided	VCV000839331	22	23793570	839331	rs1053189632	single nucleotide variant	missense variant	Uncertain significance	82
+NM_003073.5(SMARCB1):c.245C>T (p.Thr82Met)	T82M	Hereditary cancer-predisposing syndrome|not provided	VCV001002790	22	23793571	1002790	rs1928538526	single nucleotide variant	missense variant	Uncertain significance	82
+NM_003073.5(SMARCB1):c.257C>A (p.Thr86Asn)	T86N	not provided	VCV001392274	22	23793583	1392274	rs747794500	single nucleotide variant	missense variant	Uncertain significance	86
+NM_003073.5(SMARCB1):c.260G>A (p.Ser87Asn)	S87N	not provided|Hereditary cancer-predisposing syndrome	VCV001793783	22	23793586	1793783	NA	single nucleotide variant	missense variant	Uncertain significance	87
+NM_003073.5(SMARCB1):c.262G>T (p.Val88Leu)	V88L	not provided	VCV000653102	22	23793588	653102	rs1601391025	single nucleotide variant	missense variant	Uncertain significance	88
+NM_003073.5(SMARCB1):c.268del (p.Leu90fs)	L90Fs	not provided	VCV000941252	22	23793592	941252	rs1928539937	Deletion	frameshift variant	Pathogenic	90
+NM_003073.5(SMARCB1):c.277G>T (p.Ala93Ser)	A93S	Hereditary cancer-predisposing syndrome	VCV002452592	22	23793603	2452592	NA	single nucleotide variant	missense variant	Uncertain significance	93
+NM_003073.5(SMARCB1):c.277G>A (p.Ala93Thr)	A93T	not provided	VCV001435720	22	23793603	1435720	rs2145963919	single nucleotide variant	missense variant	Uncertain significance	93
+NM_003073.5(SMARCB1):c.278C>T (p.Ala93Val)	A93V	not provided	VCV001313749	22	23793604	1313749	rs2145963921	single nucleotide variant	missense variant	Uncertain significance	93
+NM_003073.5(SMARCB1):c.281C>T (p.Ser94Leu)	S94L	Hereditary cancer-predisposing syndrome|not provided	VCV000852841	22	23793607	852841	rs1223772419	single nucleotide variant	missense variant	Uncertain significance	94
+NM_003073.5(SMARCB1):c.283G>A (p.Glu95Lys)	E95K	not provided	VCV001368371	22	23793609	1368371	rs2145963960	single nucleotide variant	missense variant	Uncertain significance	95
+NM_003073.5(SMARCB1):c.284A>G (p.Glu95Gly)	E95G	not provided	VCV000582740	22	23793610	582740	rs1568937129	single nucleotide variant	missense variant	Uncertain significance	95
+NM_003073.5(SMARCB1):c.286G>A (p.Val96Met)	V96M	not provided	VCV001719248	22	23793612	1719248	NA	single nucleotide variant	missense variant	Uncertain significance	96
+NM_003073.5(SMARCB1):c.301G>C (p.Asp101His)	D101H	not provided	VCV001042238	22	23793627	1042238	rs774488493	single nucleotide variant	missense variant	Uncertain significance	101
+NM_003073.5(SMARCB1):c.301G>T (p.Asp101Tyr)	D101Y	not provided	VCV001037169	22	23793627	1037169	rs774488493	single nucleotide variant	missense variant	Uncertain significance	101
+NM_003073.5(SMARCB1):c.301G>A (p.Asp101Asn)	D101N	Hereditary cancer-predisposing syndrome|not provided	VCV000653538	22	23793627	653538	rs774488493	single nucleotide variant	missense variant	Uncertain significance	101
+NM_003073.5(SMARCB1):c.302A>G (p.Asp101Gly)	D101G	not provided	VCV000582394	22	23793628	582394	rs762188226	single nucleotide variant	missense variant	Uncertain significance	101
+NM_003073.5(SMARCB1):c.307_346del (p.Asn103fs)	N103Fs	Schwannomatosis 1	VCV001686218	22	23793631 - 23793670	1686218	rs2145964108	Deletion	frameshift variant	Pathogenic	103
+NM_003073.5(SMARCB1):c.307A>C (p.Asn103His)	N103H	not provided	VCV001468458	22	23793633	1468458	rs2145964114	single nucleotide variant	missense variant	Uncertain significance	103
+NM_003073.5(SMARCB1):c.308A>G (p.Asn103Ser)	N103S	not provided	VCV001010556	22	23793634	1010556	rs1928543301	single nucleotide variant	missense variant	Uncertain significance	103
+NM_003073.5(SMARCB1):c.310G>A (p.Asp104Asn)	D104N	Hereditary cancer-predisposing syndrome	VCV002624835	22	23793636	2624835	NA	single nucleotide variant	missense variant	Uncertain significance	104
+NM_003073.5(SMARCB1):c.311A>C (p.Asp104Ala)	D104A	not provided	VCV001358577	22	23793637	1358577	rs2145964151	single nucleotide variant	missense variant	Uncertain significance	104
+NM_003073.5(SMARCB1):c.314A>G (p.Glu105Gly)	E105G	Hereditary cancer-predisposing syndrome|not provided	VCV001474800	22	23793640	1474800	rs2145964182	single nucleotide variant	missense variant	Uncertain significance	105
+NM_003073.5(SMARCB1):c.323A>G (p.Lys108Arg)	K108R	not provided	VCV001714604	22	23793649	1714604	NA	single nucleotide variant	missense variant	Uncertain significance	108
+NM_003073.5(SMARCB1):c.329T>C (p.Val110Ala)	V110A	Rhabdoid tumor predisposition syndrome 1|Hereditary cancer-predisposing syndrome|not provided	VCV000650818	22	23793655	650818	rs1601391157	single nucleotide variant	missense variant	Uncertain significance	110
+NM_003073.5(SMARCB1):c.332C>G (p.Ser111Cys)	S111C	Hereditary cancer-predisposing syndrome|not provided	VCV001919200	22	23793658	1919200	NA	single nucleotide variant	missense variant	Uncertain significance	111
+NM_003073.5(SMARCB1):c.334A>G (p.Ile112Val)	I112V	Hereditary cancer-predisposing syndrome|not provided	VCV000872342	22	23793660	872342	rs1928546194	single nucleotide variant	missense variant	Uncertain significance	112
+NM_003073.5(SMARCB1):c.340A>G (p.Thr114Ala)	T114A	not provided	VCV001003802	22	23793666	1003802	rs750822703	single nucleotide variant	missense variant	Uncertain significance	114
+NM_003073.5(SMARCB1):c.340A>C (p.Thr114Pro)	T114P	Hereditary cancer-predisposing syndrome|not provided	VCV000655687	22	23793666	655687	rs750822703	single nucleotide variant	missense variant	Conflicting classifications of pathogenicity	114
+NM_003073.5(SMARCB1):c.346C>A (p.Pro116Thr)	P116T	not provided	VCV001000107	22	23793672	1000107	rs1928547553	single nucleotide variant	missense variant	Uncertain significance	116
+NM_003073.5(SMARCB1):c.351del (p.Thr118fs)	T118Fs	Teratoid tumor, atypical	VCV000692027	22	23793672	692027	rs1555876140	Deletion	frameshift variant	Pathogenic	118
+NM_003073.5(SMARCB1):c.347C>T (p.Pro116Leu)	P116L	not provided	VCV002769304	22	23793673	2769304	NA	single nucleotide variant	missense variant	Uncertain significance	116
+NM_003073.5(SMARCB1):c.347C>A (p.Pro116His)	P116H	not provided|Hereditary cancer-predisposing syndrome	VCV001731824	22	23793673	1731824	NA	single nucleotide variant	missense variant	Uncertain significance	116
+NM_003073.5(SMARCB1):c.349C>T (p.Pro117Ser)	P117S	Hereditary cancer-predisposing syndrome	VCV002566863	22	23793675	2566863	NA	single nucleotide variant	missense variant	Uncertain significance	117
+NM_003073.5(SMARCB1):c.352A>C (p.Thr118Pro)	T118P	Hereditary cancer-predisposing syndrome|not provided	VCV001443874	22	23793678	1443874	rs761082514	single nucleotide variant	missense variant	Uncertain significance	118
+NM_003073.5(SMARCB1):c.358C>T (p.Leu120Phe)	L120F	Hereditary cancer-predisposing syndrome|not provided	VCV000410712	22	23793684	410712	rs754350320	single nucleotide variant	missense variant	Uncertain significance	120
+NM_003073.5(SMARCB1):c.364G>T (p.Glu122Ter)	E122X	not provided	VCV001076272	22	23800945	1076272	rs1929106223	single nucleotide variant	nonsense	Pathogenic	122
+NM_003073.5(SMARCB1):c.366A>T (p.Glu122Asp)	E122D	Hereditary cancer-predisposing syndrome|not provided	VCV000410705	22	23800947	410705	rs1060503018	single nucleotide variant	missense variant	Uncertain significance	122
+NM_003073.5(SMARCB1):c.374C>T (p.Ala125Val)	A125V	not provided	VCV002781398	22	23800955	2781398	NA	single nucleotide variant	missense variant	Uncertain significance	125
+NM_003073.5(SMARCB1):c.374C>G (p.Ala125Gly)	A125G	Hereditary cancer-predisposing syndrome|not provided	VCV000658087	22	23800955	658087	rs1029942798	single nucleotide variant	missense variant	Conflicting classifications of pathogenicity	125
+NM_003073.5(SMARCB1):c.377A>G (p.Lys126Arg)	K126R	not provided|Hereditary cancer-predisposing syndrome	VCV002156962	22	23800958	2156962	NA	single nucleotide variant	missense variant	Uncertain significance	126
+NM_003073.5(SMARCB1):c.380G>A (p.Arg127Lys)	R127K	Hereditary cancer-predisposing syndrome	VCV003320791	22	23800961	3320791	NA	single nucleotide variant	missense variant	Uncertain significance	127
+NM_003073.5(SMARCB1):c.386G>C (p.Ser129Thr)	S129T	not provided	VCV002118276	22	23800967	2118276	NA	single nucleotide variant	missense variant	Uncertain significance	129
+NM_003073.5(SMARCB1):c.400A>C (p.Thr134Pro)	T134P	not provided	VCV001723694	22	23800981	1723694	NA	single nucleotide variant	missense variant	Uncertain significance	134
+NM_003073.5(SMARCB1):c.403C>G (p.Leu135Val)	L135V	not provided|not specified	VCV002005109	22	23800984	2005109	NA	single nucleotide variant	missense variant	Uncertain significance	135
+NM_003073.5(SMARCB1):c.413G>C (p.Ser138Thr)	S138T	not provided|Hereditary cancer-predisposing syndrome	VCV001334614	22	23800994	1334614	rs1929110548	single nucleotide variant	missense variant	Uncertain significance	138
+NM_003073.5(SMARCB1):c.415T>C (p.Ser139Pro)	S139P	not provided	VCV002500414	22	23800996	2500414	NA	single nucleotide variant	missense variant	Uncertain significance	139
+NM_003073.5(SMARCB1):c.430G>A (p.Ala144Thr)	A144T	Hereditary cancer-predisposing syndrome	VCV001739623	22	23801011	1739623	NA	single nucleotide variant	missense variant	Uncertain significance	144
+NM_003073.5(SMARCB1):c.433G>A (p.Val145Met)	V145M	not specified|Hereditary cancer-predisposing syndrome	VCV000824808	22	23801014	824808	rs1601401880	single nucleotide variant	missense variant	Uncertain significance	145
+NM_003073.5(SMARCB1):c.434T>G (p.Val145Gly)	V145G	not provided	VCV000646868	22	23801015	646868	rs1601401889	single nucleotide variant	missense variant	Uncertain significance	145
+NM_003073.5(SMARCB1):c.437C>G (p.Pro146Arg)	P146R	See cases	VCV001691051	22	23801018	1691051	rs2145978507	single nucleotide variant	missense variant	Uncertain significance	146
+NM_003073.5(SMARCB1):c.440G>A (p.Cys147Tyr)	C147Y	not provided	VCV002430774	22	23801021	2430774	NA	single nucleotide variant	missense variant	Uncertain significance	147
+NM_003073.5(SMARCB1):c.448A>G (p.Thr150Ala)	T150A	not provided	VCV000852718	22	23801029	852718	rs745619005	single nucleotide variant	missense variant	Uncertain significance	150
+NM_003073.5(SMARCB1):c.460A>T (p.Asn154Tyr)	N154Y	Hereditary cancer-predisposing syndrome	VCV000486506	22	23801041	486506	rs1555877022	single nucleotide variant	missense variant	Uncertain significance	154
+NM_003073.5(SMARCB1):c.461A>G (p.Asn154Ser)	N154S	not provided|Hereditary cancer-predisposing syndrome	VCV000389577	22	23801042	389577	rs1057523475	single nucleotide variant	missense variant	Uncertain significance	154
+NM_003073.5(SMARCB1):c.463del (p.Arg155fs)	R155Fs	not provided	VCV002028679	22	23801043	2028679	NA	Deletion	frameshift variant	Pathogenic	155
+NM_003073.5(SMARCB1):c.463C>T (p.Arg155Cys)	R155C	not provided	VCV000835144	22	23801044	835144	rs1458920579	single nucleotide variant	missense variant	Uncertain significance	155
+NM_003073.5(SMARCB1):c.464G>A (p.Arg155His)	R155H	Hereditary cancer-predisposing syndrome	VCV001742175	22	23801045	1742175	NA	single nucleotide variant	missense variant	Uncertain significance	155
+NM_003073.5(SMARCB1):c.466A>G (p.Met156Val)	M156V	Hereditary cancer-predisposing syndrome|not provided	VCV000410711	22	23801047	410711	rs540120954	single nucleotide variant	missense variant	Uncertain significance	156
+NM_003073.5(SMARCB1):c.467T>C (p.Met156Thr)	M156T	not provided|Hereditary cancer-predisposing syndrome	VCV002179538	22	23801048	2179538	NA	single nucleotide variant	missense variant	Uncertain significance	156
+NM_003073.5(SMARCB1):c.468G>A (p.Met156Ile)	M156I	Hereditary cancer-predisposing syndrome	VCV001742468	22	23801049	1742468	NA	single nucleotide variant	missense variant	Uncertain significance	156
+NM_003073.5(SMARCB1):c.469G>T (p.Gly157Cys)	G157C	not provided	VCV000570203	22	23801050	570203	rs1568941668	single nucleotide variant	missense variant	Uncertain significance	157
+NM_003073.5(SMARCB1):c.472C>T (p.Arg158Ter)	R158X	not provided|Rhabdoid tumor predisposition syndrome 1|Hereditary cancer-predisposing syndrome	VCV000995897	22	23801053	995897	rs2145978723	single nucleotide variant	nonsense	Pathogenic	158
+NM_003073.5(SMARCB1):c.473G>A (p.Arg158Gln)	R158Q	not provided|Hereditary cancer-predisposing syndrome	VCV002196498	22	23801054	2196498	NA	single nucleotide variant	missense variant	Uncertain significance	158
+NM_003073.5(SMARCB1):c.473G>T (p.Arg158Leu)	R158L	not provided	VCV000945406	22	23801054	945406	rs1232172026	single nucleotide variant	missense variant	Uncertain significance	158
+NM_003073.5(SMARCB1):c.487A>G (p.Thr163Ala)	T163A	SMARCB1-related disorder|Intellectual disability, autosomal dominant 15	VCV001029504	22	23801068	1029504	rs1929117173	single nucleotide variant	missense variant	Uncertain significance	163
+NM_003073.5(SMARCB1):c.489del (p.Phe164fs)	F164Fs	not provided	VCV002838229	22	23801069	2838229	NA	Deletion	frameshift variant	Pathogenic	164
+NM_003073.5(SMARCB1):c.488C>G (p.Thr163Ser)	T163S	not provided	VCV001421474	22	23801069	1421474	rs2145978836	single nucleotide variant	missense variant	Uncertain significance	163
+NM_003073.5(SMARCB1):c.492C>A (p.Phe164Leu)	F164L	not provided	VCV001056670	22	23801073	1056670	rs780005225	single nucleotide variant	missense variant	Uncertain significance	164
+NM_003073.5(SMARCB1):c.496del (p.Leu166fs)	L166Fs	not provided	VCV000855654	22	23801073	855654	rs1929117983	Deletion	frameshift variant	Pathogenic	166
+NM_003073.5(SMARCB1):c.501C>G (p.Cys167Trp)	C167W	not provided|Hereditary cancer-predisposing syndrome	VCV000575245	22	23803295	575245	rs779221331	single nucleotide variant	missense variant	Uncertain significance	167
+NM_003073.5(SMARCB1):c.502T>C (p.Phe168Leu)	F168L	not provided	VCV002825396	22	23803296	2825396	NA	single nucleotide variant	missense variant	Uncertain significance	168
+NM_003073.5(SMARCB1):c.505G>C (p.Asp169His)	D169H	not provided|Hereditary cancer-predisposing syndrome	VCV001745098	22	23803299	1745098	NA	single nucleotide variant	missense variant	Uncertain significance	169
+NM_003073.5(SMARCB1):c.508G>A (p.Asp170Asn)	D170N	not provided	VCV000565841	22	23803302	565841	rs1568943134	single nucleotide variant	missense variant	Uncertain significance	170
+NM_003073.5(SMARCB1):c.509A>G (p.Asp170Gly)	D170G	not provided	VCV001984276	22	23803303	1984276	NA	single nucleotide variant	missense variant	Uncertain significance	170
+NM_003073.5(SMARCB1):c.512A>G (p.His171Arg)	H171R	not provided|Hereditary cancer-predisposing syndrome	VCV000197748	22	23803306	197748	rs794727718	single nucleotide variant	missense variant	Uncertain significance	171
+NM_003073.5(SMARCB1):c.515A>T (p.Asp172Val)	D172V	not provided	VCV001355719	22	23803309	1355719	rs2145982695	single nucleotide variant	missense variant	Uncertain significance	172
+NM_003073.5(SMARCB1):c.517C>T (p.Pro173Ser)	P173S	not provided	VCV002891649	22	23803311	2891649	NA	single nucleotide variant	missense variant	Uncertain significance	173
+NM_003073.5(SMARCB1):c.517C>G (p.Pro173Ala)	P173A	not provided|Hereditary cancer-predisposing syndrome	VCV001381594	22	23803311	1381594	rs772788649	single nucleotide variant	missense variant	Uncertain significance	173
+NM_003073.5(SMARCB1):c.520G>T (p.Ala174Ser)	A174S	Hereditary cancer-predisposing syndrome|not provided	VCV000486502	22	23803314	486502	rs746433763	single nucleotide variant	missense variant	Conflicting classifications of pathogenicity	174
+NM_003073.5(SMARCB1):c.526A>G (p.Ile176Val)	I176V	not provided	VCV002001816	22	23803320	2001816	NA	single nucleotide variant	missense variant	Uncertain significance	176
+NM_003073.5(SMARCB1):c.526A>C (p.Ile176Leu)	I176L	not provided	VCV001046894	22	23803320	1046894	rs1929285188	single nucleotide variant	missense variant	Uncertain significance	176
+NM_003073.5(SMARCB1):c.529C>T (p.His177Tyr)	H177Y	Rhabdoid tumor predisposition syndrome 1|Hereditary cancer-predisposing syndrome	VCV002679021	22	23803323	2679021	NA	single nucleotide variant	missense variant	Uncertain significance	177
+NM_003073.5(SMARCB1):c.536_542del (p.Asn179fs)	N179Fs	not provided	VCV002707117	22	23803330 - 23803336	2707117	NA	Deletion	frameshift variant	Pathogenic	179
+NM_003073.5(SMARCB1):c.537C>A (p.Asn179Lys)	N179K	not provided	VCV002997269	22	23803331	2997269	NA	single nucleotide variant	missense variant	Uncertain significance	179
+NM_003073.5(SMARCB1):c.538G>C (p.Ala180Pro)	A180P	Autism spectrum disorder	VCV002430013	22	23803332	2430013	NA	single nucleotide variant	missense variant	Likely benign	180
+NM_003073.5(SMARCB1):c.538G>T (p.Ala180Ser)	A180S	not provided|not specified	VCV001705235	22	23803332	1705235	NA	single nucleotide variant	missense variant	Uncertain significance	180
+NM_003073.5(SMARCB1):c.538G>A (p.Ala180Thr)	A180T	not provided	VCV000566524	22	23803332	566524	rs1568943183	single nucleotide variant	missense variant	Uncertain significance	180
+NM_003073.5(SMARCB1):c.539C>T (p.Ala180Val)	A180V	not provided	VCV000464329	22	23803333	464329	rs1555877280	single nucleotide variant	missense variant	Uncertain significance	180
+NM_003073.5(SMARCB1):c.544C>T (p.Gln182Ter)	Q182X	Schwannomatosis 1, somatic	VCV000008027	22	23803338	8027	rs121434496	single nucleotide variant	nonsense	Pathogenic	182
+NM_003073.5(SMARCB1):c.546G>T (p.Gln182His)	Q182H	not provided|Hereditary cancer-predisposing syndrome	VCV000862381	22	23803340	862381	rs1929287151	single nucleotide variant	missense variant	Uncertain significance	182
+NM_003073.5(SMARCB1):c.547C>T (p.Pro183Ser)	P183S	not provided	VCV002101411	22	23803341	2101411	NA	single nucleotide variant	missense variant	Uncertain significance	183
+NM_003073.5(SMARCB1):c.548C>T (p.Pro183Leu)	P183L	Hereditary cancer-predisposing syndrome	VCV003320814	22	23803342	3320814	rs138515783	single nucleotide variant	missense variant	Uncertain significance	183
+NM_003073.5(SMARCB1):c.550G>C (p.Glu184Gln)	E184Q	Hereditary cancer-predisposing syndrome	VCV003320800	22	23803344	3320800	NA	single nucleotide variant	missense variant	Uncertain significance	184
+NM_003073.5(SMARCB1):c.550G>A (p.Glu184Lys)	E184K	not provided|Hereditary cancer-predisposing syndrome	VCV000825794	22	23803344	825794	rs776374083	single nucleotide variant	missense variant	Uncertain significance	184
+NM_003073.5(SMARCB1):c.552G>T (p.Glu184Asp)	E184D	not provided	VCV001354356	22	23803346	1354356	rs2145982835	single nucleotide variant	missense variant	Uncertain significance	184
+NM_003073.5(SMARCB1):c.553G>A (p.Val185Met)	V185M	Hereditary cancer-predisposing syndrome|not provided	VCV001060761	22	23803347	1060761	rs1251083217	single nucleotide variant	missense variant	Uncertain significance	185
+NM_003073.5(SMARCB1):c.557T>C (p.Leu186Pro)	L186P	Hereditary cancer-predisposing syndrome|not provided	VCV000825840	22	23803351	825840	rs1601405018	single nucleotide variant	missense variant	Uncertain significance	186
+NM_003073.5(SMARCB1):c.559G>T (p.Val187Phe)	V187F	not provided|Hereditary cancer-predisposing syndrome	VCV000580638	22	23803353	580638	rs1568943235	single nucleotide variant	missense variant	Uncertain significance	187
+NM_003073.5(SMARCB1):c.562C>T (p.Pro188Ser)	P188S	not provided	VCV002971148	22	23803356	2971148	rs146210466	single nucleotide variant	missense variant	Uncertain significance	188
+NM_003073.5(SMARCB1):c.565A>G (p.Ile189Val)	I189V	not provided	VCV000665220	22	23803359	665220	rs1601405054	single nucleotide variant	missense variant	Uncertain significance	189
+NM_003073.5(SMARCB1):c.566T>C (p.Ile189Thr)	I189T	Hereditary cancer-predisposing syndrome	VCV003320811	22	23803360	3320811	NA	single nucleotide variant	missense variant	Uncertain significance	189
+NM_003073.5(SMARCB1):c.567C>G (p.Ile189Met)	I189M	Hereditary cancer-predisposing syndrome	VCV002624836	22	23803361	2624836	NA	single nucleotide variant	missense variant	Uncertain significance	189
+NM_003073.5(SMARCB1):c.568C>T (p.Arg190Trp)	R190W	Hereditary cancer-predisposing syndrome|Autism spectrum disorder|Schwannomatosis 1|not provided	VCV000825898	22	23803362	825898	rs1601405064	single nucleotide variant	missense variant	Conflicting classifications of pathogenicity	190
+NM_003073.5(SMARCB1):c.577A>G (p.Met193Val)	M193V	Hereditary cancer-predisposing syndrome	VCV003223084	22	23803371	3223084	NA	single nucleotide variant	missense variant	Uncertain significance	193
+NM_003073.5(SMARCB1):c.578T>C (p.Met193Thr)	M193T	not provided	VCV003018050	22	23803372	3018050	NA	single nucleotide variant	missense variant	Uncertain significance	193
+NM_003073.5(SMARCB1):c.579G>A (p.Met193Ile)	M193I	not provided	VCV000965912	22	23803373	965912	rs1929290030	single nucleotide variant	missense variant	Uncertain significance	193
+NM_003073.5(SMARCB1):c.582G>C (p.Glu194Asp)	E194D	not provided	VCV000571583	22	23803376	571583	rs759241720	single nucleotide variant	missense variant	Uncertain significance	194
+NM_003073.5(SMARCB1):c.583A>T (p.Ile195Phe)	I195F	Hereditary cancer-predisposing syndrome|not provided	VCV001034790	22	23803377	1034790	rs1929290525	single nucleotide variant	missense variant	Uncertain significance	195
+NM_003073.5(SMARCB1):c.585C>G (p.Ile195Met)	I195M	not provided	VCV001429463	22	23803379	1429463	rs757546528	single nucleotide variant	missense variant	Uncertain significance	195
+NM_003073.5(SMARCB1):c.586_587delinsAT (p.Asp196Ile)	D196I	not provided	VCV002126576	22	23803380 - 23803381	2126576	NA	Indel	missense variant	Uncertain significance	196
+NM_003073.5(SMARCB1):c.591del (p.Gln198fs)	Q198Fs	Rhabdoid tumor predisposition syndrome 1	VCV000008024	22	23803383	8024	rs587776678	Deletion	frameshift variant	Pathogenic	198
+NM_003073.5(SMARCB1):c.593A>G (p.Gln198Arg)	Q198R	Hereditary cancer-predisposing syndrome	VCV003320817	22	23803387	3320817	NA	single nucleotide variant	missense variant	Uncertain significance	198
+NM_003073.5(SMARCB1):c.595A>G (p.Lys199Glu)	K199E	Inborn genetic diseases	VCV000985112	22	23803389	985112	rs1929291829	single nucleotide variant	missense variant	Uncertain significance	199
+NM_003073.5(SMARCB1):c.599T>G (p.Leu200Arg)	L200R	not provided	VCV002695445	22	23803393	2695445	NA	single nucleotide variant	missense variant	Uncertain significance	200
+NM_003073.5(SMARCB1):c.601C>T (p.Arg201Ter)	R201X	not provided	VCV000532962	22	23803395	532962	rs1555877286	single nucleotide variant	nonsense	Pathogenic	201
+NM_003073.5(SMARCB1):c.602G>A (p.Arg201Gln)	R201Q	Intellectual disability, autosomal dominant 15	VCV000438304	22	23803396	438304	rs1555877287	single nucleotide variant	missense variant	Likely pathogenic	201
+NM_003073.5(SMARCB1):c.607G>A (p.Ala203Thr)	A203T	Rhabdoid tumor predisposition syndrome 2|Hereditary cancer-predisposing syndrome|not provided|Schwannomatosis 1|Rhabdoid tumor predisposition syndrome 1	VCV000340912	22	23803401	340912	rs762962010	single nucleotide variant	missense variant	Conflicting classifications of pathogenicity	203
+NM_003073.5(SMARCB1):c.613A>T (p.Thr205Ser)	T205S	not provided	VCV000464331	22	23803407	464331	rs1555877290	single nucleotide variant	missense variant	Uncertain significance	205
+NM_003073.5(SMARCB1):c.614C>T (p.Thr205Ile)	T205I	not provided	VCV001395589	22	23803408	1395589	rs2145983068	single nucleotide variant	missense variant	Uncertain significance	205
+NM_003073.5(SMARCB1):c.616T>C (p.Trp206Arg)	W206R	not provided	VCV002578187	22	23803410	2578187	NA	single nucleotide variant	missense variant	Uncertain significance	206
+NM_003073.5(SMARCB1):c.620A>G (p.Asn207Ser)	N207S	Intellectual disability, autosomal dominant 15|Hereditary cancer-predisposing syndrome|not provided	VCV001478236	22	23803414	1478236	rs763872301	single nucleotide variant	missense variant	Uncertain significance	207
+NM_003073.5(SMARCB1):c.622A>G (p.Met208Val)	M208V	not provided|Hereditary cancer-predisposing syndrome	VCV001383821	22	23803416	1383821	rs1457130071	single nucleotide variant	missense variant	Uncertain significance	208
+NM_003073.5(SMARCB1):c.627T>A (p.Asn209Lys)	N209K	not provided	VCV002102868	22	23803421	2102868	NA	single nucleotide variant	missense variant	Uncertain significance	209
+NM_003073.5(SMARCB1):c.630G>T (p.Glu210Asp)	E210D	not provided|Hereditary cancer-predisposing syndrome	VCV001752795	22	23816771	1752795	NA	single nucleotide variant	missense variant	Uncertain significance	210
+NM_003073.5(SMARCB1):c.632A>G (p.Lys211Arg)	K211R	Rhabdoid tumor predisposition syndrome 1	VCV003240532	22	23816773	3240532	NA	single nucleotide variant	missense variant	Uncertain significance	211
+NM_003073.5(SMARCB1):c.634T>G (p.Leu212Val)	L212V	not provided	VCV001716717	22	23816775	1716717	NA	single nucleotide variant	missense variant	Uncertain significance	212
+NM_003073.5(SMARCB1):c.637A>T (p.Met213Leu)	M213L	not provided	VCV000969237	22	23816778	969237	rs1930218815	single nucleotide variant	missense variant	Uncertain significance	213
+NM_003073.5(SMARCB1):c.641C>G (p.Thr214Arg)	T214R	Hereditary cancer-predisposing syndrome|not provided|Rhabdoid tumor predisposition syndrome 1	VCV001327094	22	23816782	1327094	rs780906523	single nucleotide variant	missense variant	Uncertain significance	214
+NM_003073.5(SMARCB1):c.641C>T (p.Thr214Met)	T214M	Ovarian cancer|not provided|Hereditary cancer-predisposing syndrome	VCV000859261	22	23816782	859261	rs780906523	single nucleotide variant	missense variant	Conflicting classifications of pathogenicity	214
+NM_003073.5(SMARCB1):c.643C>T (p.Pro215Ser)	P215S	Hereditary cancer-predisposing syndrome	VCV003320819	22	23816784	3320819	NA	single nucleotide variant	missense variant	Uncertain significance	215
+NM_003073.5(SMARCB1):c.644del (p.Pro215fs)	P215Fs	not provided	VCV000958532	22	23816784	958532	rs1930219613	Deletion	frameshift variant	Pathogenic	215
+NM_003073.5(SMARCB1):c.652T>G (p.Phe218Val)	F218V	not provided	VCV002002566	22	23816793	2002566	NA	single nucleotide variant	missense variant	Uncertain significance	218
+NM_003073.5(SMARCB1):c.652T>C (p.Phe218Leu)	F218L	not provided|Hereditary cancer-predisposing syndrome	VCV001707957	22	23816793	1707957	NA	single nucleotide variant	missense variant	Uncertain significance	218
+NM_003073.5(SMARCB1):c.662T>C (p.Ile221Thr)	I221T	Hereditary cancer-predisposing syndrome	VCV001754572	22	23816803	1754572	NA	single nucleotide variant	missense variant	Uncertain significance	221
+NM_003073.5(SMARCB1):c.664C>G (p.Leu222Val)	L222V	not provided	VCV002991054	22	23816805	2991054	NA	single nucleotide variant	missense variant	Uncertain significance	222
+NM_003073.5(SMARCB1):c.665T>C (p.Leu222Pro)	L222P	not provided	VCV002829790	22	23816806	2829790	NA	single nucleotide variant	missense variant	Uncertain significance	222
+NM_003073.5(SMARCB1):c.668G>A (p.Cys223Tyr)	C223Y	not provided|Hereditary cancer-predisposing syndrome	VCV000659792	22	23816809	659792	rs1470474620	single nucleotide variant	missense variant	Uncertain significance	223
+NM_003073.5(SMARCB1):c.673G>A (p.Asp225Asn)	D225N	Hereditary cancer-predisposing syndrome|not provided	VCV001041054	22	23816814	1041054	rs768379745	single nucleotide variant	missense variant	Uncertain significance	225
+NM_003073.5(SMARCB1):c.673G>T (p.Asp225Tyr)	D225Y	not provided|Rhabdoid tumor predisposition syndrome 1|Hereditary cancer-predisposing syndrome	VCV000581167	22	23816814	581167	rs768379745	single nucleotide variant	missense variant	Uncertain significance	225
+NM_003073.5(SMARCB1):c.682T>A (p.Leu228Met)	L228M	not provided	VCV001716146	22	23816823	1716146	NA	single nucleotide variant	missense variant	Uncertain significance	228
+NM_003073.5(SMARCB1):c.688C>A (p.Pro230Thr)	P230T	Hereditary cancer-predisposing syndrome	VCV003320801	22	23816829	3320801	NA	single nucleotide variant	missense variant	Uncertain significance	230
+NM_003073.5(SMARCB1):c.689C>A (p.Pro230Gln)	P230Q	not provided	VCV002157332	22	23816830	2157332	NA	single nucleotide variant	missense variant	Uncertain significance	230
+NM_003073.5(SMARCB1):c.689C>T (p.Pro230Leu)	P230L	not provided|Hereditary cancer-predisposing syndrome	VCV001449813	22	23816830	1449813	rs2146009762	single nucleotide variant	missense variant	Uncertain significance	230
+NM_003073.5(SMARCB1):c.695C>T (p.Thr232Met)	T232M	not provided|Hereditary cancer-predisposing syndrome|Rhabdoid tumor predisposition syndrome 1	VCV000464334	22	23816836	464334	rs776693680	single nucleotide variant	missense variant	Conflicting classifications of pathogenicity	232
+NM_003073.5(SMARCB1):c.698T>A (p.Phe233Tyr)	F233Y	not provided	VCV002172231	22	23816839	2172231	NA	single nucleotide variant	missense variant	Uncertain significance	233
+NM_003073.5(SMARCB1):c.700G>T (p.Val234Leu)	V234L	Rhabdoid tumor predisposition syndrome 1|not provided	VCV002116736	22	23816841	2116736	NA	single nucleotide variant	missense variant	Uncertain significance	234
+NM_003073.5(SMARCB1):c.700G>C (p.Val234Leu)	V234L	Hereditary cancer-predisposing syndrome|not provided	VCV001698160	22	23816841	1698160	rs1272912695	single nucleotide variant	missense variant	Uncertain significance	234
+NM_003073.5(SMARCB1):c.706G>C (p.Ala236Pro)	A236P	not provided	VCV001350535	22	23816847	1350535	rs1930223455	single nucleotide variant	missense variant	Uncertain significance	236
+NM_003073.5(SMARCB1):c.710T>G (p.Ile237Ser)	I237S	not provided|Intellectual disability, autosomal dominant 15	VCV001407743	22	23816851	1407743	rs2146009925	single nucleotide variant	missense variant	Uncertain significance	237
+NM_003073.5(SMARCB1):c.712G>T (p.Ala238Ser)	A238S	Rhabdoid tumor predisposition syndrome 2	VCV001710933	22	23816853	1710933	NA	single nucleotide variant	missense variant	Uncertain significance	238
+NM_003073.5(SMARCB1):c.712G>A (p.Ala238Thr)	A238T	not provided|Hereditary cancer-predisposing syndrome	VCV000410709	22	23816853	410709	rs765514964	single nucleotide variant	missense variant	Conflicting classifications of pathogenicity	238
+NM_003073.5(SMARCB1):c.713C>T (p.Ala238Val)	A238V	not provided	VCV000410708	22	23816854	410708	rs1060503019	single nucleotide variant	missense variant	Uncertain significance	238
+NM_003073.5(SMARCB1):c.719C>G (p.Ala240Gly)	A240G	Rhabdoid tumor predisposition syndrome 1	VCV002679019	22	23816860	2679019	NA	single nucleotide variant	missense variant	Uncertain significance	240
+NM_003073.5(SMARCB1):c.721A>G (p.Ile241Val)	I241V	not provided	VCV002888808	22	23816862	2888808	NA	single nucleotide variant	missense variant	Uncertain significance	241
+NM_003073.5(SMARCB1):c.731A>T (p.Gln244Leu)	Q244L	not provided	VCV000532972	22	23816872	532972	rs763202805	single nucleotide variant	missense variant	Uncertain significance	244
+NM_003073.5(SMARCB1):c.733A>G (p.Ile245Val)	I245V	Hereditary cancer-predisposing syndrome	VCV001758399	22	23816874	1758399	NA	single nucleotide variant	missense variant	Uncertain significance	245
+NM_003073.5(SMARCB1):c.734T>C (p.Ile245Thr)	I245T	Hereditary cancer-predisposing syndrome	VCV000486503	22	23816875	486503	rs1555879350	single nucleotide variant	missense variant	Uncertain significance	245
+NM_003073.5(SMARCB1):c.736G>A (p.Glu246Lys)	E246K	not provided|Hereditary cancer-predisposing syndrome	VCV000839989	22	23816877	839989	rs1930225458	single nucleotide variant	missense variant	Uncertain significance	246
+NM_003073.5(SMARCB1):c.742T>C (p.Tyr248His)	Y248H	Hereditary cancer-predisposing syndrome	VCV003320805	22	23816883	3320805	NA	single nucleotide variant	missense variant	Uncertain significance	248
+NM_003073.5(SMARCB1):c.743A>G (p.Tyr248Cys)	Y248C	not provided|Hereditary cancer-predisposing syndrome	VCV001008863	22	23816884	1008863	rs1444281296	single nucleotide variant	missense variant	Uncertain significance	248
+NM_003073.5(SMARCB1):c.745C>T (p.Pro249Ser)	P249S	not provided	VCV000964441	22	23816886	964441	rs1930226221	single nucleotide variant	missense variant	Uncertain significance	249
+NM_003073.5(SMARCB1):c.748A>G (p.Thr250Ala)	T250A	not provided|Hereditary cancer-predisposing syndrome	VCV002127105	22	23816889	2127105	NA	single nucleotide variant	missense variant	Uncertain significance	250
+NM_003073.5(SMARCB1):c.749C>T (p.Thr250Met)	T250M	Hereditary cancer-predisposing syndrome|not provided|Rhabdoid tumor predisposition syndrome 1	VCV000464337	22	23816890	464337	rs751957685	single nucleotide variant	missense variant	Conflicting classifications of pathogenicity	250
+NM_003073.5(SMARCB1):c.754A>G (p.Ser252Gly)	S252G	Hereditary cancer-predisposing syndrome|not provided	VCV001759465	22	23816895	1759465	NA	single nucleotide variant	missense variant	Uncertain significance	252
+NM_003073.5(SMARCB1):c.755G>A (p.Ser252Asn)	S252N	Hereditary cancer-predisposing syndrome|not provided	VCV000577001	22	23816896	577001	rs372924301	single nucleotide variant	missense variant	Uncertain significance	252
+NM_003073.5(SMARCB1):c.758T>C (p.Ile253Thr)	I253T	Hereditary cancer-predisposing syndrome|not provided	VCV001400604	22	23816899	1400604	rs2146010326	single nucleotide variant	missense variant	Uncertain significance	253
+NM_003073.5(SMARCB1):c.759C>G (p.Ile253Met)	I253M	not provided	VCV001370810	22	23816900	1370810	rs889171672	single nucleotide variant	missense variant	Uncertain significance	253
+NM_003073.5(SMARCB1):c.765G>C (p.Glu255Asp)	E255D	not provided	VCV002740746	22	23816906	2740746	NA	single nucleotide variant	missense variant	Uncertain significance	255
+NM_003073.5(SMARCB1):c.767A>G (p.Asp256Gly)	D256G	not provided	VCV000858679	22	23816908	858679	rs749976156	single nucleotide variant	missense variant	Uncertain significance	256
+NM_003073.5(SMARCB1):c.769C>A (p.Gln257Lys)	Q257K	not provided	VCV001706970	22	23816910	1706970	NA	single nucleotide variant	missense variant	Uncertain significance	257
+NM_003073.5(SMARCB1):c.771G>C (p.Gln257His)	Q257H	not provided	VCV001716147	22	23816912	1716147	NA	single nucleotide variant	missense variant	Uncertain significance	257
+NM_003073.5(SMARCB1):c.772T>C (p.Ser258Pro)	S258P	Hereditary cancer-predisposing syndrome	VCV003320813	22	23816913	3320813	NA	single nucleotide variant	missense variant	Uncertain significance	258
+NM_003073.5(SMARCB1):c.778C>T (p.Gln260Ter)	Q260X	not provided	VCV001459852	22	23816919	1459852	rs2146010499	single nucleotide variant	nonsense	Pathogenic	260
+NM_003073.5(SMARCB1):c.781C>A (p.Arg261Ser)	R261S	Hereditary cancer-predisposing syndrome	VCV001760761	22	23816922	1760761	NA	single nucleotide variant	missense variant	Uncertain significance	261
+NM_003073.5(SMARCB1):c.781C>T (p.Arg261Cys)	R261C	Hereditary cancer-predisposing syndrome|Rhabdoid tumor predisposition syndrome 1|not provided	VCV001692746	22	23816922	1692746	rs1368176286	single nucleotide variant	missense variant	Uncertain significance	261
+NM_003073.5(SMARCB1):c.782G>A (p.Arg261His)	R261H	not provided|Hereditary cancer-predisposing syndrome	VCV001061155	22	23816923	1061155	rs779587990	single nucleotide variant	missense variant	Uncertain significance	261
+NM_003073.5(SMARCB1):c.784G>A (p.Val262Ile)	V262I	not provided|Hereditary cancer-predisposing syndrome	VCV002240619	22	23816925	2240619	NA	single nucleotide variant	missense variant	Uncertain significance	262
+NM_003073.5(SMARCB1):c.787A>G (p.Ile263Val)	I263V	not provided|Hereditary cancer-predisposing syndrome	VCV001760986	22	23816928	1760986	NA	single nucleotide variant	missense variant	Uncertain significance	263
+NM_003073.5(SMARCB1):c.788T>C (p.Ile263Thr)	I263T	Hereditary cancer-predisposing syndrome	VCV003223087	22	23816929	3223087	NA	single nucleotide variant	missense variant	Uncertain significance	263
+NM_003073.5(SMARCB1):c.790A>T (p.Ile264Phe)	I264F	not provided	VCV001021461	22	23816931	1021461	rs887245809	single nucleotide variant	missense variant	Uncertain significance	264
+NM_003073.5(SMARCB1):c.790A>G (p.Ile264Val)	I264V	not provided|Hereditary cancer-predisposing syndrome	VCV000580688	22	23816931	580688	rs887245809	single nucleotide variant	missense variant	Uncertain significance	264
+NM_003073.5(SMARCB1):c.790A>C (p.Ile264Leu)	I264L	not provided	VCV000410701	22	23816931	410701	rs887245809	single nucleotide variant	missense variant	Uncertain significance	264
+NM_003073.5(SMARCB1):c.805C>T (p.His269Tyr)	H269Y	SMARCB1-related disorder	VCV003350066	22	23825234	3350066	NA	single nucleotide variant	missense variant	Likely pathogenic	269
+NM_003073.5(SMARCB1):c.812del (p.Gly271fs)	G271Fs	Rhabdoid tumor predisposition syndrome 1	VCV000695025	22	23825239	695025	rs1601433318	Deletion	frameshift variant	Pathogenic	271
+NM_003073.5(SMARCB1):c.812G>A (p.Gly271Glu)	G271E	SMARCB1-related BAFopathy|Intellectual disability, autosomal dominant 15	VCV001029505	22	23825241	1029505	rs2030318562	single nucleotide variant	missense variant	Likely pathogenic	271
+NM_003073.5(SMARCB1):c.815A>G (p.Asn272Ser)	N272S	Hereditary cancer-predisposing syndrome	VCV002452595	22	23825244	2452595	NA	single nucleotide variant	missense variant	Uncertain significance	272
+NM_003073.5(SMARCB1):c.820T>G (p.Ser274Ala)	S274A	not provided	VCV002850592	22	23825249	2850592	NA	single nucleotide variant	missense variant	Uncertain significance	274
+NM_003073.5(SMARCB1):c.823C>G (p.Leu275Val)	L275V	Hereditary cancer-predisposing syndrome	VCV003320823	22	23825252	3320823	NA	single nucleotide variant	missense variant	Uncertain significance	275
+NM_003073.5(SMARCB1):c.826G>A (p.Val276Met)	V276M	not provided	VCV000939855	22	23825255	939855	rs2030319219	single nucleotide variant	missense variant	Uncertain significance	276
+NM_003073.5(SMARCB1):c.827T>C (p.Val276Ala)	V276A	not provided	VCV000944473	22	23825256	944473	rs2030319413	single nucleotide variant	missense variant	Uncertain significance	276
+NM_003073.5(SMARCB1):c.829G>A (p.Asp277Asn)	D277N	not provided	VCV000942219	22	23825258	942219	rs2030319772	single nucleotide variant	missense variant	Uncertain significance	277
+NM_003073.5(SMARCB1):c.831C>G (p.Asp277Glu)	D277E	not provided	VCV001043491	22	23825260	1043491	rs1601433351	single nucleotide variant	missense variant	Uncertain significance	277
+NM_003073.5(SMARCB1):c.836T>G (p.Phe279Cys)	F279C	not provided	VCV001018508	22	23825265	1018508	rs2030320193	single nucleotide variant	missense variant	Uncertain significance	279
+NM_003073.5(SMARCB1):c.845A>G (p.Asp282Gly)	D282G	not provided	VCV000852251	22	23825274	852251	rs2030320561	single nucleotide variant	missense variant	Uncertain significance	282
+NM_003073.5(SMARCB1):c.847A>T (p.Met283Leu)	M283L	not provided	VCV001920981	22	23825276	1920981	NA	single nucleotide variant	missense variant	Uncertain significance	283
+NM_003073.5(SMARCB1):c.849G>C (p.Met283Ile)	M283I	Hereditary cancer-predisposing syndrome	VCV003223090	22	23825278	3223090	NA	single nucleotide variant	missense variant	Uncertain significance	283
+NM_003073.5(SMARCB1):c.849G>A (p.Met283Ile)	M283I	Hereditary cancer-predisposing syndrome	VCV000822513	22	23825278	822513	rs1601433375	single nucleotide variant	missense variant	Uncertain significance	283
+NM_003073.5(SMARCB1):c.850T>G (p.Ser284Ala)	S284A	not provided	VCV001054902	22	23825279	1054902	rs2146026778	single nucleotide variant	missense variant	Uncertain significance	284
+NM_003073.5(SMARCB1):c.853G>A (p.Glu285Lys)	E285K	Hereditary cancer-predisposing syndrome	VCV002452587	22	23825282	2452587	NA	single nucleotide variant	missense variant	Uncertain significance	285
+NM_003073.5(SMARCB1):c.857A>G (p.Lys286Arg)	K286R	not provided	VCV001470226	22	23825286	1470226	rs2146026825	single nucleotide variant	missense variant	Uncertain significance	286
+NM_003073.5(SMARCB1):c.862A>G (p.Asn288Asp)	N288D	Hereditary cancer-predisposing syndrome	VCV003320802	22	23825291	3320802	NA	single nucleotide variant	missense variant	Uncertain significance	288
+NM_003073.5(SMARCB1):c.866C>T (p.Ser289Leu)	S289L	not provided	VCV000962107	22	23825295	962107	rs2030322042	single nucleotide variant	missense variant	Uncertain significance	289
+NM_003073.5(SMARCB1):c.868C>T (p.Pro290Ser)	P290S	Intellectual disability, autosomal dominant 15	VCV001805132	22	23825297	1805132	NA	single nucleotide variant	missense variant	Likely benign	290
+NM_003073.5(SMARCB1):c.868C>G (p.Pro290Ala)	P290A	not provided|Hereditary cancer-predisposing syndrome	VCV000949337	22	23825297	949337	rs2030322683	single nucleotide variant	missense variant	Uncertain significance	290
+NM_003073.5(SMARCB1):c.880G>A (p.Ala294Thr)	A294T	Hereditary cancer-predisposing syndrome|not provided	VCV000532967	22	23825309	532967	rs1555880578	single nucleotide variant	missense variant	Uncertain significance	294
+NM_003073.5(SMARCB1):c.881C>T (p.Ala294Val)	A294V	Hereditary cancer-predisposing syndrome|not provided	VCV000486505	22	23825310	486505	rs1555880581	single nucleotide variant	missense variant	Uncertain significance	294
+NM_003073.5(SMARCB1):c.883C>G (p.Leu295Val)	L295V	not provided	VCV002101410	22	23825312	2101410	NA	single nucleotide variant	missense variant	Uncertain significance	295
+NM_003073.5(SMARCB1):c.888G>T (p.Lys296Asn)	K296N	not provided|not specified|Hereditary cancer-predisposing syndrome	VCV000198489	22	23825317	198489	rs769322487	single nucleotide variant	missense variant	Conflicting classifications of pathogenicity	296
+NM_003073.5(SMARCB1):c.892T>C (p.Cys298Arg)	C298R	Hereditary cancer-predisposing syndrome	VCV001765159	22	23825321	1765159	NA	single nucleotide variant	missense variant	Uncertain significance	298
+NM_003073.5(SMARCB1):c.894C>G (p.Cys298Trp)	C298W	not provided	VCV001020099	22	23825323	1020099	rs2030323849	single nucleotide variant	missense variant	Uncertain significance	298
+NM_003073.5(SMARCB1):c.896C>T (p.Ser299Leu)	S299L	Hereditary cancer-predisposing syndrome|not provided	VCV000937299	22	23825325	937299	rs1362758319	single nucleotide variant	missense variant	Conflicting classifications of pathogenicity	299
+NM_003073.5(SMARCB1):c.914G>A (p.Gly305Glu)	G305E	not provided	VCV002862744	22	23825343	2862744	NA	single nucleotide variant	missense variant	Uncertain significance	305
+NM_003073.5(SMARCB1):c.923T>A (p.Val308Asp)	V308D	Hereditary cancer-predisposing syndrome	VCV003320809	22	23825352	3320809	NA	single nucleotide variant	missense variant	Uncertain significance	308
+NM_003073.5(SMARCB1):c.933C>G (p.Ile311Met)	I311M	not provided	VCV001718558	22	23825362	1718558	NA	single nucleotide variant	missense variant	Uncertain significance	311
+NM_003073.5(SMARCB1):c.934G>A (p.Ala312Thr)	A312T	Hereditary cancer-predisposing syndrome|not provided	VCV000961239	22	23825363	961239	rs749348930	single nucleotide variant	missense variant	Uncertain significance	312
+NM_003073.5(SMARCB1):c.935C>T (p.Ala312Val)	A312V	not provided	VCV000938994	22	23825364	938994	rs2030327085	single nucleotide variant	missense variant	Uncertain significance	312
+NM_003073.5(SMARCB1):c.941G>A (p.Ser314Asn)	S314N	Hereditary cancer-predisposing syndrome	VCV002447182	22	23825370	2447182	NA	single nucleotide variant	missense variant	Uncertain significance	314
+NM_003073.5(SMARCB1):c.943A>T (p.Ile315Phe)	I315F	not provided	VCV001390691	22	23825372	1390691	rs2146027104	single nucleotide variant	missense variant	Uncertain significance	315
+NM_003073.5(SMARCB1):c.946C>G (p.Arg316Gly)	R316G	not provided	VCV002728487	22	23825375	2728487	NA	single nucleotide variant	missense variant	Uncertain significance	316
+NM_003073.5(SMARCB1):c.946C>T (p.Arg316Trp)	R316W	Hereditary cancer-predisposing syndrome|not provided	VCV000464341	22	23825375	464341	rs769023941	single nucleotide variant	missense variant	Uncertain significance	316
+NM_003073.5(SMARCB1):c.947G>A (p.Arg316Gln)	R316Q	not provided|Rhabdoid tumor predisposition syndrome 1|Hereditary cancer-predisposing syndrome	VCV000951906	22	23825376	951906	rs2030327999	single nucleotide variant	missense variant	Uncertain significance	316
+NM_003073.5(SMARCB1):c.951del (p.Gln318fs)	Q318Fs	Malignant rhabdoid tumor, somatic	VCV000008022	22	23825380	8022	rs587776677	Deletion	frameshift variant	Pathogenic	318
+NM_003073.5(SMARCB1):c.953A>G (p.Gln318Arg)	Q318R	not provided	VCV002831386	22	23825382	2831386	NA	single nucleotide variant	missense variant	Uncertain significance	318
+NM_003073.5(SMARCB1):c.958A>G (p.Ser320Gly)	S320G	Hereditary cancer-predisposing syndrome	VCV003320796	22	23825387	3320796	NA	single nucleotide variant	missense variant	Uncertain significance	320
+NM_003073.5(SMARCB1):c.961T>A (p.Trp321Arg)	W321R	not provided	VCV001372690	22	23825390	1372690	rs2146027158	single nucleotide variant	missense variant	Uncertain significance	321
+NM_003073.5(SMARCB1):c.964C>T (p.His322Tyr)	H322Y	Hereditary cancer-predisposing syndrome	VCV002566864	22	23825393	2566864	NA	single nucleotide variant	missense variant	Uncertain significance	322
+NM_003073.5(SMARCB1):c.967C>A (p.Gln323Lys)	Q323K	Hereditary cancer-predisposing syndrome|not provided|Rhabdoid tumor predisposition syndrome 1	VCV000486504	22	23825396	486504	rs1265308124	single nucleotide variant	missense variant	Uncertain significance	323
+NM_003073.5(SMARCB1):c.969G>C (p.Gln323His)	Q323H	not provided	VCV002007581	22	23825398	2007581	NA	single nucleotide variant	missense variant	Uncertain significance	323
+NM_003073.5(SMARCB1):c.969_976del (p.Lys324fs)	K324Fs	not provided	VCV000410704	22	23825398 - 23825405	410704	rs1060503017	Deletion	frameshift variant	Pathogenic	324
+NM_003073.5(SMARCB1):c.977A>C (p.Tyr326Ser)	Y326S	Hereditary cancer-predisposing syndrome	VCV001768155	22	23825406	1768155	NA	single nucleotide variant	missense variant	Uncertain significance	326
+NM_003073.5(SMARCB1):c.979G>A (p.Ala327Thr)	A327T	Hereditary cancer-predisposing syndrome|not provided	VCV000660223	22	23825408	660223	rs1601433577	single nucleotide variant	missense variant	Uncertain significance	327
+NM_003073.5(SMARCB1):c.985A>G (p.Ser329Gly)	S329G	not provided	VCV000566461	22	23825414	566461	rs1568957782	single nucleotide variant	missense variant	Uncertain significance	329
+NM_003073.5(SMARCB1):c.986G>A (p.Ser329Asn)	S329N	not provided	VCV002131423	22	23825415	2131423	NA	single nucleotide variant	missense variant	Uncertain significance	329
+NM_003073.5(SMARCB1):c.987C>A (p.Ser329Arg)	S329R	not provided	VCV000949393	22	23833572	949393	rs137942040	single nucleotide variant	missense variant	Uncertain significance	329
+NM_003073.5(SMARCB1):c.988G>A (p.Glu330Lys)	E330K	not provided|Hereditary cancer-predisposing syndrome	VCV002482362	22	23833573	2482362	NA	single nucleotide variant	missense variant	Uncertain significance	330
+NM_003073.5(SMARCB1):c.990G>C (p.Glu330Asp)	E330D	Hereditary cancer-predisposing syndrome	VCV003320820	22	23833575	3320820	NA	single nucleotide variant	missense variant	Uncertain significance	330
+NM_003073.5(SMARCB1):c.995C>T (p.Pro332Leu)	P332L	not provided	VCV001492253	22	23833580	1492253	rs2146041698	single nucleotide variant	missense variant	Uncertain significance	332
+NM_003073.5(SMARCB1):c.995C>G (p.Pro332Arg)	P332R	not provided	VCV001388307	22	23833580	1388307	rs2146041698	single nucleotide variant	missense variant	Uncertain significance	332
+NM_003073.5(SMARCB1):c.1007T>C (p.Val336Ala)	V336A	Hereditary cancer-predisposing syndrome	VCV001788372	22	23833592	1788372	NA	single nucleotide variant	missense variant	Uncertain significance	336
+NM_003073.5(SMARCB1):c.1011G>T (p.Glu337Asp)	E337D	not provided	VCV002862170	22	23833596	2862170	NA	single nucleotide variant	missense variant	Uncertain significance	337
+NM_003073.5(SMARCB1):c.1012A>G (p.Ile338Val)	I338V	not provided	VCV002828090	22	23833597	2828090	NA	single nucleotide variant	missense variant	Uncertain significance	338
+NM_003073.5(SMARCB1):c.1012A>C (p.Ile338Leu)	I338L	not provided	VCV001055761	22	23833597	1055761	rs2146041824	single nucleotide variant	missense variant	Uncertain significance	338
+NM_003073.5(SMARCB1):c.1013T>C (p.Ile338Thr)	I338T	Hereditary cancer-predisposing syndrome|not provided	VCV001380690	22	23833598	1380690	rs2146041839	single nucleotide variant	missense variant	Uncertain significance	338
+NM_003073.5(SMARCB1):c.1018A>G (p.Ile340Val)	I340V	not provided	VCV002083891	22	23833603	2083891	NA	single nucleotide variant	missense variant	Uncertain significance	340
+NM_003073.5(SMARCB1):c.1020C>G (p.Ile340Met)	I340M	not provided	VCV002185255	22	23833605	2185255	NA	single nucleotide variant	missense variant	Uncertain significance	340
+NM_003073.5(SMARCB1):c.1021C>T (p.Arg341Trp)	R341W	Hereditary cancer-predisposing syndrome|not provided	VCV001760991	22	23833606	1760991	NA	single nucleotide variant	missense variant	Uncertain significance	341
+NM_003073.5(SMARCB1):c.1022G>T (p.Arg341Leu)	R341L	Hereditary cancer-predisposing syndrome	VCV002452593	22	23833607	2452593	NA	single nucleotide variant	missense variant	Uncertain significance	341
+NM_003073.5(SMARCB1):c.1022G>A (p.Arg341Gln)	R341Q	Hereditary cancer-predisposing syndrome|not provided	VCV000532966	22	23833607	532966	rs748441485	single nucleotide variant	missense variant	Conflicting classifications of pathogenicity	341
+NM_003073.5(SMARCB1):c.1025A>G (p.Asn342Ser)	N342S	not provided	VCV001505644	22	23833610	1505644	rs2146041993	single nucleotide variant	missense variant	Uncertain significance	342
+NM_003073.5(SMARCB1):c.1028C>T (p.Thr343Met)	T343M	Hereditary cancer-predisposing syndrome|not provided	VCV000464320	22	23833613	464320	rs773457718	single nucleotide variant	missense variant	Uncertain significance	343
+NM_003073.5(SMARCB1):c.1033G>A (p.Asp345Asn)	D345N	not provided	VCV000546230	22	23833618	546230	rs794727911	single nucleotide variant	missense variant	Uncertain significance	345
+NM_003073.5(SMARCB1):c.1033G>T (p.Asp345Tyr)	D345Y	not provided|Hereditary cancer-predisposing syndrome	VCV000198781	22	23833618	198781	rs794727911	single nucleotide variant	missense variant	Uncertain significance	345
+NM_003073.5(SMARCB1):c.1037C>T (p.Ala346Val)	A346V	Rhabdoid tumor predisposition syndrome 1|not provided	VCV001063816	22	23833622	1063816	rs1231539032	single nucleotide variant	missense variant	Uncertain significance	346
+NM_003073.5(SMARCB1):c.1042C>G (p.Gln348Glu)	Q348E	not provided	VCV002110680	22	23833627	2110680	NA	single nucleotide variant	missense variant	Uncertain significance	348
+NM_003073.5(SMARCB1):c.1052C>T (p.Pro351Leu)	P351L	Hereditary cancer-predisposing syndrome|not provided	VCV000850717	22	23833637	850717	rs2030790017	single nucleotide variant	missense variant	Uncertain significance	351
+NM_003073.5(SMARCB1):c.1062_1063del (p.Glu354fs)	E354Fs	Rhabdoid tumor predisposition syndrome 1	VCV001032872	22	23833645 - 23833646	1032872	rs2030790572	Microsatellite	frameshift variant	Pathogenic	354
+NM_003073.5(SMARCB1):c.1061A>G (p.Glu354Gly)	E354G	Hereditary cancer-predisposing syndrome	VCV001780323	22	23833646	1780323	NA	single nucleotide variant	missense variant	Uncertain significance	354
+NM_003073.5(SMARCB1):c.1066_1067del (p.Leu356fs)	L356Fs	Intellectual disability, autosomal dominant 15|not provided	VCV000532963	22	23833649 - 23833650	532963	rs1555881563	Microsatellite	frameshift variant	Pathogenic	356
+NM_003073.5(SMARCB1):c.1069A>G (p.Thr357Ala)	T357A	Hereditary cancer-predisposing syndrome	VCV001782663	22	23833654	1782663	NA	single nucleotide variant	missense variant	Uncertain significance	357
+NM_003073.5(SMARCB1):c.1070C>T (p.Thr357Ile)	T357I	not provided	VCV000580796	22	23833655	580796	rs1555881567	single nucleotide variant	missense variant	Likely pathogenic	357
+NM_003073.5(SMARCB1):c.1070C>G (p.Thr357Arg)	T357R	Intellectual disability, autosomal dominant 15|Hereditary cancer-predisposing syndrome	VCV000559897	22	23833655	559897	rs1555881567	single nucleotide variant	missense variant	Conflicting classifications of pathogenicity	357
+NM_003073.5(SMARCB1):c.1075G>A (p.Ala359Thr)	A359T	not provided|Hereditary cancer-predisposing syndrome	VCV001784737	22	23833660	1784737	NA	single nucleotide variant	missense variant	Uncertain significance	359
+NM_003073.5(SMARCB1):c.1084G>A (p.Glu362Lys)	E362K	SMARCB1-related disorder	VCV002631196	22	23833669	2631196	NA	single nucleotide variant	missense variant	Uncertain significance	362
+NM_003073.5(SMARCB1):c.1087A>G (p.Lys363Glu)	K363E	Intellectual disability, autosomal dominant 15|not provided	VCV000212263	22	23833672	212263	rs797045989	single nucleotide variant	missense variant	Pathogenic/Likely pathogenic	363
+NM_003073.5(SMARCB1):c.1089G>T (p.Lys363Asn)	K363N	not provided|Intellectual disability, autosomal dominant 15|SMARCB1-related BAFopathy	VCV000561114	22	23833674	561114	rs1568963037	single nucleotide variant	missense variant	Conflicting classifications of pathogenicity	363
+NM_003073.5(SMARCB1):c.1091A>T (p.Lys364Met)	K364M	not provided	VCV001039859	22	23833676	1039859	rs2030793132	single nucleotide variant	missense variant	Uncertain significance	364
+NM_003073.5(SMARCB1):c.1092G>T (p.Lys364Asn)	K364N	not provided	VCV002701457	22	23833677	2701457	NA	single nucleotide variant	missense variant	Uncertain significance	364
+NM_003073.5(SMARCB1):c.1096C>G (p.Arg366Gly)	R366G	Intellectual disability, autosomal dominant 15	VCV001343154	22	23833681	1343154	rs886039520	single nucleotide variant	missense variant	Likely pathogenic	366
+NM_003073.5(SMARCB1):c.1096C>T (p.Arg366Cys)	R366C	not provided|Intellectual disability, autosomal dominant 15	VCV000265393	22	23833681	265393	rs886039520	single nucleotide variant	missense variant	Pathogenic/Likely pathogenic	366
+NM_003073.5(SMARCB1):c.1097G>A (p.Arg366His)	R366H	not provided	VCV000532968	22	23833682	532968	rs1555881572	single nucleotide variant	missense variant	Uncertain significance	366
+NM_003073.5(SMARCB1):c.1099G>C (p.Asp367His)	D367H	not provided	VCV001521059	22	23833684	1521059	rs2030794083	single nucleotide variant	missense variant	Uncertain significance	367
+NM_003073.5(SMARCB1):c.1102C>T (p.Gln368Ter)	Q368X	Rhabdoid tumor predisposition syndrome 1|Neoplasm	VCV003240535	22	23833687	3240535	NA	single nucleotide variant	nonsense	Likely pathogenic	368
+NM_003073.5(SMARCB1):c.1106A>T (p.Asp369Val)	D369V	Inborn genetic diseases	VCV000985428	22	23833691	985428	rs2030794445	single nucleotide variant	missense variant	Uncertain significance	369
+NM_003073.5(SMARCB1):c.1115C>T (p.Thr372Met)	T372M	Hereditary cancer-predisposing syndrome|not provided	VCV000464321	22	23833700	464321	rs992198711	single nucleotide variant	missense variant	Uncertain significance	372
+NM_003073.5(SMARCB1):c.1120C>T (p.Arg374Trp)	R374W	not provided|Intellectual disability, autosomal dominant 15	VCV000633561	22	23834142	633561	rs1568963596	single nucleotide variant	missense variant	Conflicting classifications of pathogenicity	374
+NM_003073.5(SMARCB1):c.1121G>A (p.Arg374Gln)	R374Q	SMARCB1-related BAFopathy|Intellectual disability, autosomal dominant 15|not provided|Hereditary cancer-predisposing syndrome	VCV000372511	22	23834143	372511	rs1057517825	single nucleotide variant	missense variant	Conflicting classifications of pathogenicity	374
+NM_003073.5(SMARCB1):c.1127G>C (p.Arg376Thr)	R376T	not specified	VCV001723239	22	23834149	1723239	NA	single nucleotide variant	missense variant	Uncertain significance	376
+NM_003073.5(SMARCB1):c.1129C>G (p.Arg377Gly)	R377G	NK-cell enteropathy	VCV000638627	22	23834151	638627	rs1601446826	single nucleotide variant	missense variant	Likely pathogenic	377
+NM_003073.5(SMARCB1):c.1130G>A (p.Arg377His)	R377H	not provided|Hereditary cancer-predisposing syndrome	VCV000030203	22	23834152	30203	rs387906812	single nucleotide variant	missense variant	Conflicting classifications of pathogenicity	377
+NM_003073.5(SMARCB1):c.1132C>T (p.Leu378Phe)	L378F	not provided	VCV001000534	22	23834154	1000534	rs2030838981	single nucleotide variant	missense variant	Uncertain significance	378
+NM_003073.5(SMARCB1):c.1133T>C (p.Leu378Pro)	L378P	not provided	VCV000916053	22	23834155	916053	rs1410970733	single nucleotide variant	missense variant	Likely pathogenic	378
+NM_003073.5(SMARCB1):c.1142C>T (p.Thr381Met)	T381M	not provided|Rhabdoid tumor predisposition syndrome 1|Hereditary cancer-predisposing syndrome	VCV000651993	22	23834164	651993	rs1387467529	single nucleotide variant	missense variant	Uncertain significance	381
+NM_003073.5(SMARCB1):c.1142C>G (p.Thr381Arg)	T381R	Hereditary cancer-predisposing syndrome|not provided	VCV000623977	22	23834164	623977	rs1387467529	single nucleotide variant	missense variant	Conflicting classifications of pathogenicity	381
+NM_003073.5(SMARCB1):c.1148del (p.Pro383fs)	P383Fs	not provided	VCV001416806	22	23834167	1416806	rs2146045204	Deletion	frameshift variant	Pathogenic	383
+NM_003073.5(SMARCB1):c.1145C>T (p.Ala382Val)	A382V	not provided|Hereditary cancer-predisposing syndrome	VCV000822249	22	23834167	822249	rs756129754	single nucleotide variant	missense variant	Uncertain significance	382
+NM_003073.5(SMARCB1):c.1148C>T (p.Pro383Leu)	P383L	not provided	VCV001710405	22	23834170	1710405	NA	single nucleotide variant	missense variant	Uncertain significance	383
+NM_003073.5(SMARCB1):c.1150G>C (p.Ala384Pro)	A384P	not specified	VCV001338295	22	23834172	1338295	rs2146045278	single nucleotide variant	missense variant	Uncertain significance	384
+NM_003073.5(SMARCB1):c.1155G>C (p.Trp385Cys)	W385C	not provided	VCV001306948	22	23834177	1306948	rs2030841425	single nucleotide variant	missense variant	Uncertain significance	385
+NM_003073.5(SMARCB1):c.1155G>T (p.Trp385Cys)	W385C	not provided	VCV000859091	22	23834177	859091	rs2030841425	single nucleotide variant	missense variant	Uncertain significance	385
+NM_003073.5(SMARCB1):c.973A>C (p.Thr325Pro)	T325P	not provided	VCV003360710	NA	NA	3360710	NA	single nucleotide variant	missense variant	Uncertain significance	325

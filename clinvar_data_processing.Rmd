@@ -1,0 +1,361 @@
+---
+title: "ClinVar Data Processing"
+author: "Garrett Cooper"
+date: 11/23/2024
+output:
+  github_document:
+    toc: true
+    html_preview: false
+editor_options: 
+  chunk_output_type: inline
+---
+
+Here we are filtering for ClinVar variants that were included in our screen, particularly those that affect the coding sequence of SMARCB1. (Data obtained from ClinVar on November 22, 2024)
+
+```{r}
+
+library(readr)
+library(dplyr)
+
+#read in config file
+config <- read_yaml("./config.yaml")
+
+#We are filtering data that was obtained from ClinVar's website on November 22, 2024
+
+clinvar_SMARCB1 <- read_tsv(file=config$clinvar_raw)
+
+```
+
+
+
+First we need to filter for only deletions, indels, missense, and SNVs
+```{r}
+
+
+#I am removing copy number gain, copy number loss, duplication
+clinvar_SMARCB1_filtered1 <- clinvar_SMARCB1 %>%
+  filter(clinvar_SMARCB1$`Variant type` == "single nucleotide variant"|
+         clinvar_SMARCB1$`Variant type` == "Deletion"|
+         clinvar_SMARCB1$`Variant type` == "Indel"|
+         clinvar_SMARCB1$`Variant type` == "Insertion"|
+         clinvar_SMARCB1$`Variant type` == "Microsatellite")
+
+#7 were weird with DERL3 annotation, lots of intronic, and 3' and 5' UTR variants
+
+clinvar_SMARCB1_filtered2 <- clinvar_SMARCB1_filtered1[!grepl("DERL3", clinvar_SMARCB1_filtered1$Name) & !is.na(clinvar_SMARCB1_filtered1$`Molecular consequence`) &  !grepl("3 prime UTR variant", clinvar_SMARCB1_filtered1$`Molecular consequence`) & !grepl("5 prime UTR variant", clinvar_SMARCB1_filtered1$`Molecular consequence`) & !grepl("intron variant", clinvar_SMARCB1_filtered1$`Molecular consequence`) ,]
+
+#There are alot of pathogenic splice variants in ClinVar but our screen does not include these so they will be filtered out... will keep for later
+clinvar_splice_variants <- clinvar_SMARCB1_filtered2 %>%
+  filter(clinvar_SMARCB1_filtered2$`Molecular consequence` == "splice acceptor variant"|
+         clinvar_SMARCB1_filtered2$`Molecular consequence` == "splice donor variant")
+
+
+clinvar_SMARCB1_filtered3 <- clinvar_SMARCB1_filtered2 %>%
+  filter(clinvar_SMARCB1_filtered2$`Molecular consequence` != "splice acceptor variant",
+         clinvar_SMARCB1_filtered2$`Molecular consequence` != "splice donor variant",
+         clinvar_SMARCB1_filtered2$`Molecular consequence` != "splice donor variant",
+         clinvar_SMARCB1_filtered2$`Molecular consequence` != "inframe_indel",
+         clinvar_SMARCB1_filtered2$`Molecular consequence` != "inframe_deletion|initiator_codon_variant",
+         clinvar_SMARCB1_filtered2$`Molecular consequence` != "inframe_deletion" )
+
+
+clinvar_SMARCB1_NA_protein_change <- clinvar_SMARCB1_filtered3[is.na(clinvar_SMARCB1_filtered3$`Protein change`), ]
+
+#Theres also some funky mutations that are in frame multiple amino acid deletions and multi amino acid changes (missense variant here) that are not included in the screen so we will filter them out
+
+clinvar_SMARCB1_synonymous <- clinvar_SMARCB1_NA_protein_change %>%
+  filter(clinvar_SMARCB1_NA_protein_change$`Molecular consequence` != "inframe_deletion",
+         clinvar_SMARCB1_NA_protein_change$`Molecular consequence` != "inframe_indel",
+         clinvar_SMARCB1_NA_protein_change$`Molecular consequence` != "missense variant")
+         
+
+
+clinvar_SMARCB1_with_protein_change <- clinvar_SMARCB1_filtered3[!is.na(clinvar_SMARCB1_filtered3$`Protein change`), ]
+
+
+#There's some funky one we just gotta do by hand, were putting them into a new df and will merge them back in later...
+clinvar_SMARCB1_exceptions <- clinvar_SMARCB1_with_protein_change[89,]
+
+
+#Removing the one exception and also the two that are not in isoform v1
+clinvar_SMARCB1_with_protein_change <- clinvar_SMARCB1_with_protein_change[-c(89,165,166),]
+
+
+
+
+```
+
+
+
+Clinvar has the amino acid subsititions for different isoforms which is super annoying, so here we are filtering the Protein Change column for only the v1 amino acid values.
+```{r}
+
+
+
+extract_number <- function(text) {
+  # Extract the number that comes after any letter sequence (like Met, Leu, etc.)
+  numbers <- gsub(".*[A-Za-z]+([0-9]+).*", "\\1", text)
+  
+  # Return the extracted number
+  return(numbers)
+}
+
+clinvar_SMARCB1_with_protein_change$Residue <- sapply(clinvar_SMARCB1_with_protein_change$Name, extract_number)
+
+filter_second_column <- function(extracted_number, second_column) {
+  # Split the second column by commas and trim any leading or trailing spaces
+  variants <- strsplit(second_column, ",")[[1]]
+  variants <- trimws(variants)  # Remove leading/trailing spaces from each variant
+  
+  # Find values that match the extracted number
+  matching_variants <- variants[grep(paste0("[^a-zA-Z]*", extracted_number, "[^a-zA-Z]*"), variants)]
+  
+  # Return the matching variants as a string
+  return(paste(matching_variants, collapse = ","))
+}
+
+clinvar_SMARCB1_with_protein_change$`Protein change` <- mapply(filter_second_column, clinvar_SMARCB1_with_protein_change$Residue, clinvar_SMARCB1_with_protein_change$`Protein change`)
+
+
+```
+
+Now we need to filter the exceptions that didnt work in that function above. Then we combine them
+```{r}
+
+# Create a function to extract specific values by position
+extract_specific_variant <- function(text, position) {
+  # Split the text by commas
+  variants <- strsplit(text, ",")[[1]]
+  # Trim any leading or trailing whitespace
+  variants <- trimws(variants)
+  # Return the value at the specified position
+  return(variants[position])
+}
+
+# Define the positions you want for each row
+positions <- c(1)
+
+# Apply the function row-wise, using the specified positions
+clinvar_SMARCB1_exceptions$`Protein change` <- mapply(
+  extract_specific_variant,
+  clinvar_SMARCB1_exceptions$`Protein change`,
+  positions
+)
+
+
+
+clinvar_SMARCB1_exceptions$Residue <- sapply(clinvar_SMARCB1_exceptions$`Protein change`, extract_number)
+
+
+clinvar_SMARCB1_protein_change2 <- rbind(clinvar_SMARCB1_exceptions, clinvar_SMARCB1_with_protein_change)
+
+```
+
+Join the synonymous and nonsynonymous mutants
+
+```{r}
+
+clinvar_SMARCB1_synonymous$Residue <- sapply(clinvar_SMARCB1_synonymous$Name, extract_number)
+
+
+#Now lets add in the synonymous substitution so we can correspond it with the MITE data.
+SMARCB1_sequence <- "MMMMALSKTFGQKPVKFQLEDDGEFYMIGSEVGNYLRMFRGSLYKRYPSLWRRLATVEERKKIVASSHGKKTKPNTKDHGYTTLATSVTLLKASEVEEILDGNDEKYKAVSISTEPPTYLREQKAKRNSQWVPTLPNSSHHLDAVPCSTTINRNRMGRDKKRTFPLCFDDHDPAVIHENASQPEVLVPIRLDMEIDGQKLRDAFTWNMNEKLMTPEMFSEILCDDLDLNPLTFVPAIASAIRQQIESYPTDSILEDQSDQRVIIKLNIHVGNISLVDQFEWDMSEKENSPEKFALKLCSELGLGGEFVTTIAYSIRGQLSWHQKTYAFSENPLPTVEIAIRNTGDADQWCPLLETLTDAEMEKKIRDQDRNTRRMRRLANTAPAW"
+
+clinvar_SMARCB1_synonymous$`Protein change` <- sapply(clinvar_SMARCB1_synonymous$Residue, function(residue) {
+  # Check if Residue is not NA
+  if (!is.na(residue)) {
+    # Get the corresponding amino acid from the sequence
+    amino_acid <- substr(SMARCB1_sequence, residue, residue)
+    # Format it as "AminoAcidNumberAminoAcid"
+    return(paste0(amino_acid, residue, amino_acid))
+  } else {
+    return(NA)  # Keep NA if the Residue is NA
+  }
+})
+
+
+clinvar_SMARCB1_filtered4 <- rbind(clinvar_SMARCB1_synonymous, clinvar_SMARCB1_protein_change2)
+
+#Now lets filter it for only the columns we want
+clinvar_SMARCB1_filtered5 <- clinvar_SMARCB1_filtered4[,c(1,3,4,5,8,9,10,12,14,15,16,26)]
+
+#Now we have to reformat the Protein change column so it matches exactly with the mite data
+
+clinvar_SMARCB1_filtered5 <- clinvar_SMARCB1_filtered5 %>%
+  mutate(`Protein change` = gsub("fs$", "Fs", `Protein change`), # Replace 'fs' with 'Fs'
+         `Protein change` = gsub("\\*$", "X", `Protein change`)) # Replace '*' with 'X'
+
+#Have to remove the silent mutation at the end of TAA -> TGA as this was not included in our screen
+clinvar_SMARCB1_filtered5 <- clinvar_SMARCB1_filtered5[-c(274),]
+
+write_tsv(clinvar_SMARCB1_filtered5, "./data/clinvar/clinvar_SMARCB1_coding_variants.tsv")
+
+```
+
+#Ok now lets integrate it with the MITE data
+```{r}
+
+mite_data <- read.csv("./results/functional_scores/mitedata.csv")
+
+#Now we have to reformat the Protein change column so it matches exactly with the mite data
+
+clinvar_SMARCB1_filtered5 <- clinvar_SMARCB1_filtered5 %>%
+  mutate(`Protein change` = gsub("fs$", "Fs", `Protein change`), # Replace 'fs' with 'Fs'
+         `Protein change` = gsub("\\*$", "X", `Protein change`)) # Replace '*' with 'X'
+
+clinvar_SMARCB1_filtered6 <- clinvar_SMARCB1_filtered5 %>%
+  left_join(mite_data %>% select(Substitution, all_reps_zscore), 
+            by = c("Protein change" = "Substitution"))
+
+
+
+clinvar_SMARCB1_filtered7 <- clinvar_SMARCB1_filtered6[-c(274),]
+
+```
+
+
+```{r}
+
+clinvar_SMARCB1_filtered8 <- clinvar_SMARCB1_filtered7 %>%
+  left_join(
+    data %>%
+      select(StdNom.Vt.aa.By.Ted, cadd_score) %>%
+      distinct(StdNom.Vt.aa.By.Ted, .keep_all = TRUE), 
+    by = c("Protein change" = "StdNom.Vt.aa.By.Ted")
+  )
+
+clinvar_SMARCB1_filtered9 <- clinvar_SMARCB1_filtered8 %>%
+  left_join(
+    data %>%
+      select(StdNom.Vt.aa.By.Ted, revel_score) %>%
+      distinct(StdNom.Vt.aa.By.Ted, .keep_all = TRUE), 
+    by = c("Protein change" = "StdNom.Vt.aa.By.Ted")
+  )
+
+
+```
+
+
+
+```{r, hide}
+
+library(dplyr)
+library(pROC)
+library(randomForest)
+library(readr)
+
+```
+
+
+Plotting with only screen data
+
+```{r}
+
+setwd("/Users/gwcoope/Library/CloudStorage/GoogleDrive-gcooper.gene@gmail.com/My\ Drive/Hong\ Lab\ Project\ Folders.gdrive/Results\ GC/17-SMARCB1_MITEseq2/Manuscript/ClinVar_analysis/")
+
+#data <- read_tsv("/Users/gwcoope/Library/CloudStorage/GoogleDrive-gcooper.gene@gmail.com/.shortcut-targets-by-id/1rALxO157_wDKXF4JjmT8CFruCpBbWa5o/Hong Lab Project Folders/Results GC/2-SMARCB1\ MITE-seq/ROC_curve/miteseq_supp_tablev1.txt")
+
+clinvar_pos <- c('Pathogenic/Likely pathogenic', 'Pathogenic', "Likely pathogenic")
+
+# Plot ROC curve
+
+clinvar_SMARCB1_filtered7$response <- ifelse(clinvar_SMARCB1_filtered7$`Germline classification` %in% clinvar_pos, 1, 0)   #Code cases (Clinvar +) as 1, and controls as 0
+
+#roc_revel <- roc(data$response, data$revel_score)
+
+roc_zscore <- roc(clinvar_SMARCB1_filtered7$response, clinvar_SMARCB1_filtered7$all_reps_zscore)
+
+
+#roc_cadd <- roc(data$response, data$cadd_score)
+
+tiff("ROC_curve_all_w_likely_path.tiff", units="in", width=6, height=6, res=600)
+
+plot(roc_zscore, col = "red",lwd=4, xlab = "Specificity", ylab = "Sensitivity",cex.lab=2, cex.axis=1.5)
+
+legend_text <- c(paste0("DMS (AUC=", round(auc(roc_zscore), 2), ")"))
+                
+                
+legend("bottomright", legend = legend_text, col = c("red"), lwd = 4,cex=1.25)
+
+dev.off()
+
+
+
+```
+
+
+
+```{r}
+
+setwd("/Users/gwcoope/Library/CloudStorage/GoogleDrive-gcooper.gene@gmail.com/My\ Drive/Hong\ Lab\ Project\ Folders.gdrive/Results\ GC/17-SMARCB1_MITEseq2/Manuscript/ClinVar_analysis/")
+
+#data <- read_tsv("/Users/gwcoope/Library/CloudStorage/GoogleDrive-gcooper.gene@gmail.com/.shortcut-targets-by-id/1rALxO157_wDKXF4JjmT8CFruCpBbWa5o/Hong Lab Project Folders/Results GC/2-SMARCB1\ MITE-seq/ROC_curve/miteseq_supp_tablev1.txt")
+
+clinvar_pos <- c('Pathogenic/Likely pathogenic', 'Pathogenic', "Likely pathogenic")
+
+# Plot ROC curve
+
+clinvar_SMARCB1_filtered7$response <- ifelse(clinvar_SMARCB1_filtered7$`Germline classification` %in% clinvar_pos, 1, 0)   #Code cases (Clinvar +) as 1, and controls as 0
+
+roc_revel <- roc(data$response, data$revel_score)
+
+roc_zscore <- roc(clinvar_SMARCB1_filtered7$response, clinvar_SMARCB1_filtered7$all_reps_zscore)
+
+roc_cadd <- roc(data$response, data$cadd_score)
+
+
+tiff("ROC_curve_CADD_REVEL_w_likely_path.tiff", units="in", width=6, height=6, res=600)
+
+plot(roc_zscore, col = "red",lwd=4, xlab = "Specificity", ylab = "Sensitivity",cex.lab=2, cex.axis=1.5)
+plot(roc_revel, col = "gainsboro",lwd=4, add = TRUE)
+plot(roc_cadd, col = "lightblue",lwd=4, add = TRUE)
+
+
+
+legend_text <- c(paste0("DMS (AUC=", round(auc(roc_zscore), 2), ")"),
+                paste0("Revel (AUC=", round(auc(roc_revel), 2), ")"),
+                paste0("CADD (AUC=", round(auc(roc_cadd), 2), ")"))
+legend("bottomright", legend = legend_text, col = c("red", "gainsboro", "lightblue"), lwd = 4,cex=1.25)
+
+dev.off()
+
+
+
+
+```
+
+
+```{r}
+
+library(writexl)
+
+clinvar_SMARCB1_filtered10 <- clinvar_SMARCB1_filtered9 %>%
+  filter(clinvar_SMARCB1_filtered9$`Molecular consequence` != "synonymous variant")
+
+
+write_xlsx(clinvar_SMARCB1_filtered10, "/Users/gwcoope/Library/CloudStorage/GoogleDrive-gcooper.gene@gmail.com/My\ Drive/Hong\ Lab\ Project\ Folders.gdrive/Results\ GC/17-SMARCB1_MITEseq2/Manuscript/ClinVar_analysis/clinvar_no_silents.xlsx")
+
+
+
+clinvar_SMARCB1_benign <- clinvar_SMARCB1_filtered10 %>%
+  filter(clinvar_SMARCB1_filtered10$`Germline classification` == "Benign")
+
+clinvar_SMARCB1_likely_benign <- clinvar_SMARCB1_filtered10 %>%
+  filter(clinvar_SMARCB1_filtered10$`Germline classification` == "Likely benign")
+
+clinvar_SMARCB1_likely_pathogenic <- clinvar_SMARCB1_filtered10 %>%
+  filter(clinvar_SMARCB1_filtered10$`Germline classification` == "Likely pathogenic")
+
+clinvar_SMARCB1_pathogenic <- clinvar_SMARCB1_filtered10 %>%
+  filter(clinvar_SMARCB1_filtered10$`Germline classification` == "Pathogenic" | clinvar_SMARCB1_filtered10$`Germline classification` == "Pathogenic/Likely pathogenic")
+
+clinvar_SMARCB1_VUS <- clinvar_SMARCB1_filtered10 %>%
+  filter(clinvar_SMARCB1_filtered10$`Germline classification` == "Uncertain significance")
+
+clinvar_SMARCB1_conflict <- clinvar_SMARCB1_filtered10 %>%
+  filter(clinvar_SMARCB1_filtered10$`Germline classification` == "Conflicting classifications of pathogenicity")
+
+
+
+```
+
