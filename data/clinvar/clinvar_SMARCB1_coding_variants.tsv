@@ -272,6 +272,7 @@ NM_003073.5(SMARCB1):c.1143G>C (p.Thr381=)	T381T	not provided|Hereditary cancer-
 NM_003073.5(SMARCB1):c.1146C>T (p.Ala382=)	A382A	not provided	VCV002984809	22	23834168	2984809	NA	single nucleotide variant	synonymous variant	Likely benign	382
 NM_003073.5(SMARCB1):c.1149G>C (p.Pro383=)	P383P	Hereditary cancer-predisposing syndrome	VCV003223078	22	23834171	3223078	NA	single nucleotide variant	synonymous variant	Likely benign	383
 NM_003073.5(SMARCB1):c.1149G>A (p.Pro383=)	P383P	Hereditary cancer-predisposing syndrome|not provided	VCV000410707	22	23834171	410707	rs780103418	single nucleotide variant	synonymous variant	Likely benign	383
+NM_003073.5(SMARCB1):c.1157A>G (p.Ter386=)	386	Hereditary cancer-predisposing syndrome	VCV000818447	22	23834179	818447	rs1601446932	single nucleotide variant	synonymous variant	Likely benign	386
 NM_003073.5(SMARCB1):c.205G>A (p.Gly69Ser)	G69S	not provided	VCV001471392	22	23791867	1471392	rs2145960551	single nucleotide variant	missense variant	Uncertain significance	69
 NM_003073.5(SMARCB1):c.1A>C (p.Met1Leu)	M1L	not provided	VCV002712544	22	23787170	2712544	NA	single nucleotide variant	missense variant|initiator_codon_variant	Uncertain significance	1
 NM_003073.5(SMARCB1):c.1A>G (p.Met1Val)	M1V	Hereditary cancer-predisposing syndrome|Rhabdoid tumor predisposition syndrome 1|Schwannomatosis 1|not provided	VCV000135257	22	23787170	135257	rs367768260	single nucleotide variant	missense variant|initiator_codon_variant	Benign/Likely benign	1
