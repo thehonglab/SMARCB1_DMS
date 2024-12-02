@@ -1,0 +1,228 @@
+---
+title: "Computational Predictor Processing"
+author: "Garrett Cooper"
+date: 12/02/2024
+output:
+  github_document:
+    toc: true
+    html_preview: false
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r}
+library(yaml)
+
+config <- read_yaml("./config.yaml")
+
+```
+
+
+Lets first filter the CADD v1.7 variants
+
+
+```{r}
+
+library(readr)
+library(dplyr)
+
+
+cadd_data <- read_tsv(file=config$cadd_raw)
+
+cadd_data_exons <- cadd_data %>%
+  filter(Pos >= 23787170 & Pos <= 23787262 | #exon 1
+         Pos >= 23791756 & Pos <= 23791894 | #exon 2
+         Pos >= 23793559 & Pos <= 23793688 | #exon 3
+         Pos >= 23800944 & Pos <= 23801081 | #exon 4
+         Pos >= 23803295 & Pos <= 23803422 | #exon 5
+         Pos >= 23816770 & Pos <= 23816936 | #exon 6
+         Pos >= 23825225 & Pos <= 23825415 | #exon 7
+         Pos >= 23833572 & Pos <= 23833703 | #exon 8
+         Pos >= 23834141 & Pos <= 23834180)  #exon 9
+
+
+
+
+cadd_data_exons
+
+
+
+```
+
+
+```{r}
+
+
+# Add a column that increases by 1 every 3 rows starting at 1
+cadd_data_exons$Site <- rep(1:ceiling(nrow(cadd_data_exons)/3), each = 3, length.out = nrow(cadd_data_exons))
+
+
+cadd_data_exons <- cadd_data_exons %>%
+  # Create a new grouping column (block of 3 sites: 1-3, 4-6, etc.)
+  mutate(Codon = (Site - 1) %/% 3 + 1) %>%
+  group_by(Codon) %>%
+  # Concatenate unique Ref values per group
+  mutate(Ref_Codon = paste(Ref, collapse = "")) %>%
+  ungroup() %>%
+  mutate(Ref_Codon = str_sub(Ref_Codon, 2, 2) %>% 
+           paste0(str_sub(Ref_Codon, 4, 4), 
+                  str_sub(Ref_Codon, 7, 7)))
+
+cadd_data_exons <- cadd_data_exons %>%
+  mutate(codon_site = (Site - 1) %% 3 + 1,  # Create a new column with the adjusted Site values
+         Alt_Codon = mapply(function(codon, site, alt) {
+           # Convert codon into a vector of characters
+           codon_vec <- strsplit(codon, "")[[1]]
+           
+           # Replace the base at the position specified by 'site'
+           codon_vec[site] <- alt
+           
+           # Recombine the codon and return it
+           paste0(codon_vec, collapse = "")
+         }, Ref_Codon, codon_site, Alt))  # Use the new 'codon_site' column
+
+
+codon_table <- c(
+  "ATA" = "I", "ATC" = "I", "ATT" = "I", "ATG" = "M", "ACA" = "T", "ACC" = "T",
+  "ACG" = "T", "ACT" = "T", "AAC" = "N", "AAT" = "N", "AAA" = "K", "AAG" = "K",
+  "AGC" = "S", "AGT" = "S", "AGA" = "R", "AGG" = "R", "CTA" = "L", "CTC" = "L",
+  "CTG" = "L", "CTT" = "L", "CCA" = "P", "CCC" = "P", "CCG" = "P", "CCT" = "P",
+  "CAC" = "H", "CAT" = "H", "CAA" = "Q", "CAG" = "Q", "CGA" = "R", "CGC" = "R",
+  "CGG" = "R", "CGT" = "R", "GTA" = "V", "GTC" = "V", "GTG" = "V", "GTT" = "V",
+  "GCA" = "A", "GCC" = "A", "GCG" = "A", "GCT" = "A", "GAC" = "D", "GAT" = "D",
+  "GAA" = "E", "GAG" = "E", "GGA" = "G", "GGC" = "G", "GGG" = "G", "GGT" = "G",
+  "TCA" = "S", "TCC" = "S", "TCG" = "S", "TCT" = "S", "TTC" = "F", "TTT" = "F",
+  "TTA" = "L", "TTG" = "L", "TAC" = "Y", "TAT" = "Y", "TAA" = "Stop", "TAG" = "Stop",
+  "TGC" = "C", "TGT" = "C", "TGA" = "Stop", "TGG" = "W"
+)
+
+# Create a new column to report the amino acid substitution
+cadd_data_exons <- cadd_data_exons %>%
+  mutate(Amino_Acid_Ref = sapply(Ref_Codon, function(codon) codon_table[codon]),
+         Amino_Acid_Alt = sapply(Alt_Codon, function(codon) codon_table[codon]),
+         AA_Substitution = paste(Amino_Acid_Ref, Codon, Amino_Acid_Alt, sep=""))
+
+
+write.table(cadd_data_exons, file = "./data/computational_predictors/SMARCB1_CADD_v1.7_annotated.tsv", sep = "\t", row.names = FALSE, quote = FALSE)
+
+
+```
+
+
+
+
+Next lets filter the REVEL v1.3 Variants
+
+
+```{r}
+
+library(dplyr)
+
+revel_data <- read.csv(file=config$revel_raw)
+
+
+revel_data_filtered <- revel_data %>%
+  filter(grch38_pos >= 23787169 & grch38_pos <= 23834181)
+
+
+revel_data_filtered <- revel_data_filtered[,-2]
+
+#Reformat to match CADD data
+colnames(revel_data_filtered)[colnames(revel_data_filtered) == "grch38_pos"] <- "Pos"
+
+revel_data_filtered$Pos <- as.numeric(revel_data_filtered$Pos)
+
+```
+
+```{r}
+
+revel_data_exons <- revel_data_filtered %>%
+  filter(Pos >= 23787170 & Pos <= 23787262 | #exon 1
+         Pos >= 23791756 & Pos <= 23791894 | #exon 2
+         Pos >= 23793559 & Pos <= 23793688 | #exon 3
+         Pos >= 23800944 & Pos <= 23801081 | #exon 4
+         Pos >= 23803295 & Pos <= 23803422 | #exon 5
+         Pos >= 23816770 & Pos <= 23816936 | #exon 6
+         Pos >= 23825225 & Pos <= 23825415 | #exon 7
+         Pos >= 23833572 & Pos <= 23833703 | #exon 8
+         Pos >= 23834141 & Pos <= 23834180)  #exon 9
+
+```
+
+
+```{r}
+
+cadd_data_exons_unique <- cadd_data_exons %>%
+  distinct(Pos, .keep_all = TRUE)
+
+revel_data_exons <- revel_data_exons %>%
+  left_join(cadd_data_exons_unique %>% select(Pos, Codon, Site), by = "Pos")
+
+
+
+cadd_data_exons_unique_codon <- cadd_data_exons2 %>%
+  distinct(Codon, .keep_all = TRUE)
+
+revel_data_exons <- revel_data_exons %>%
+  left_join(cadd_data_exons_unique_codon %>% select(Codon, Ref_Codon), by = "Codon")
+
+
+
+
+revel_data_exons <- revel_data_exons %>%
+  mutate(codon_site = (Site - 1) %% 3 + 1,  # Create a new column with the adjusted Site values
+         Alt_Codon = mapply(function(codon, site, alt) {
+           # Convert codon into a vector of characters
+           codon_vec <- strsplit(codon, "")[[1]]
+           
+           # Replace the base at the position specified by 'site'
+           codon_vec[site] <- alt
+           
+           # Recombine the codon and return it
+           paste0(codon_vec, collapse = "")
+         }, Ref_Codon, codon_site, alt))  # Use the new 'codon_site' column
+
+codon_table <- c(
+  "ATA" = "I", "ATC" = "I", "ATT" = "I", "ATG" = "M", "ACA" = "T", "ACC" = "T",
+  "ACG" = "T", "ACT" = "T", "AAC" = "N", "AAT" = "N", "AAA" = "K", "AAG" = "K",
+  "AGC" = "S", "AGT" = "S", "AGA" = "R", "AGG" = "R", "CTA" = "L", "CTC" = "L",
+  "CTG" = "L", "CTT" = "L", "CCA" = "P", "CCC" = "P", "CCG" = "P", "CCT" = "P",
+  "CAC" = "H", "CAT" = "H", "CAA" = "Q", "CAG" = "Q", "CGA" = "R", "CGC" = "R",
+  "CGG" = "R", "CGT" = "R", "GTA" = "V", "GTC" = "V", "GTG" = "V", "GTT" = "V",
+  "GCA" = "A", "GCC" = "A", "GCG" = "A", "GCT" = "A", "GAC" = "D", "GAT" = "D",
+  "GAA" = "E", "GAG" = "E", "GGA" = "G", "GGC" = "G", "GGG" = "G", "GGT" = "G",
+  "TCA" = "S", "TCC" = "S", "TCG" = "S", "TCT" = "S", "TTC" = "F", "TTT" = "F",
+  "TTA" = "L", "TTG" = "L", "TAC" = "Y", "TAT" = "Y", "TAA" = "Stop", "TAG" = "Stop",
+  "TGC" = "C", "TGT" = "C", "TGA" = "Stop", "TGG" = "W"
+)
+
+
+revel_data_exons <- revel_data_exons %>%
+  mutate(Amino_Acid_Ref = sapply(Ref_Codon, function(codon) codon_table[codon]),
+         Amino_Acid_Alt = sapply(Alt_Codon, function(codon) codon_table[codon]),
+         AA_Substitution = paste(Amino_Acid_Ref, Codon, Amino_Acid_Alt, sep=""))
+
+
+write.table(revel_data_exons, file = "./data/computational_predictors/SMARCB1_revel_v1.3_annotated.tsv", sep = "\t", row.names = FALSE, quote = FALSE)
+
+
+```
+
+
+```{r}
+
+
+
+alpha_missense <- read_tsv(file=config$alphamissense_raw)
+
+
+alpha_missense <- alpha_missense %>%
+  mutate(
+    Residue = as.numeric(str_extract(protein_variant, "\\d+")),  # Extract the number
+    Amino_Acid_Alt = str_sub(protein_variant, start = -1)  # Extract the last letter
+  )
+
+write.table(alpha_missense, file = "./data/computational_predictors/SMARCB1_AlphaMissense_annotated.tsv", sep = "\t", row.names = FALSE, quote = FALSE)
+
+```
+
