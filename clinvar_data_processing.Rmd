@@ -185,9 +185,6 @@ clinvar_SMARCB1_filtered5 <- clinvar_SMARCB1_filtered5 %>%
   mutate(`Protein change` = gsub("fs$", "Fs", `Protein change`), # Replace 'fs' with 'Fs'
          `Protein change` = gsub("\\*$", "X", `Protein change`)) # Replace '*' with 'X'
 
-#Have to remove the silent mutation at the end of TAA -> TGA as this was not included in our screen
-clinvar_SMARCB1_filtered5 <- clinvar_SMARCB1_filtered5[-c(274),]
-
 write_tsv(clinvar_SMARCB1_filtered5, "./data/clinvar/clinvar_SMARCB1_coding_variants.tsv")
 
 ```
