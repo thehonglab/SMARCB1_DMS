@@ -13,6 +13,7 @@ editor_options:
 ```{r}
 library(yaml)
 
+#read in config file
 config <- read_yaml("./config.yaml")
 
 ```
@@ -152,6 +153,7 @@ revel_data_exons <- revel_data_filtered %>%
 
 ```{r}
 
+#Since revel does not have every site like cadd, we are going to use cadd as a reference to pull in some data
 cadd_data_exons_unique <- cadd_data_exons %>%
   distinct(Pos, .keep_all = TRUE)
 
@@ -160,8 +162,10 @@ revel_data_exons <- revel_data_exons %>%
 
 
 
-cadd_data_exons_unique_codon <- cadd_data_exons2 %>%
+cadd_data_exons_unique_codon <- cadd_data_exons %>%
   distinct(Codon, .keep_all = TRUE)
+
+cadd_data_exons_unique_codon$Codon <- as.numeric(cadd_data_exons_unique_codon$Codon)
 
 revel_data_exons <- revel_data_exons %>%
   left_join(cadd_data_exons_unique_codon %>% select(Codon, Ref_Codon), by = "Codon")
@@ -201,6 +205,12 @@ revel_data_exons <- revel_data_exons %>%
   mutate(Amino_Acid_Ref = sapply(Ref_Codon, function(codon) codon_table[codon]),
          Amino_Acid_Alt = sapply(Alt_Codon, function(codon) codon_table[codon]),
          AA_Substitution = paste(Amino_Acid_Ref, Codon, Amino_Acid_Alt, sep=""))
+
+#One site at exon 5 was incorrectly annotated will be filtered
+revel_data_exons <- revel_data_exons %>%
+  filter(revel_data_exons$AA_Substitution != "C167Stop")
+
+
 
 
 write.table(revel_data_exons, file = "./data/computational_predictors/SMARCB1_revel_v1.3_annotated.tsv", sep = "\t", row.names = FALSE, quote = FALSE)

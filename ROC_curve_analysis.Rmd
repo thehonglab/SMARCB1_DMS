@@ -1,0 +1,128 @@
+---
+title: "ROC Curve Analysis"
+author: "Garrett Cooper"
+date: 11/23/2024
+output:
+  github_document:
+    toc: true
+    html_preview: false
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r}
+
+library(readr)
+library(dplyr)
+
+#read in config file
+config <- read_yaml("./config.yaml")
+
+```
+
+Read in all of the data sources
+```{r}
+
+clinvar_SMARCB1 <- read_tsv(file=config$clinvar)
+
+revel_SMARCB1 <- read_tsv(file=config$revel)
+
+cadd_SMARCB1 <- read_tsv(file=config$cadd)
+
+alpha_SMARCB1 <- read_tsv(file=config$alphamissense)
+
+mite_data <- read.csv(file=config$mitedata)
+
+```
+
+
+Integrate them all into one dataframe
+```{r}
+#There are multiple nucleotide substitutions that lead to the same amino acid change (or silent change). We double checked these duplicates are classified the same. Here we keep only the first instance to not add unnecessary data.
+
+clinvar_SMARCB1_no_duplicates <- clinvar_SMARCB1 %>%
+  distinct(`Protein change`, .keep_all = TRUE)
+
+
+
+integrated_data <- mite_data %>%
+  left_join(clinvar_SMARCB1_no_duplicates %>% select("Protein change", "Germline classification"), 
+            by = c("Substitution" = "Protein change" ))
+
+
+#REVEL has duplicate rows where multiple nucleotide substitution lead to the same amino acid change. Here we will average the REVEL score across all duplicates and keep as one row.
+revel_SMARCB1_no_duplicates <- revel_SMARCB1 %>%
+  group_by(AA_Substitution) %>%
+  summarise(
+    across(-REVEL, ~ first(.), .names = "{.col}"), # Keep the first instance of all columns
+    REVEL = mean(REVEL, na.rm = TRUE) # Replace REVEL with the average of duplicates
+  ) %>%
+  ungroup()
+
+integrated_data <- integrated_data %>%
+  left_join(revel_SMARCB1_no_duplicates %>% select("AA_Substitution", "REVEL"),
+            by = c("Substitution" = "AA_Substitution"))
+
+#CADD has duplicate rows where multiple nucleotide substitution lead to the same amino acid change. Here we will average the PHRED score across all duplicates and keep as one row.
+cadd_SMARCB1_no_duplicates <- cadd_SMARCB1 %>%
+  group_by(AA_Substitution) %>%
+  summarise(
+    across(-PHRED, ~ first(.), .names = "{.col}"), # Keep the first instance for all columns except PHRED
+    PHRED = mean(PHRED, na.rm = TRUE) # Calculate the average for PHRED
+  ) %>%
+  ungroup()
+
+
+#We also need to reformat the CADD data to match with the mitedata
+cadd_SMARCB1_no_duplicates <- cadd_SMARCB1_no_duplicates %>%
+  mutate(AA_Substitution = str_replace(AA_Substitution, "Stop", "X"))
+
+integrated_data <- integrated_data %>%
+  left_join(cadd_SMARCB1_no_duplicates %>% select("AA_Substitution", "PHRED"),
+            by = c("Substitution" = "AA_Substitution"))
+
+
+```
+
+
+Plot ROC Curves
+```{r}
+
+library(pROC)
+
+clinvar_pos <- c('Pathogenic/Likely pathogenic', 'Pathogenic')
+
+
+integrated_data$response <- ifelse(integrated_data$'Germline classification' %in% clinvar_pos, 1, 0) 
+
+roc_cadd <- roc(integrated_data$response, integrated_data$PHRED)
+
+roc_zscore <- roc(integrated_data$response, integrated_data$all_reps_zscore)
+
+
+tiff("./plots/ROC_curves/ROC_CADD_DMS.tiff", units="in", width=6, height=6, res=600)
+
+plot(roc_zscore, col = "red",lwd=4, xlab = "Specificity", ylab = "Sensitivity",cex.lab=2, cex.axis=1.5)
+plot(roc_cadd, col = "lightblue",lwd=4, add = TRUE)
+
+legend_text <- c(paste0("DMS (AUC=", round(auc(roc_zscore), 2), ")"),
+                 paste0("CADD (AUC=", round(auc(roc_cadd), 2), ")"))
+legend("bottomright", legend = legend_text, col = c("red", "lightblue"), lwd = 4,cex=1.25)
+
+dev.off()
+
+tiff("./plots/ROC_curves/ROC_DMS_only.tiff", units="in", width=6, height=6, res=600)
+
+plot(roc_zscore, col = "red",lwd=4, xlab = "Specificity", ylab = "Sensitivity",cex.lab=2, cex.axis=1.5)
+
+legend_text <- c(paste0("DMS (AUC=", round(auc(roc_zscore), 2), ")"))
+legend("bottomright", legend = legend_text, col = c("red"), lwd = 4,cex=1.25)
+
+dev.off()
+
+
+```
+
+
+
+
