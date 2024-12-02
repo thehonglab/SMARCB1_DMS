@@ -1337,7 +1337,12 @@ tiff("./plots/DMS_plots/allreps_by_amino_acid_missense_silent_only.tiff", units=
 
 x <- missense_silent_mutants_averaged$Residue; y <- missense_silent_mutants_averaged$all_reps_zscore; z <-as.factor(missense_silent_mutants_averaged$Mutation_Type)
 
-plot(x,y,pch=16,col=c("gray", "black")[z],xlab="Amino Acid Position",ylab="Average Z-Score",main=paste("All reps by amino acid silent and Missense"), cex=0.5, xlim=c(0,385), ylim=c(-7,10))
+colors <- ifelse(y > 2, "orange", c("gray", "black")[z])
+
+plot(x,y,pch=16,col=colors,xlab="Amino Acid Position",ylab="Average Z-Score",main=paste("All reps by amino acid silent and Missense"), cex=0.5, xlim=c(0,385), ylim=c(-7,10))
+
+# Add a dotted line at y = 2
+abline(h=2, col="black", lty=2, lwd=2)
 
 dev.off()
 
@@ -1420,7 +1425,11 @@ two_sd_lof = missense_mean + 2*missense_sd
 missense_mite_data_2sd_lof <- missense_mite_data %>%
   filter(missense_mite_data$all_reps_zscore > two_sd_lof)
 
+zscore_lof <- missense_mite_data %>%
+  filter(missense_mite_data$all_reps_zscore > 2)
 
+zscore_ambiguous <- missense_mite_data %>%
+  filter(missense_mite_data$all_reps_zscore < 2 | missense_mite_data$all_reps_zscore > 1)
 
 WHD_mutants <- missense_mite_data_2sd_lof %>%
   filter(missense_mite_data_2sd_lof$Residue > 10 & missense_mite_data_2sd_lof$Residue < 110)
@@ -1453,10 +1462,8 @@ top_mutants <- rbind(WHD_mutants, IDR_mutants, RPT1_mutants, RPT2_mutants, CCD_m
 
 write_tsv(top_mutants, "./results/functional_scores/top_LOF_mutants.tsv")
 
-
-
-
 ```
+
 
 
 
