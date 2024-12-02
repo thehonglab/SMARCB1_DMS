@@ -1050,7 +1050,7 @@ Frameshift data filtered because each of these does not have the same identifier
 
 ```{r, message = FALSE}
 
-single_mutants_data <- read_csv("./results/functional_scores/single_mutant_data.csv")
+single_mutants_data <- read_csv("./results/functional_scores/DMS_single_mutant_data.csv")
 
 #Frameshifts make this a bit difficult because they do not have unique names. So here we are going to filter out the frameshifts. Here we are averaging z-scores across all molecules for each missense, silent, and nonsense mutation.
 
@@ -1255,6 +1255,8 @@ Saving the Final Data Frame for Further Analysis
 
 write_csv(all_mutants_averaged, "./results/functional_scores/DMS_collapsed_data.csv")
 
+
+
 ```
 
 
@@ -1381,6 +1383,8 @@ missense_mite_data <- all_mutants_averaged %>%
 average_residue_result <- missense_mite_data %>%
   group_by(Residue) %>%
   summarise(avg_zscore = mean(all_reps_zscore, na.rm = TRUE))
+
+average_residue_result <- head(average_residue_result, -1)
 
 
 average_residue_result_sorted <- average_residue_result[order(-average_residue_result$avg_zscore), ]
