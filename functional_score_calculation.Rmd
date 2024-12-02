@@ -478,9 +478,6 @@ indel_mask = grepl("D", export_data$all_mut) |
 indel_data = dplyr::filter(export_data,
                            indel_mask)
 
-# write_csv(export_data,
-#           file = "C:/Users/bplee3/Google Drive/Hong Lab Project Folders/Results BL/1 - SMARCB1 MITE-seq/Filter by Cell Lines Data/20210729_BL_excel_export_indel.csv")
-
 export_data = filter(export_data,
                      !indel_mask)
 
@@ -632,7 +629,7 @@ single_mutants_data = single_mutants_data[order(single_mutants_data$mut_1), ]
 Inclusion of Double Mutant Molecules to Avoid Restriction Sites
 ```{r, message = FALSE}
 
-intended_double_mutants = readxl::read_excel(path = "/Users/gwcoope/Library/CloudStorage/GoogleDrive-gcooper.gene@gmail.com/My\ Drive/Hong\ Lab\ Project\ Folders.gdrive/Results\ GC/2-SMARCB1\ MITE-seq/20210311_BL_SMARCB1_restriction_enzymes_fix.xlsx")
+intended_double_mutants = readxl::read_excel(path = "./data/counts/20210311_BL_SMARCB1_restriction_enzymes_fix.xlsx")
 
 
 
@@ -1043,7 +1040,7 @@ rm(RCRF1009T_roll_stats_2)
 ## Export ####
 
 write_csv(single_mutants_data,
-          file = "/Users/gwcoope/Library/CloudStorage/GoogleDrive-gcooper.gene@gmail.com/My\ Drive/Hong\ Lab\ Project\ Folders.gdrive/Results\ GC/2-SMARCB1\ MITE-seq/20240916_GC_single_mutants_data_w_fs_w_zscores.csv")
+          file = "./results/functional_scores/DMS_single_mutant_data.csv")
 ```
 
 
@@ -1053,7 +1050,7 @@ Frameshift data filtered because each of these does not have the same identifier
 
 ```{r, message = FALSE}
 
-single_mutants_data <- read_csv("/Users/gwcoope/Library/CloudStorage/GoogleDrive-gcooper.gene@gmail.com/My\ Drive/Hong\ Lab\ Project\ Folders.gdrive/Results\ GC/2-SMARCB1\ MITE-seq/20240916_GC_single_mutants_data_w_fs_w_zscores.csv")
+single_mutants_data <- read_csv("./results/functional_scores/single_mutant_data.csv")
 
 #Frameshifts make this a bit difficult because they do not have unique names. So here we are going to filter out the frameshifts. Here we are averaging z-scores across all molecules for each missense, silent, and nonsense mutation.
 
@@ -1256,7 +1253,7 @@ all_mutants_averaged <- all_mutants_averaged %>%
 Saving the Final Data Frame for Further Analysis
 ```{r, message = FALSE}
 
-write_csv(all_mutants_averaged, "/Users/gwcoope/Library/CloudStorage/GoogleDrive-gcooper.gene@gmail.com/My\ Drive/Hong\ Lab\ Project\ Folders.gdrive/Results\ GC/17-SMARCB1_MITEseq2/Manuscript/miteanalysis_supp_data/mitedata_GC_20240916.csv")
+write_csv(all_mutants_averaged, "./results/functional_scores/DMS_collapsed_data.csv")
 
 ```
 
@@ -1264,12 +1261,9 @@ write_csv(all_mutants_averaged, "/Users/gwcoope/Library/CloudStorage/GoogleDrive
 ## Plotting Z-scores Across 385 Amino Acids
 ```{r}
 
-setwd("/Users/gwcoope/Library/CloudStorage/GoogleDrive-gcooper.gene@gmail.com/My\ Drive/Hong\ Lab\ Project\ Folders.gdrive/Results\ GC/17-SMARCB1_MITEseq2/Manuscript/miteanalysis_supp_data/zscore_plots")
-
-
 all_mutants_averaged <- all_mutants_averaged[order(all_mutants_averaged$Mutation_Type, decreasing = FALSE),]
 
-tiff("allreps_by_amino_acid.tiff", units="in", width=6, height=6, res=300)
+tiff("./plots/DMS_plots/allreps_by_amino_acid.tiff", units="in", width=6, height=6, res=300)
 
 x <- all_mutants_averaged$Residue; y <- all_mutants_averaged$all_reps_zscore; z <-as.factor(all_mutants_averaged$Mutation_Type)
 
@@ -1285,7 +1279,7 @@ plot(x,y,pch=16,col=c("blue", "gray", "red", "black")[z],xlab="Amino Acid Positi
 
 
 
-tiff("G401_by_amino_acid.tiff", units="in", width=6, height=6, res=300)
+tiff("./plots/DMS_plots/G401_by_amino_acid.tiff", units="in", width=6, height=6, res=300)
 
 x <- all_mutants_averaged$Residue; y <- all_mutants_averaged$G401_average_zscore
 
@@ -1302,7 +1296,7 @@ plot(x,y,pch=16,col=c("blue", "gray", "red", "black")[z],xlab="Amino Acid Positi
 
 
 
-tiff("BT16_by_amino_acid.tiff", units="in", width=6, height=6, res=300)
+tiff("./plots/DMS_plots/BT16_by_amino_acid.tiff", units="in", width=6, height=6, res=300)
 
 x <- all_mutants_averaged$Residue; y <- all_mutants_averaged$BT16_average_zscore
 
@@ -1317,7 +1311,7 @@ plot(x,y,pch=16,col=c("blue", "gray", "red", "black")[z],xlab="Amino Acid Positi
 
 
 
-tiff("RCRF1009T_by_amino_acid.tiff", units="in", width=6, height=6, res=300)
+tiff("./plots/DMS_plots/RCRF1009T_by_amino_acid.tiff", units="in", width=6, height=6, res=300)
 
 x <- all_mutants_averaged$Residue; y <- all_mutants_averaged$RCRF1009T_average_zscore
 
@@ -1337,7 +1331,7 @@ missense_silent_mutants_averaged <- all_mutants_averaged %>%
   filter(all_mutants_averaged$Mutation_Type == "M" | all_mutants_averaged$Mutation_Type == "S")
 
 
-tiff("allreps_by_amino_acid_missense_silent_only.tiff", units="in", width=6, height=6, res=300)
+tiff("./plots/DMS_plots/allreps_by_amino_acid_missense_silent_only.tiff", units="in", width=6, height=6, res=300)
 
 x <- missense_silent_mutants_averaged$Residue; y <- missense_silent_mutants_averaged$all_reps_zscore; z <-as.factor(missense_silent_mutants_averaged$Mutation_Type)
 
@@ -1355,7 +1349,7 @@ plot(x,y,pch=16,col=c("gray", "black")[z],xlab="Amino Acid Position",ylab="Avera
 nonsense_frameshift_silent_mutants_averaged <- all_mutants_averaged %>%
   filter(all_mutants_averaged$Mutation_Type == "F" | all_mutants_averaged$Mutation_Type == "N" | all_mutants_averaged$Mutation_Type == "S")
 
-tiff("allreps_by_amino_acid_nonsense_fs_silent_only.tiff", units="in", width=6, height=6, res=300)
+tiff("./plots/DMS_plots/allreps_by_amino_acid_nonsense_fs_silent_only.tiff", units="in", width=6, height=6, res=300)
 
 x <- nonsense_frameshift_silent_mutants_averaged$Residue; y <- nonsense_frameshift_silent_mutants_averaged$all_reps_zscore; z <-as.factor(nonsense_frameshift_silent_mutants_averaged$Mutation_Type)
 
@@ -1373,17 +1367,15 @@ plot(x,y,pch=16,col=c("blue", "red", "black")[z],xlab="Amino Acid Position",ylab
 
 
 
-
+Here we are going to average all 19 possible amino acid substitutions for each residue as a measure of mutational intolerance. Then we will rank these.
 
 ```{r}
 
 library(dplyr)
 library(readr)
 
-mite_data <- read.csv("/Users/gwcoope/Library/CloudStorage/GoogleDrive-gcooper.gene@gmail.com/My\ Drive/Hong\ Lab\ Project\ Folders.gdrive/Results\ GC/17-SMARCB1_MITEseq2/Manuscript/miteanalysis_supp_data/mitedata_GC_20240916.csv")
-
-missense_mite_data <- mite_data %>%
-  filter(mite_data$Mutation_Type == "M")
+missense_mite_data <- all_mutants_averaged %>%
+  filter(all_mutants_averaged$Mutation_Type == "M")
 
 
 average_residue_result <- missense_mite_data %>%
@@ -1396,7 +1388,7 @@ average_residue_result_sorted <- average_residue_result[order(-average_residue_r
 average_residue_result_sorted$rank <- 1:nrow(average_residue_result_sorted)
 
 
-write_csv(average_residue_result_sorted, "/Users/gwcoope/Library/CloudStorage/GoogleDrive-gcooper.gene@gmail.com/My\ Drive/Hong\ Lab\ Project\ Folders.gdrive/Results\ GC/17-SMARCB1_MITEseq2/Manuscript/miteanalysis_supp_data/mitedata_residues_averaged_GC_20241024.csv")
+write_csv(average_residue_result_sorted, "./results/functional_scores/mitedata_residues_averaged_missense.csv")
 
 
 sd <- sd(average_residue_result_sorted$avg_zscore)
@@ -1407,20 +1399,11 @@ one_sd_pos <-  mean + 2*sd
 
 one_sd_neg <- mean- 2*sd 
 
-
-
-
-
-
-
 ```
 
-
+Here we are identifying which mutations rise above the threshold of 2 SD above the mean z-score.
 
 ```{r}
-
-missense_mite_data <- mite_data %>%
-  filter(mite_data$Mutation_Type == "M")
 
 missense_mean <- mean(missense_mite_data$all_reps_zscore)
 
@@ -1438,17 +1421,36 @@ missense_mite_data_2sd_lof <- missense_mite_data %>%
 WHD_mutants <- missense_mite_data_2sd_lof %>%
   filter(missense_mite_data_2sd_lof$Residue > 10 & missense_mite_data_2sd_lof$Residue < 110)
 
+WHD_mutants$Domain <- "WHD"
+
 RPT1_mutants <- missense_mite_data_2sd_lof %>%
   filter(missense_mite_data_2sd_lof$Residue > 183 & missense_mite_data_2sd_lof$Residue < 245)
+
+RPT1_mutants$Domain <- "RPT1"
 
 RPT2_mutants <- missense_mite_data_2sd_lof %>%
   filter(missense_mite_data_2sd_lof$Residue > 259 & missense_mite_data_2sd_lof$Residue < 319)
 
+RPT2_mutants$Domain <- "RPT2"
+
 CCD_mutants <- missense_mite_data_2sd_lof %>%
   filter(missense_mite_data_2sd_lof$Residue > 335 & missense_mite_data_2sd_lof$Residue < 378)
 
+CCD_mutants$Domain <- "CCD"
+
 IDR_mutants <- missense_mite_data_2sd_lof %>%
   filter(missense_mite_data_2sd_lof$Residue > 110 & missense_mite_data_2sd_lof$Residue < 185)
+
+IDR_mutants$Domain <- "IDR"
+
+
+top_mutants <- rbind(WHD_mutants, IDR_mutants, RPT1_mutants, RPT2_mutants, CCD_mutants)
+
+
+write_tsv(top_mutants, "./results/functional_scores/top_LOF_mutants.tsv")
+
+
+
 
 ```
 

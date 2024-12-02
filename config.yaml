@@ -14,4 +14,4 @@ clinvar_raw: ./data/clinvar/20241122_clinvar_data_SMARCB1.tsv
 clinvar: ./data/clinvar/clinvar_SMARCB1_coding_variants.tsv
 
 #Screen Data
-mitedata: ./results/functional_scores/mitedata.csv 
+mitedata: ./results/functional_scores/DMS_collapsed_data.csv 
