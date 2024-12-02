@@ -82,21 +82,28 @@ integrated_data <- integrated_data %>%
             by = c("Substitution" = "AA_Substitution"))
 
 
+#Integrate alphamissense data
+integrated_data <- integrated_data %>%
+  left_join(alpha_SMARCB1 %>% select("protein_variant", "am_pathogenicity"),
+            by = c("Substitution" = "protein_variant"))
+
+
+
 write_tsv(integrated_data, "./results/ROC_curve_analysis/integrated_data_DMS_ClinVar_REVEL_CADD.tsv")
 
 
 ```
 
 
-Plot ROC Curves
+Plot ROC Curves for all data in ClinVar
 ```{r}
 
 library(pROC)
 
-clinvar_pos <- c('Pathogenic/Likely pathogenic', 'Pathogenic')
+clinvar_pos <- c('Pathogenic/Likely pathogenic', 'Pathogenic', 'Likely pathogenic')
 
 
-integrated_data$response <- ifelse(integrated_data$'Germline classification' %in% clinvar_pos, 1, 0) 
+integrated_data$response <- ifelse(integrated_data$'Germline classification' %in% clinvar_pos, 1, 0)
 
 roc_cadd <- roc(integrated_data$response, integrated_data$PHRED)
 
@@ -124,7 +131,80 @@ legend("bottomright", legend = legend_text, col = c("red"), lwd = 4,cex=1.25)
 dev.off()
 
 
+clinvar_pos <- c('Pathogenic/Likely pathogenic', 'Pathogenic')
+
+
+integrated_data$response <- ifelse(integrated_data$'Germline classification' %in% clinvar_pos, 1, 0)
+
+roc_cadd <- roc(integrated_data$response, integrated_data$PHRED)
+
+roc_zscore <- roc(integrated_data$response, integrated_data$all_reps_zscore)
+
+
+tiff("./plots/ROC_curves/ROC_CADD_DMS_stringent.tiff", units="in", width=6, height=6, res=600)
+
+plot(roc_zscore, col = "red",lwd=4, xlab = "Specificity", ylab = "Sensitivity",cex.lab=2, cex.axis=1.5)
+plot(roc_cadd, col = "lightblue",lwd=4, add = TRUE)
+
+legend_text <- c(paste0("DMS (AUC=", round(auc(roc_zscore), 2), ")"),
+                 paste0("CADD (AUC=", round(auc(roc_cadd), 2), ")"))
+legend("bottomright", legend = legend_text, col = c("red", "lightblue"), lwd = 4,cex=1.25)
+
+dev.off()
+
+tiff("./plots/ROC_curves/ROC_DMS_only_stringent.tiff", units="in", width=6, height=6, res=600)
+
+plot(roc_zscore, col = "red",lwd=4, xlab = "Specificity", ylab = "Sensitivity",cex.lab=2, cex.axis=1.5)
+
+legend_text <- c(paste0("DMS (AUC=", round(auc(roc_zscore), 2), ")"))
+legend("bottomright", legend = legend_text, col = c("red"), lwd = 4,cex=1.25)
+
+dev.off()
+
+
 ```
+
+Plot ROC Curves for just missense data
+```{r}
+
+integrated_data_missense_only <- integrated_data %>%
+  filter(integrated_data$Mutation_Type == "M")
+
+clinvar_pos <- c('Pathogenic/Likely pathogenic', 'Pathogenic', 'Likely pathogenic')
+
+
+integrated_data_missense_only$response <- ifelse(integrated_data_missense_only$'Germline classification' %in% clinvar_pos, 1, 0)
+
+roc_cadd <- roc(integrated_data_missense_only$response, integrated_data_missense_only$PHRED)
+
+roc_revel <- roc(integrated_data_missense_only$response, integrated_data_missense_only$REVEL)
+
+roc_zscore <- roc(integrated_data_missense_only$response, integrated_data_missense_only$all_reps_zscore)
+
+roc_am <- roc(integrated_data_missense_only$response, integrated_data_missense_only$am_pathogenicity)
+
+
+
+
+tiff("./plots/ROC_curves/ROC_missense_only.tiff", units="in", width=6, height=6, res=600)
+
+plot(roc_zscore, col = "red",lwd=4, xlab = "Specificity", ylab = "Sensitivity",cex.lab=2, cex.axis=1.5)
+plot(roc_cadd, col = "lightblue",lwd=4, add = TRUE)
+plot(roc_revel, col = "gainsboro",lwd=4, add = TRUE)
+plot(roc_am, col = "black",lwd=4, add = TRUE)
+
+legend_text <- c(paste0("DMS (AUC=", round(auc(roc_zscore), 2), ")"),
+                 paste0("CADD (AUC=", round(auc(roc_cadd), 2), ")"),
+                 paste0("Revel (AUC=", round(auc(roc_revel), 2), ")"),
+                 paste0("AlphaMissense (AUC=", round(auc(roc_am), 2), ")"))
+
+legend("bottomright", legend = legend_text, col = c("red", "lightblue", "gainsboro", "black"), lwd = 4,cex=1.25)
+
+dev.off()
+
+
+```
+
 
 
 
