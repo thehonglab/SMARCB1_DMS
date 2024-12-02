@@ -82,6 +82,9 @@ integrated_data <- integrated_data %>%
             by = c("Substitution" = "AA_Substitution"))
 
 
+write_tsv(integrated_data, "./results/ROC_curve_analysis/integrated_data_DMS_ClinVar_REVEL_CADD.tsv")
+
+
 ```
 
 
