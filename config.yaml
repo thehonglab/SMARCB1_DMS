@@ -6,8 +6,10 @@ alphamissense_raw: ./data/computational_predictors/SMARCB1_AlphaMissense.tsv
 alphamissense: ./data/computational_predictors/SMARCB1_AlphaMissense_annotated.tsv
 cadd_raw: ./data/computational_predictors/SMARCB1_CADD_v1.7.tsv
 cadd: ./data/computational_predictors/SMARCB1_CADD_v1.7_annotated.tsv
+cadd_duplicate_avg: ./data/computational_predictors/duplicates_averaged/SMARCB1_CADD_v1.7_duplicates_averaged.tsv
 revel_raw: ./data/computational_predictors/revel_chr22_v1.3.csv
 revel: ./data/computational_predictors/SMARCB1_REVEL_v1.3_annotated.tsv 
+revel_duplicate_avg: ./data/computational_predictors/duplicates_averaged/SMARCB1_REVEL_v1.3_duplicates_averaged.tsv
 
 #ClinVar (data obtained -  November 22, 2024)
 clinvar_raw: ./data/clinvar/20241122_clinvar_data_SMARCB1.tsv
