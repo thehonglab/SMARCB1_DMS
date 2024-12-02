@@ -59,9 +59,16 @@ revel_SMARCB1_no_duplicates <- revel_SMARCB1 %>%
   ) %>%
   ungroup()
 
+#Save this later so we can plot this in a heatmap
+
+write_tsv(revel_SMARCB1_no_duplicates, "./data/computational_predictors/duplicates_averaged/SMARCB1_REVEL_v1.3_duplicates_averaged.tsv")
+
 integrated_data <- integrated_data %>%
   left_join(revel_SMARCB1_no_duplicates %>% select("AA_Substitution", "REVEL"),
             by = c("Substitution" = "AA_Substitution"))
+
+
+
 
 #CADD has duplicate rows where multiple nucleotide substitution lead to the same amino acid change. Here we will average the PHRED score across all duplicates and keep as one row.
 cadd_SMARCB1_no_duplicates <- cadd_SMARCB1 %>%
@@ -73,9 +80,14 @@ cadd_SMARCB1_no_duplicates <- cadd_SMARCB1 %>%
   ungroup()
 
 
+
+
 #We also need to reformat the CADD data to match with the mitedata
 cadd_SMARCB1_no_duplicates <- cadd_SMARCB1_no_duplicates %>%
   mutate(AA_Substitution = str_replace(AA_Substitution, "Stop", "X"))
+
+#Write this to a tsv for plotting later in the heatmap
+write_tsv(cadd_SMARCB1_no_duplicates, "./data/computational_predictors/duplicates_averaged/SMARCB1_CADD_v1.7_duplicates_averaged.tsv")
 
 integrated_data <- integrated_data %>%
   left_join(cadd_SMARCB1_no_duplicates %>% select("AA_Substitution", "PHRED"),

@@ -219,10 +219,11 @@ write.table(revel_data_exons, file = "./data/computational_predictors/SMARCB1_re
 ```
 
 
+Data obtained from this: https://console.cloud.google.com/storage/browser/dm_alphamissense;tab=objects?pli=1&inv=1&invt=AbinwQ&prefix=&forceOnObjectsSortingFiltering=false
+Downloaded this file: AlphaMissense_aa_substitutions.tsv.gz
+
+
 ```{r}
-
-
-
 alpha_missense <- read_tsv(file=config$alphamissense_raw)
 
 
@@ -233,6 +234,5 @@ alpha_missense <- alpha_missense %>%
   )
 
 write.table(alpha_missense, file = "./data/computational_predictors/SMARCB1_AlphaMissense_annotated.tsv", sep = "\t", row.names = FALSE, quote = FALSE)
-
 ```
 
