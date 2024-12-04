@@ -1381,9 +1381,6 @@ Here we are going to average all 19 possible amino acid substitutions for each r
 library(dplyr)
 library(readr)
 
-
-write_csv(all_mutants_averaged, "./results/functional_scores/DMS_collapsed_data.csv")
-
 all_mutants_averaged <- read.csv("./results/functional_scores/DMS_collapsed_data.csv")
 
 missense_mite_data <- all_mutants_averaged %>%

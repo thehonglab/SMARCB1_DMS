@@ -1,0 +1,167 @@
+```{r}
+
+library(readr)
+library(dplyr)
+library(yaml)
+library(stringr)
+library(ggplot2)
+
+#read in config file
+config <- read_yaml("./config.yaml")
+
+```
+
+
+
+
+
+
+
+```{r}
+
+COSMICv100 <- read_tsv(file=config$cosmicv100)
+
+missense_data <- COSMICv100 %>%
+  filter(Type == "Substitution - Missense")
+
+missense_count_by_position <- missense_data %>%
+  group_by(Position) %>%
+  summarize(total_count_cosmic = sum(Count), .groups = "drop")
+
+missense_count_by_mutation <- missense_data %>%
+  group_by(missense_data$'AA Mutation') %>%
+  summarize(total_count = sum(Count), .groups = "drop")
+```
+
+
+```{r}
+
+
+genie_missense <- read_tsv(file=config$genie_smarcb1_missense)
+
+extract_number <- function(text) {
+  # Extract the number that comes after any letter sequence (like Met, Leu, etc.)
+  numbers <- gsub(".*[A-Za-z]+([0-9]+).*", "\\1", text)
+  
+  # Return the extracted number
+  return(numbers)
+}
+
+
+genie_missense$Residue <- sapply(genie_missense$'Protein Change', extract_number)
+
+genie_missense <- genie_missense %>%
+  mutate(Count = 1)
+
+
+
+missense_count_by_position_genie <- genie_missense %>%
+  group_by(Residue) %>%
+  summarize(total_count_genie = sum(Count), .groups = "drop")
+
+
+
+missense_count_by_mutation_genie <- genie_missense %>%
+  group_by(genie_missense$`Protein Change`) %>%
+  summarize(total_count = sum(Count), .groups = "drop")
+
+write_tsv(missense_count_by_mutation_genie, "./data/patient_mutation_data/GENIE_v16.1_SMARCB1_missense_count_by_mutation.tsv")
+
+
+missense_count_by_position <- missense_count_by_position %>% rename(Residue = Position)
+
+missense_count_by_position_genie$Residue <- as.numeric(missense_count_by_position_genie$Residue)
+missense_count_by_position$Residue <- as.numeric(missense_count_by_position$Residue)
+
+
+
+SMARCB1_sequence <- "MMMMALSKTFGQKPVKFQLEDDGEFYMIGSEVGNYLRMFRGSLYKRYPSLWRRLATVEERKKIVASSHGKKTKPNTKDHGYTTLATSVTLLKASEVEEILDGNDEKYKAVSISTEPPTYLREQKAKRNSQWVPTLPNSSHHLDAVPCSTTINRNRMGRDKKRTFPLCFDDHDPAVIHENASQPEVLVPIRLDMEIDGQKLRDAFTWNMNEKLMTPEMFSEILCDDLDLNPLTFVPAIASAIRQQIESYPTDSILEDQSDQRVIIKLNIHVGNISLVDQFEWDMSEKENSPEKFALKLCSELGLGGEFVTTIAYSIRGQLSWHQKTYAFSENPLPTVEIAIRNTGDADQWCPLLETLTDAEMEKKIRDQDRNTRRMRRLANTAPAW"
+
+
+
+
+```
+
+
+Let plot the lollipop graph with both datasets
+```{r}
+
+
+
+all_positions <- data.frame(Residue = 1:385)
+
+all_positions$amino_acid <- mapply(function(residue) {
+  paste0(substr(SMARCB1_sequence, residue, residue), residue)
+}, all_positions$Residue)
+
+missense_count_by_position_all <- full_join(all_positions, missense_count_by_position, by = "Residue") %>%
+  full_join(missense_count_by_position_genie, by = "Residue")
+
+missense_count_by_position_all$total_count_genie[is.na(missense_count_by_position_all$total_count_genie)] <- 0
+missense_count_by_position_all$total_count_cosmic[is.na(missense_count_by_position_all$total_count_cosmic)] <- 0
+
+
+
+missense_count_by_position_all <- missense_count_by_position_all %>%
+  mutate(total_count_cosmic_neg = -total_count_cosmic)
+
+
+missense_count_by_position_all_long <- missense_count_by_position_all %>%
+  pivot_longer(cols = c("total_count_genie", "total_count_cosmic_neg"),
+               names_to = "Source",
+               values_to = "count") %>%
+  mutate(source = recode(Source, 
+                        "total_count_genie" = "Genie", 
+                        "total_count_cosmic_neg" = "Cosmic"))
+
+
+missense_count_by_position_all_long <- missense_count_by_position_all_long %>%
+  mutate(label = ifelse(count > 10 | count < -10, as.character(amino_acid), NA))
+
+missense_count_by_position_all_long <- missense_count_by_position_all_long %>%
+  mutate(count = ifelse(count == 0, NA, count))
+
+
+library(ggrepel)
+
+
+mutation_plot <- ggplot(missense_count_by_position_all_long, aes(x = Residue, y = count, color = Source)) +
+  geom_segment(aes(xend = Residue, yend = 0), size = 0.25) +  # Create the lines
+  geom_point(size = 0.5) +  # Create the points
+  geom_vline(xintercept = 0, color = "black", size = 0.5) +
+  geom_text_repel(aes(label = label),  # Use ggrepel for non-overlapping labels
+                  size = 4, 
+                  color = "black", 
+                  nudge_y = ifelse(missense_count_by_position_all_long$count > 0, 5, -6),  # Conditional nudging
+                  nudge_x = -8,
+                  min.segment.length = 0,  # Always show connecting lines
+                  segment.color = "black",  # Color of the line
+                  segment.size = 0.5) +  # Thickness of the line
+  scale_y_continuous(labels = abs) +  # Show absolute values on y-axis
+  labs(title = "Lollipop Plot of Genie and Cosmic (Negative) Mutation Counts", 
+       x = "Residue Position", 
+       y = "Mutation Count") +
+  scale_color_manual(values = c("red", "blue"), 
+                     labels = c("COSMIC", "Genie")) + 
+  theme_minimal() +
+  theme(
+    panel.grid = element_blank(),  # Remove gridlines
+    axis.line = element_blank(),
+    legend.text = element_text(size = 12)) +
+  xlim(0, 385)
+
+
+mutation_plot
+
+
+ggsave("./plots/patient_data/Geniev16.1_COSMICv100_mutation_plot.tiff", 
+       plot = mutation_plot, 
+       width = 7, 
+       height = 3.5, 
+       dpi = 600)
+
+
+```
+
+
+

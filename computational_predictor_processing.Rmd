@@ -143,6 +143,8 @@ write_tsv(cadd_data_no_duplicates, "./data/computational_predictors/duplicates_a
 cadd_data_exons_missense <- cadd_data_no_duplicates %>%
   filter(cadd_data_no_duplicates$Mutation_type == "M")
 
+write_tsv(cadd_data_exons_missense, "./data/computational_predictors/SMARCB1_CADD_v1.7_missense_only.tsv")
+
 cadd_pathogenic <- cadd_data_exons_missense %>%
   filter(cadd_data_exons_missense$PHRED > 20)
 
@@ -164,6 +166,8 @@ cadd_average_residue_sorted <- cadd_average_residue[order(-cadd_average_residue$
 cadd_average_residue_sorted$rank <- 1:nrow(cadd_average_residue_sorted)
 
 write_tsv(cadd_average_residue_sorted, "./data/computational_predictors/residue_averaged_zscores/CADD_SMARCB1_v1.7_res_avg.tsv")
+
+
 
 
 ```

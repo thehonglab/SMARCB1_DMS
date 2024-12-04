@@ -8,6 +8,7 @@ alphamissense_res_avg: ./data/computational_predictors/residue_averaged_zscores/
 cadd_raw: ./data/computational_predictors/SMARCB1_CADD_v1.7.tsv
 cadd: ./data/computational_predictors/SMARCB1_CADD_v1.7_annotated.tsv
 cadd_duplicate_avg: ./data/computational_predictors/duplicates_averaged/SMARCB1_CADD_v1.7_duplicates_averaged.tsv
+cadd_missense: ./data/computational_predictors/SMARCB1_CADD_v1.7_missense_only.tsv
 cadd_res_avg: ./data/computational_predictors/residue_averaged_zscores/CADD_SMARCB1_v1.7_res_avg.tsv
 revel_raw: ./data/computational_predictors/revel_chr22_v1.3.csv
 revel: ./data/computational_predictors/SMARCB1_REVEL_v1.3_annotated.tsv 
@@ -15,9 +16,20 @@ revel_duplicate_avg: ./data/computational_predictors/duplicates_averaged/SMARCB1
 revel_res_avg: ./data/computational_predictors/residue_averaged_zscores/REVEL_SMARCB1_v1.3_res_avg.tsv
 
 #ClinVar (data obtained -  November 22, 2024)
-clinvar_raw: ./data/clinvar/20241122_clinvar_data_SMARCB1.tsv
+clinvar_SMARCB1_raw: ./data/clinvar/clinvar_SMARCB1_12042024.txt
 clinvar: ./data/clinvar/clinvar_SMARCB1_coding_variants.tsv
+clinvar_BRCA1_raw: ./data/clinvar/clinvar_BRCA1_12042024.txt
+clinvar_TP53_raw: ./data/clinvar/clinvar_TP53_12042024.txt
+clinvar_PTEN_raw: ./data/clinvar/clinvar_PTEN_12042024.txt
 
 #Screen Data
 mitedata: ./results/functional_scores/DMS_collapsed_data.csv 
 residue_averaged: ./results/functional_scores/mitedata_residues_averaged_missense.csv
+
+
+#Patient Data
+genie_smarcb1: ./data/patient_mutation_data/GENIE_Cohort_v16.1_SMARCB1.tsv
+genie_smarcb1_missense: ./data/patient_mutation_data/GENIE_v16.1_SMARCB1_missense_only.tsv
+genie_smarcb1_missense_mutation_freq: ./data/patient_mutation_data/GENIE_v16.1_SMARCB1_missense_count_by_mutation.tsv
+genie_tp53: ./data/patient_mutation_data/GENIE_Cohort_v16.1_TP53.tsv
+cosmicv100: ./data/patient_mutation_data/COSMICv100_gene_mutations_Oct_14_2024.tsv

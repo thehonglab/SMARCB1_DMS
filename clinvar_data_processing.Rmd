@@ -10,19 +10,21 @@ editor_options:
   chunk_output_type: inline
 ---
 
-Here we are filtering for ClinVar variants that were included in our screen, particularly those that affect the coding sequence of SMARCB1. (Data obtained from ClinVar on November 22, 2024)
+Here we are filtering for ClinVar variants that were included in our screen, particularly those that affect the coding sequence of SMARCB1. (Data obtained from ClinVar on December, 4 2024)
 
 ```{r}
 
 library(readr)
 library(dplyr)
+library(yaml)
+library(stringr)
 
 #read in config file
 config <- read_yaml("./config.yaml")
 
-#We are filtering data that was obtained from ClinVar's website on November 22, 2024
+#We are filtering data that was obtained from ClinVar's website on December 4, 2024
 
-clinvar_SMARCB1 <- read_tsv(file=config$clinvar_raw)
+clinvar_SMARCB1 <- read_tsv(file=config$clinvar_SMARCB1_raw)
 
 ```
 
@@ -186,6 +188,200 @@ clinvar_SMARCB1_filtered5 <- clinvar_SMARCB1_filtered5 %>%
          `Protein change` = gsub("\\*$", "X", `Protein change`)) # Replace '*' with 'X'
 
 write_tsv(clinvar_SMARCB1_filtered5, "./data/clinvar/clinvar_SMARCB1_coding_variants.tsv")
+
+
+
+clinvar_SMARCB1_missense <- clinvar_SMARCB1_filtered5 %>%
+  filter(str_detect(`Molecular consequence`, "missense"))
+
+
+pathogenic_SMARCB1 <- clinvar_SMARCB1_missense %>%
+  filter(clinvar_SMARCB1_missense$`Germline classification` == "Pathogenic" | clinvar_SMARCB1_missense$`Germline classification` == "Pathogenic/Likely pathogenic" | clinvar_SMARCB1_missense$`Germline classification` == "Likely pathogenic")
+
+VUS_SMARCB1 <- clinvar_SMARCB1_missense %>%
+  filter(clinvar_SMARCB1_missense$`Germline classification` == "Uncertain significance" | clinvar_SMARCB1_missense$`Germline classification` == "Conflicting classifications of pathogenicity")
+
+Benign_SMARCB1 <- clinvar_SMARCB1_missense %>%
+  filter(clinvar_SMARCB1_missense$`Germline classification` == "Likely benign" | clinvar_SMARCB1_missense$`Germline classification` == "Benign" | clinvar_SMARCB1_missense$`Germline classification` == "Benign/Likely benign")
+  
+  
+
+
+```
+
+
+
+
+
+
+
+
+Next let's filter the BRCA1 Variants
+
+```{r}
+
+clinvar_BRCA1 <- read_tsv(file=config$clinvar_BRCA1_raw)
+
+
+clinvar_BRCA1_missense <- clinvar_BRCA1 %>% 
+  filter(str_detect(`Molecular consequence`, "missense"))
+
+
+clinvar_BRCA1_missense$Residue <- sapply(clinvar_BRCA1_missense$Name, extract_number)
+
+
+clinvar_BRCA1_missense$`Protein change` <- mapply(filter_second_column, clinvar_BRCA1_missense$Residue, clinvar_BRCA1_missense$`Protein change`)
+
+clinvar_BRCA1_missense <- clinvar_BRCA1_missense %>%
+  mutate(`Protein change` = str_extract(`Protein change`, "^[^,]+"))
+
+clinvar_BRCA1_missense <- clinvar_BRCA1_missense %>% 
+  filter(str_detect(`Name`, "NM_007294.4"))
+
+
+
+# Replace 'your_dataframe' and 'your_column' with the actual names
+row_index <- grep("NM_007294.4\\(BRCA1\\):c\\.2155A>G \\(p\\.Lys719Glu\\)", clinvar_BRCA1_missense$Name)
+
+# View the row index
+print(row_index)
+
+clinvar_BRCA1_missense <- clinvar_BRCA1_missense %>%
+  mutate(`Protein change` = if_else(row_number() == 3724, "K719E", `Protein change`))
+
+
+clinvar_BRCA1_no_protein_change <- clinvar_BRCA1_missense %>%
+  filter(is.na(`Protein change`) | `Protein change` == "")
+
+
+clinvar_BRCA1_missense <- clinvar_BRCA1_missense %>%
+  filter(!is.na(`Protein change`) & `Protein change` != "")
+
+
+
+write_tsv(clinvar_BRCA1_missense, "./data/clinvar/clinvar_BRCA1_coding_variants_missense.tsv")
+
+
+
+pathogenic_BRCA1 <- clinvar_BRCA1_missense %>%
+  filter(clinvar_BRCA1_missense$`Germline classification` == "Pathogenic" | clinvar_BRCA1_missense$`Germline classification` == "Pathogenic/Likely pathogenic" | clinvar_BRCA1_missense$`Germline classification` == "Likely pathogenic")
+
+VUS_BRCA1 <- clinvar_BRCA1_missense %>%
+  filter(clinvar_BRCA1_missense$`Germline classification` == "Uncertain significance" | clinvar_BRCA1_missense$`Germline classification` == "Conflicting classifications of pathogenicity")
+
+Benign_BRCA1 <- clinvar_BRCA1_missense %>%
+  filter(clinvar_BRCA1_missense$`Germline classification` == "Likely benign" | clinvar_BRCA1_missense$`Germline classification` == "Benign" | clinvar_BRCA1_missense$`Germline classification` == "Benign/Likely benign")
+
+```
+
+
+
+
+Next letts filter the TP53 ClinVar Variants
+
+
+```{r}
+
+clinvar_TP53 <- read_tsv(file=config$clinvar_TP53_raw)
+
+
+clinvar_TP53_missense <- clinvar_TP53 %>% 
+  filter(str_detect(`Molecular consequence`, "missense"))
+
+
+clinvar_TP53_missense$Residue <- sapply(clinvar_TP53_missense$Name, extract_number)
+
+
+clinvar_TP53_missense$`Protein change` <- mapply(filter_second_column, clinvar_TP53_missense$Residue, clinvar_TP53_missense$`Protein change`)
+
+clinvar_TP53_missense <- clinvar_TP53_missense %>%
+  mutate(`Protein change` = str_extract(`Protein change`, "^[^,]+"))
+
+clinvar_TP53_missense <- clinvar_TP53_missense %>% 
+  filter(str_detect(`Name`, "NM_000546.6"))
+
+
+
+# Replace 'your_dataframe' and 'your_column' with the actual names
+row_index <- grep("NM_000546\\.6\\(TP53\\):c\\.755T>C \\(p\\.Leu252Pro\\)", clinvar_TP53_missense$Name)
+
+# View the row index
+print(row_index)
+
+clinvar_TP53_missense <- clinvar_TP53_missense %>%
+  mutate(`Protein change` = if_else(row_number() == 483, "L252P", `Protein change`))
+
+
+clinvar_TP53_no_protein_change <- clinvar_TP53_missense %>%
+  filter(is.na(`Protein change`) | `Protein change` == "")
+
+
+clinvar_TP53_missense <- clinvar_TP53_missense %>%
+  filter(!is.na(`Protein change`) & `Protein change` != "")
+
+
+
+write_tsv(clinvar_TP53_missense, "./data/clinvar/clinvar_TP53_coding_variants_missense.tsv")
+
+
+pathogenic_TP53 <- clinvar_TP53_missense %>%
+  filter(clinvar_TP53_missense$`Germline classification` == "Pathogenic" | clinvar_TP53_missense$`Germline classification` == "Pathogenic/Likely pathogenic" | clinvar_TP53_missense$`Germline classification` == "Likely pathogenic")
+
+VUS_TP53 <- clinvar_TP53_missense %>%
+  filter(clinvar_TP53_missense$`Germline classification` == "Uncertain significance" | clinvar_TP53_missense$`Germline classification` == "Conflicting classifications of pathogenicity" )
+
+Benign_TP53 <- clinvar_TP53_missense %>%
+  filter(clinvar_TP53_missense$`Germline classification` == "Likely benign" | clinvar_TP53_missense$`Germline classification` == "Benign" | clinvar_TP53_missense$`Germline classification` == "Benign/Likely benign")
+
+```
+
+
+
+Next lets filter the PTEN ClinVar Variants
+
+
+```{r}
+
+clinvar_PTEN <- read_tsv(file=config$clinvar_PTEN_raw)
+
+
+clinvar_PTEN_missense <- clinvar_PTEN %>% 
+  filter(str_detect(`Molecular consequence`, "missense"))
+
+
+clinvar_PTEN_missense$Residue <- sapply(clinvar_PTEN_missense$Name, extract_number)
+
+
+clinvar_PTEN_missense$`Protein change` <- mapply(filter_second_column, clinvar_PTEN_missense$Residue, clinvar_PTEN_missense$`Protein change`)
+
+clinvar_PTEN_missense <- clinvar_PTEN_missense %>%
+  mutate(`Protein change` = str_extract(`Protein change`, "^[^,]+"))
+
+clinvar_PTEN_missense <- clinvar_PTEN_missense %>% 
+  filter(str_detect(`Name`, "NM_000314.8"))
+
+
+
+clinvar_PTEN_no_protein_change <- clinvar_PTEN_missense %>%
+  filter(is.na(`Protein change`) | `Protein change` == "")
+
+
+clinvar_PTEN_missense <- clinvar_PTEN_missense %>%
+  filter(!is.na(`Protein change`) & `Protein change` != "")
+
+
+
+write_tsv(clinvar_PTEN_missense, "./data/clinvar/clinvar_PTEN_coding_variants_missense.tsv")
+
+
+pathogenic_PTEN <- clinvar_PTEN_missense %>%
+  filter(clinvar_PTEN_missense$`Germline classification` == "Pathogenic" | clinvar_PTEN_missense$`Germline classification` == "Pathogenic/Likely pathogenic" | clinvar_PTEN_missense$`Germline classification` == "Likely pathogenic")
+
+VUS_PTEN <- clinvar_PTEN_missense %>%
+  filter(clinvar_PTEN_missense$`Germline classification` == "Uncertain significance" | clinvar_PTEN_missense$`Germline classification` == "Conflicting classifications of pathogenicity" )
+
+Benign_PTEN <- clinvar_PTEN_missense %>%
+  filter(clinvar_PTEN_missense$`Germline classification` == "Likely benign" | clinvar_PTEN_missense$`Germline classification` == "Benign" | clinvar_PTEN_missense$`Germline classification` == "Benign/Likely benign")
 
 ```
 

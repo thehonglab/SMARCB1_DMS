@@ -1,0 +1,39 @@
+```{r}
+
+library(readr)
+library(dplyr)
+library(yaml)
+library(stringr)
+library(tidyr)
+
+#read in config file
+config <- read_yaml("./config.yaml")
+
+#We are filtering data that was obtained from from AACR Genie v16.1
+
+missense_count_by_mutation_genie <- read_tsv(file=config$genie_smarcb1_missense_mutation_freq)
+
+cadd_data_exons_missense <- read_tsv(file=config$cadd_missense)
+
+```
+
+
+
+
+
+```{r}
+
+tiff("./plots/patient_data/Genie_v_CADD.tiff", units="in", width=5, height=5, res=300)
+
+colnames(missense_count_by_mutation_genie)[colnames(missense_count_by_mutation_genie) == "genie_missense$`Protein Change`"] <- "Protein_Change"
+
+merged_dataframe <- left_join(missense_count_by_mutation_genie, cadd_data_exons_missense, by = c("Protein_Change" = "AA_Substitution"))
+
+y <- merged_dataframe$total_count; x <- merged_dataframe$PHRED
+
+plot(x,y,pch=16,xlab="PHRED",ylab="Mutation Count (Genie)",main=paste("CADD vs Patient Data"), cex=0.5)
+
+dev.off()
+
+```
+
