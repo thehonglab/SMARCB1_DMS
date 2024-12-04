@@ -1,0 +1,154 @@
+```{r}
+
+library(readr)
+library(dplyr)
+library(yaml)
+library(stringr)
+library(tidyr)
+
+#read in config file
+config <- read_yaml("./config.yaml")
+
+#We are filtering data that was obtained from from AACR Genie v16.1
+
+genie <- read_tsv(file=config$genie_smarcb1)
+
+```
+
+
+
+
+
+```{r}
+
+#This has some mutations which have been captured in the same patient multiple times, lets filter those out
+
+genie_msk <- genie[grep("MSK", genie$`Sample ID`), ]
+
+genie_no_msk <- genie[!grepl("MSK", genie$`Sample ID`), ]
+
+genie_no_msk$Participant_ID <- sapply(strsplit(genie_no_msk$`Sample ID`, "-"), `[`, 3)
+
+genie_no_msk <- genie_no_msk[, c(1:2, ncol(genie_no_msk), 3:(ncol(genie_no_msk)-1))]
+
+genie_msk$Participant_ID <- sapply(strsplit(genie_msk$`Sample ID`, "-"), `[`, 4)
+
+genie_msk <- genie_msk[, c(1:2, ncol(genie_msk), 3:(ncol(genie_msk)-1))]
+
+genie_with_partid <- rbind(genie_msk, genie_no_msk)
+
+multiple_samples_same_patient <- genie_with_partid[duplicated(genie_with_partid[c('Participant_ID', 'Protein Change')]) | duplicated(genie_with_partid[c('Participant_ID', 'Protein Change')], fromLast = TRUE), ]
+
+genie_single_samples <- genie_with_partid[!duplicated(genie_with_partid[c('Participant_ID', 'Protein Change')]) & !duplicated(genie_with_partid[c('Participant_ID', 'Protein Change')], fromLast = TRUE), ]
+
+multiple_samples_same_patient_filtered <- multiple_samples_same_patient[!duplicated(multiple_samples_same_patient[c('Participant_ID', 'Protein Change')]), ]
+
+genie_final <- rbind(multiple_samples_same_patient_filtered, genie_single_samples)
+
+```
+
+Let's see which ones are drivers at least according to Genie
+```{r}
+
+genie_missense <- genie_final %>%
+  filter(genie_final$`Mutation Type` == "Missense_Mutation")
+
+write_tsv(genie_missense, "./data/patient_mutation_data/GENIE_v16.1_SMARCB1_missense_only.tsv")
+
+
+# driver_missense_mutations <- genie_missense[grep("OncoKB: Likely Oncogenic", genie_missense$`Annotation`), ]
+# 
+# vus_missense_mutations <- genie_missense[!grepl("OncoKB: Likely Oncogenic", genie_missense$`Annotation`), ]
+# 
+# 
+# driver_mutations <- unique(driver_missense_mutations$`Protein Change`)
+# 
+# length(driver_mutations)
+# 
+# vus_mutations <- unique(vus_missense_mutations$`Protein Change`)
+# 
+# length(vus_mutations)
+# 
+# total_unique_mutations <- unique(genie_missense_final$`Protein Change`)
+# 
+# length(total_unique_mutations)
+
+```
+
+Now lets see what percentage of cancers contain SMARCB1 alterations outside of RT, ATRT, and renal medullary
+
+```{r}
+
+genie_final_non_rhabdoid_rmc <- genie_final[!grepl("Rhabdoid|Renal Medullary Carcinoma", genie_final$`Cancer Type Detailed`), ]
+
+cancer_types <- unique(genie_final_non_rhabdoid_rmc$`Cancer Type Detailed`)
+
+length(cancer_types)
+
+
+
+```
+
+
+```{r}
+
+genie_TP53 <- read_tsv(file=config$genie_tp53)
+
+#This has some mutations which have been capture in the same patient multiple times, lets filter those out
+
+genie_TP53_msk <- genie_TP53[grep("MSK", genie_TP53$`Sample ID`), ]
+
+genie_TP53_no_msk <- genie_TP53[!grepl("MSK", genie_TP53$`Sample ID`), ]
+
+genie_TP53_no_msk$Participant_ID <- sapply(strsplit(genie_TP53_no_msk$`Sample ID`, "-"), `[`, 3)
+
+genie_TP53_no_msk <- genie_TP53_no_msk[, c(1:2, ncol(genie_TP53_no_msk), 3:(ncol(genie_TP53_no_msk)-1))]
+
+genie_TP53_msk$Participant_ID <- sapply(strsplit(genie_TP53_msk$`Sample ID`, "-"), `[`, 4)
+
+genie_TP53_msk <- genie_TP53_msk[, c(1:2, ncol(genie_TP53_msk), 3:(ncol(genie_TP53_msk)-1))]
+
+genie_TP53_with_partid <- rbind(genie_TP53_msk, genie_TP53_no_msk)
+
+multiple_samples_same_patient <- genie_TP53_with_partid[duplicated(genie_TP53_with_partid[c('Participant_ID', 'Protein Change')]) | duplicated(genie_TP53_with_partid[c('Participant_ID', 'Protein Change')], fromLast = TRUE), ]
+
+genie_TP53_single_samples <- genie_TP53_with_partid[!duplicated(genie_TP53_with_partid[c('Participant_ID', 'Protein Change')]) & !duplicated(genie_TP53_with_partid[c('Participant_ID', 'Protein Change')], fromLast = TRUE), ]
+
+
+multiple_samples_same_patient_filtered <- multiple_samples_same_patient[!duplicated(multiple_samples_same_patient[c('Participant_ID', 'Protein Change')]), ]
+
+genie_TP53_final <- rbind(multiple_samples_same_patient_filtered, genie_TP53_single_samples)
+
+```
+
+```{r}
+
+genie_missense <- genie_TP53_final %>%
+  filter(genie_TP53_final$`Mutation Type` == "Missense_Mutation")
+
+
+
+driver_missense_mutations <- genie_missense[grep("3DHotspot: yes", genie_missense$`Annotation`), ]
+
+vus_missense_mutations <- genie_missense[!grepl("3DHotspot: yes", genie_missense$`Annotation`), ]
+
+
+driver_mutations <- unique(driver_missense_mutations$`Protein Change`)
+
+length(driver_mutations)
+
+vus_mutations <- unique(vus_missense_mutations$`Protein Change`)
+
+length(vus_mutations)
+
+total_unique_mutations <- unique(genie_missense_final$`Protein Change`)
+
+length(total_unique_mutations)
+
+
+```
+
+
+
+
+

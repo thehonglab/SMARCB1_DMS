@@ -14,6 +14,7 @@ editor_options:
 
 library(readr)
 library(dplyr)
+library(yaml)
 
 #read in config file
 config <- read_yaml("./config.yaml")
@@ -184,6 +185,138 @@ dev.off()
 
 ```
 
+
+
+
+
+```{r}
+
+tiff("./plots/computational_correlations/AlphaMissense_v_DMS.tiff", units="cm", width=30, height=14, res=300)
+
+y <- integrated_data$all_reps_zscore; x <- integrated_data$am_pathogenicity
+
+plot(x,y,pch=16,xlab="AlphaMissense",ylab="Average Z-Score",main=paste("AlphaMissense v DMS"), cex=0.5, xlim=c(0,1), ylim=c(-5,5))
+
+fit1 <- lm(y ~ x)
+abline(fit1, col="red", lwd=2)  # Red line for the best fit
+
+r_squared1 <- summary(fit1)$r.squared
+# Add the slope and R^2 value as text on the plot
+text(0.1, 4, paste("\nR^2: ", round(r_squared1, 3)), col="red", cex=1)
+
+dev.off()
+
+
+tiff("./plots/computational_correlations/REVEL_v_DMS.tiff", units="cm", width=30, height=14, res=300)
+
+y <- integrated_data$all_reps_zscore; x <- integrated_data$REVEL
+
+plot(x,y,pch=16,xlab="REVEL",ylab="Average Z-Score",main=paste("REVEL v DMS"), cex=0.5, xlim=c(0,1), ylim=c(-5,5))
+
+fit1 <- lm(y ~ x)
+abline(fit1, col="red", lwd=2)  # Red line for the best fit
+
+r_squared1 <- summary(fit1)$r.squared
+
+# Add the slope and R^2 value as text on the plot
+text(0.1, 3, paste("\nR^2: ", round(r_squared1, 3)), col="red", cex=1)
+
+dev.off()
+
+
+tiff("./plots/computational_correlations/CADD_v_DMS_NMS.tiff", units="in", width=12, height=7, res=300)
+
+integrated_data_NMS <- integrated_data %>%
+  filter(integrated_data$Mutation_Type == "S" | integrated_data$Mutation_Type == "N" | integrated_data$Mutation_Type == "M")
+
+
+y <- integrated_data_NMS$all_reps_zscore; x <- integrated_data_NMS$PHRED; z <- as.factor(integrated_data_NMS$Mutation_Type)
+
+plot(x, y, pch = 16, col = c("gray70", "red", "black")[z], 
+     xlab = "CADD", ylab = "Z-Score", 
+     main = paste("CADD v DMS"), cex = 1.5, 
+     xlim = c(0, 60), ylim = c(-6.5, 6.5), 
+     cex.lab = 2, cex.axis = 2)
+
+par(new = TRUE)  # Ensures that plot remains active
+box(bty = "l")  # Removes top and right spines, keeps bottom and left
+
+
+dev.off()
+
+
+
+tiff("./plots/computational_correlations/CADD_v_DMS_NS.tiff", units="cm", width=30, height=14, res=300)
+
+integrated_data_NS <- integrated_data %>%
+  filter(integrated_data$Mutation_Type == "S" | integrated_data$Mutation_Type == "N")
+
+
+y <- integrated_data_NS$all_reps_zscore; x <- integrated_data_NS$PHRED; z <- as.factor(integrated_data_NS$Mutation_Type)
+
+plot(x,y,pch=16,col=c("blue", "red", "gray")[z], xlab="CADD",ylab="Z-Score",main=paste("CADD v DMS"), cex=0.5, xlim=c(0,60), ylim=c(-6.5,6.5))
+
+fit1 <- lm(y ~ x)
+abline(fit1, col="red", lwd=2)  # Red line for the best fit
+
+r_squared1 <- summary(fit1)$r.squared
+
+# Add the slope and R^2 value as text on the plot
+text(5, 3, paste("\nR^2: ", round(r_squared1, 3)), col="red", cex=1)
+
+
+dev.off()
+
+
+```
+
+
+```{r}
+
+y <- integrated_data$REVEL; x <- integrated_data$am_pathogenicity
+
+plot(x,y,pch=16,xlab="AlphaMissense",ylab="REVEL",main=paste("All reps by amino acid silent and Missense"), cex=0.5, xlim=c(0,1), ylim=c(0,1))
+
+fit1 <- lm(y ~ x)
+abline(fit1, col="red", lwd=2)  # Red line for the best fit
+
+r_squared1 <- summary(fit1)$r.squared
+
+# Add the slope and R^2 value as text on the plot
+text(0.5, 0.1, paste("\nR^2: ", round(r_squared1, 3)), col="red", cex=1)
+
+
+
+
+y <- integrated_data$REVEL; x <- integrated_data$PHRED
+
+plot(x,y,pch=16,xlab="CADD",ylab="REVEL",main=paste("All reps by amino acid silent and Missense"), cex=0.5, xlim=c(0,40), ylim=c(0,1))
+
+fit1 <- lm(y ~ x)
+abline(fit1, col="red", lwd=2)  # Red line for the best fit
+
+r_squared1 <- summary(fit1)$r.squared
+
+# Add the slope and R^2 value as text on the plot
+text(30, 0.1, paste("\nR^2: ", round(r_squared1, 3)), col="red", cex=1)
+
+
+y <- integrated_data$am_pathogenicity; x <- integrated_data$PHRED
+
+plot(x,y,pch=16,xlab="CADD",ylab="AlphaMissense",main=paste("All reps by amino acid silent and Missense"), cex=0.5, xlim=c(0,40), ylim=c(0,1))
+
+fit1 <- lm(y ~ x)
+abline(fit1, col="red", lwd=2)  # Red line for the best fit
+
+r_squared1 <- summary(fit1)$r.squared
+
+# Add the slope and R^2 value as text on the plot
+text(5, 0.5, paste("\nR^2: ", round(r_squared1, 3)), col="red", cex=1)
+
+
+
+
+```
 
 
 
