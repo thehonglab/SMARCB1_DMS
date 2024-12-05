@@ -37,3 +37,58 @@ dev.off()
 
 ```
 
+
+```{r}
+
+missense_count_by_mutation_genie <- read_tsv(file=config$genie_smarcb1_missense_mutation_freq)
+
+revel_data_exons_missense <- read_tsv(file=config$revel_duplicate_avg)
+
+```
+
+
+
+
+```{r}
+
+tiff("./plots/patient_data/Genie_v_REVEL.tiff", units="in", width=5, height=5, res=300)
+
+colnames(missense_count_by_mutation_genie)[colnames(missense_count_by_mutation_genie) == "genie_missense$`Protein Change`"] <- "AA_Substitution"
+
+merged_dataframe <- left_join(missense_count_by_mutation_genie, revel_data_exons_missense, by = c("AA_Substitution" = "AA_Substitution"))
+
+y <- merged_dataframe$total_count; x <- merged_dataframe$REVEL
+
+plot(x,y,pch=16,xlab="REVEL",ylab="Mutation Count (Genie)",main=paste("REVEL vs Patient Data"), cex=0.5)
+
+dev.off()
+
+
+```
+
+
+```{r}
+alphamissense_missense <- read_tsv(file=config$alphamissense)
+```
+
+
+```{r}
+
+tiff("./plots/patient_data/Genie_v_AlphaMissense.tiff", units="in", width=5, height=5, res=300)
+
+colnames(missense_count_by_mutation_genie)[colnames(missense_count_by_mutation_genie) == "genie_missense$`Protein Change`"] <- "AA_Substitution"
+
+merged_dataframe <- left_join(missense_count_by_mutation_genie, alphamissense_missense, by = c("AA_Substitution" = "protein_variant"))
+
+y <- merged_dataframe$total_count; x <- merged_dataframe$am_pathogenicity
+
+plot(x,y,pch=16,xlab="AlphaMissense",ylab="Mutation Count (Genie)",main=paste("AlphaMissense vs Patient Data"), cex=0.5)
+
+dev.off()
+
+
+
+```
+
+
+
