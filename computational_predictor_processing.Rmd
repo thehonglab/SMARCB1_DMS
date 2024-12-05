@@ -134,6 +134,9 @@ cadd_data_no_duplicates <- cadd_data_exons %>%
 
 
 #Write this to a tsv for plotting later in the heatmap and use for ROC curve predictions
+
+cadd_data_no_duplicates[2682, "Mutation_type"] <- "S"
+
 write_tsv(cadd_data_no_duplicates, "./data/computational_predictors/duplicates_averaged/SMARCB1_CADD_v1.7_duplicates_averaged.tsv")
 
 
@@ -274,6 +277,21 @@ revel_data_exons <- revel_data_exons %>%
   filter(revel_data_exons$AA_Substitution != "C167Stop")
 
 
+revel_data_exons <- revel_data_exons %>%
+  mutate(Mutation_type = case_when(
+    # Special case: Stop codon replaced with an amino acid (e.g., X386Q, Stop386Q)
+    grepl("^X\\d+[A-Za-z]$", AA_Substitution) | grepl("Stop\\d+[A-Za-z]$", AA_Substitution) ~ "M",  
+    # Synonymous mutation (where first and last characters are the same)
+    substr(AA_Substitution, 1, 1) == substr(AA_Substitution, nchar(AA_Substitution), nchar(AA_Substitution)) ~ "S", 
+    # All others (non-synonymous)
+    TRUE ~ "M"
+  ))
+
+#There were some inaccurately annotated regions, lets just take them out.
+revel_data_exons <- revel_data_exons %>%
+  filter(revel_data_exons$Mutation_type == "M")
+
+
 
 
 write.table(revel_data_exons, file = "./data/computational_predictors/SMARCB1_revel_v1.3_annotated.tsv", sep = "\t", row.names = FALSE, quote = FALSE)
@@ -336,6 +354,8 @@ alpha_missense <- alpha_missense %>%
 
 alpha_missense <- alpha_missense %>%
   mutate(Residue = as.numeric(gsub("[^0-9]", "", protein_variant)))
+
+alpha_missense$Mutation_type = "M"
 
 write.table(alpha_missense, file = "./data/computational_predictors/SMARCB1_AlphaMissense_annotated.tsv", sep = "\t", row.names = FALSE, quote = FALSE)
 
