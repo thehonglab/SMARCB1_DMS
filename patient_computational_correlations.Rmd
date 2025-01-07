@@ -31,9 +31,19 @@ merged_dataframe <- left_join(missense_count_by_mutation_genie, cadd_data_exons_
 
 y <- merged_dataframe$total_count; x <- merged_dataframe$PHRED
 
-plot(x,y,pch=16,xlab="PHRED",ylab="Mutation Count (Genie)",main=paste("CADD vs Patient Data"), cex=0.5)
+r_squared <- cor(x, y, use = "complete.obs")^2
+
+plot(x, y, pch=16, xlab="PHRED", ylab="Mutation Count (Genie)",
+     main=paste("PHRED vs Patient Data\nR^2 =", round(r_squared, 2)), cex=0.5)
 
 dev.off()
+
+
+cadd_pathogenic <- cadd_data_exons_missense %>%
+  filter(cadd_data_exons_missense$PHRED > 20)
+
+merged_dataframe_pathogenic <- left_join(missense_count_by_mutation_genie, cadd_data_exons_missense, by = c("Protein_Change" = "AA_Substitution"))
+
 
 ```
 
@@ -59,7 +69,10 @@ merged_dataframe <- left_join(missense_count_by_mutation_genie, revel_data_exons
 
 y <- merged_dataframe$total_count; x <- merged_dataframe$REVEL
 
-plot(x,y,pch=16,xlab="REVEL",ylab="Mutation Count (Genie)",main=paste("REVEL vs Patient Data"), cex=0.5)
+r_squared <- cor(x, y, use = "complete.obs")^2
+
+plot(x, y, pch=16, xlab="REVEL", ylab="Mutation Count (Genie)",
+     main=paste("REVEL vs Patient Data\nR^2 =", round(r_squared, 2)), cex=0.5)
 
 dev.off()
 
@@ -82,7 +95,10 @@ merged_dataframe <- left_join(missense_count_by_mutation_genie, alphamissense_mi
 
 y <- merged_dataframe$total_count; x <- merged_dataframe$am_pathogenicity
 
-plot(x,y,pch=16,xlab="AlphaMissense",ylab="Mutation Count (Genie)",main=paste("AlphaMissense vs Patient Data"), cex=0.5)
+r_squared <- cor(x, y, use = "complete.obs")^2
+
+plot(x, y, pch=16, xlab="AlphaMissense", ylab="Mutation Count (Genie)",
+     main=paste("AlphaMissense vs Patient Data\nR^2 =", round(r_squared, 2)), cex=0.5)
 
 dev.off()
 

@@ -194,6 +194,8 @@ write_tsv(clinvar_SMARCB1_filtered5, "./data/clinvar/clinvar_SMARCB1_coding_vari
 clinvar_SMARCB1_missense <- clinvar_SMARCB1_filtered5 %>%
   filter(str_detect(`Molecular consequence`, "missense"))
 
+write_tsv(clinvar_SMARCB1_missense, "./data/clinvar/clinvar_SMARCB1_coding_variants_missense_only.tsv")
+
 
 pathogenic_SMARCB1 <- clinvar_SMARCB1_missense %>%
   filter(clinvar_SMARCB1_missense$`Germline classification` == "Pathogenic" | clinvar_SMARCB1_missense$`Germline classification` == "Pathogenic/Likely pathogenic" | clinvar_SMARCB1_missense$`Germline classification` == "Likely pathogenic")
@@ -266,6 +268,8 @@ write_tsv(clinvar_BRCA1_missense, "./data/clinvar/clinvar_BRCA1_coding_variants_
 pathogenic_BRCA1 <- clinvar_BRCA1_missense %>%
   filter(clinvar_BRCA1_missense$`Germline classification` == "Pathogenic" | clinvar_BRCA1_missense$`Germline classification` == "Pathogenic/Likely pathogenic" | clinvar_BRCA1_missense$`Germline classification` == "Likely pathogenic")
 
+cancer_variants <- grep("cancer", pathogenic_BRCA1$`Condition(s)`, value = TRUE)
+
 VUS_BRCA1 <- clinvar_BRCA1_missense %>%
   filter(clinvar_BRCA1_missense$`Germline classification` == "Uncertain significance" | clinvar_BRCA1_missense$`Germline classification` == "Conflicting classifications of pathogenicity")
 
@@ -327,6 +331,10 @@ write_tsv(clinvar_TP53_missense, "./data/clinvar/clinvar_TP53_coding_variants_mi
 pathogenic_TP53 <- clinvar_TP53_missense %>%
   filter(clinvar_TP53_missense$`Germline classification` == "Pathogenic" | clinvar_TP53_missense$`Germline classification` == "Pathogenic/Likely pathogenic" | clinvar_TP53_missense$`Germline classification` == "Likely pathogenic")
 
+cancer_variants <- grep("cancer|Li-Fraumeni|Acute myeloid leukemia|neoplasm|Carcinoma|adenocarcinoma|lymphoma|carcinoma", pathogenic_TP53$`Condition(s)`, value = TRUE)
+
+
+
 VUS_TP53 <- clinvar_TP53_missense %>%
   filter(clinvar_TP53_missense$`Germline classification` == "Uncertain significance" | clinvar_TP53_missense$`Germline classification` == "Conflicting classifications of pathogenicity" )
 
@@ -376,6 +384,10 @@ write_tsv(clinvar_PTEN_missense, "./data/clinvar/clinvar_PTEN_coding_variants_mi
 
 pathogenic_PTEN <- clinvar_PTEN_missense %>%
   filter(clinvar_PTEN_missense$`Germline classification` == "Pathogenic" | clinvar_PTEN_missense$`Germline classification` == "Pathogenic/Likely pathogenic" | clinvar_PTEN_missense$`Germline classification` == "Likely pathogenic")
+
+
+cancer_variants <- grep("Hereditary cancer-predisposing syndrome|Glioma|Squamous", pathogenic_TP53$`Condition(s)`, value = TRUE)
+
 
 VUS_PTEN <- clinvar_PTEN_missense %>%
   filter(clinvar_PTEN_missense$`Germline classification` == "Uncertain significance" | clinvar_PTEN_missense$`Germline classification` == "Conflicting classifications of pathogenicity" )
