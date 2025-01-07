@@ -1050,6 +1050,11 @@ Frameshift data filtered because each of these does not have the same identifier
 
 ```{r, message = FALSE}
 
+library(readr)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+
 single_mutants_data <- read_csv("./results/functional_scores/DMS_single_mutant_data.csv")
 
 #Frameshifts make this a bit difficult because they do not have unique names. So here we are going to filter out the frameshifts. Here we are averaging z-scores across all molecules for each missense, silent, and nonsense mutation.
@@ -1332,12 +1337,15 @@ plot(x,y,pch=16,col=c("blue", "gray", "red", "black")[z],xlab="Amino Acid Positi
 missense_silent_mutants_averaged <- all_mutants_averaged %>%
   filter(all_mutants_averaged$Mutation_Type == "M" | all_mutants_averaged$Mutation_Type == "S")
 
+missense_silent_mutants_averaged_filtered <- missense_silent_mutants_averaged %>%
+  filter(missense_silent_mutants_averaged$all_reps_zscore > -2)
+
 
 tiff("./plots/DMS_plots/allreps_by_amino_acid_missense_silent_only.tiff", units="in", width=6, height=6, res=300)
 
 x <- missense_silent_mutants_averaged$Residue; y <- missense_silent_mutants_averaged$all_reps_zscore; z <-as.factor(missense_silent_mutants_averaged$Mutation_Type)
 
-colors <- ifelse(y > 2, "orange", c("gray", "black")[z])
+colors <- ifelse(y > 2, "green", c("gray", "black")[z])
 
 plot(x,y,pch=16,col=colors,xlab="Amino Acid Position",ylab="Average Z-Score",main=paste("All reps by amino acid silent and Missense"), cex=0.5, xlim=c(0,385), ylim=c(-7,10))
 
@@ -1386,10 +1394,18 @@ all_mutants_averaged <- read.csv("./results/functional_scores/DMS_collapsed_data
 missense_mite_data <- all_mutants_averaged %>%
   filter(all_mutants_averaged$Mutation_Type == "M")
 
+silent_mite_data <- all_mutants_averaged %>%
+  filter(all_mutants_averaged$Mutation_Type == "S")
+
+nonsense_mite_data <- all_mutants_averaged %>%
+  filter(all_mutants_averaged$Mutation_Type == "N")
+
 
 average_residue_result <- missense_mite_data %>%
   group_by(Residue) %>%
   summarise(avg_zscore = mean(all_reps_zscore, na.rm = TRUE))
+
+write.table(average_residue_result, "./results/structural_analysis/residue_average_zscore_missense_only.tsv", sep = "\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
 
 average_residue_result <- head(average_residue_result, -1)
 
@@ -1408,7 +1424,7 @@ mean <- mean(average_residue_result_sorted$avg_zscore)
 
 one_sd_pos <-  mean + 2*sd
 
-one_sd_neg <- mean- 2*sd 
+one_sd_neg <- mean- 2*sd
 
 ```
 
@@ -1430,31 +1446,35 @@ missense_mite_data_2sd_lof <- missense_mite_data %>%
 zscore_lof <- missense_mite_data %>%
   filter(missense_mite_data$all_reps_zscore > 2)
 
+counts <- table(zscore_lof$Residue)
+
+counts_df <- as.data.frame(counts)
+
 zscore_ambiguous <- missense_mite_data %>%
   filter(missense_mite_data$all_reps_zscore < 2 | missense_mite_data$all_reps_zscore > 1)
 
-WHD_mutants <- missense_mite_data_2sd_lof %>%
-  filter(missense_mite_data_2sd_lof$Residue > 10 & missense_mite_data_2sd_lof$Residue < 110)
+WHD_mutants <- zscore_lof %>%
+  filter(zscore_lof$Residue > 10 & zscore_lof$Residue < 110)
 
 WHD_mutants$Domain <- "WHD"
 
-RPT1_mutants <- missense_mite_data_2sd_lof %>%
-  filter(missense_mite_data_2sd_lof$Residue > 183 & missense_mite_data_2sd_lof$Residue < 245)
+RPT1_mutants <- zscore_lof %>%
+  filter(zscore_lof$Residue > 183 & zscore_lof$Residue < 245)
 
 RPT1_mutants$Domain <- "RPT1"
 
-RPT2_mutants <- missense_mite_data_2sd_lof %>%
-  filter(missense_mite_data_2sd_lof$Residue > 259 & missense_mite_data_2sd_lof$Residue < 319)
+RPT2_mutants <- zscore_lof %>%
+  filter(zscore_lof$Residue > 259 & zscore_lof$Residue < 319)
 
 RPT2_mutants$Domain <- "RPT2"
 
-CCD_mutants <- missense_mite_data_2sd_lof %>%
-  filter(missense_mite_data_2sd_lof$Residue > 335 & missense_mite_data_2sd_lof$Residue < 378)
+CCD_mutants <- zscore_lof %>%
+  filter(zscore_lof$Residue > 335 & zscore_lof$Residue < 378)
 
 CCD_mutants$Domain <- "CCD"
 
-IDR_mutants <- missense_mite_data_2sd_lof %>%
-  filter(missense_mite_data_2sd_lof$Residue > 110 & missense_mite_data_2sd_lof$Residue < 185)
+IDR_mutants <- zscore_lof %>%
+  filter(zscore_lof$Residue > 110 & zscore_lof$Residue < 185)
 
 IDR_mutants$Domain <- "IDR"
 

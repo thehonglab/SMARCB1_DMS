@@ -12,6 +12,8 @@ editor_options:
 
 ```{r}
 library(yaml)
+library(stringr)
+library(dplyr)
 
 #read in config file
 config <- read_yaml("./config.yaml")
@@ -378,6 +380,39 @@ alpha_missense_average_residue_sorted <- alpha_missense_average_residue[order(-a
 alpha_missense_average_residue_sorted$rank <- 1:nrow(alpha_missense_average_residue_sorted)
 
 write_tsv(alpha_missense_average_residue_sorted, "./data/computational_predictors/residue_averaged_zscores/AlphaMissense_SMARCB1_res_avg.tsv")
+
+```
+
+```{r}
+
+library(purrr)
+
+alpha_missense$AA_Substitution <- alpha_missense$protein_variant
+
+
+
+
+merged_df <- full_join(alpha_missense, cadd_data_no_duplicates, by = "AA_Substitution")
+
+merged_df2 <- full_join(merged_df, revel_data_no_duplicates, by = "AA_Substitution")
+
+merged_df2 <- merged_df2 %>%
+  mutate(Mutation_type_combined = pmap_chr(list(Mutation_type, Mutation_type.x, Mutation_type.y), function(x, y, z) {
+    unique(c(x, y, z)) %>% # Combine and get unique values
+      na.omit() %>%       # Remove NAs
+      paste(collapse = "/") # Collapse into a single string
+  })) %>%
+  select(AA_Substitution, Mutation_type_combined, everything(), -Mutation_type, -Mutation_type.x, -Mutation_type.y)
+
+merged_df3 <- merged_df2[,c(1,2,5,21,36)]
+
+merged_df3 <- merged_df3 %>%
+  rename(Mutation_type = Mutation_type_combined)
+
+
+write_tsv(merged_df3, "./data/computational_predictors/computational_predictor_supp.tsv")
+
+
 
 ```
 
