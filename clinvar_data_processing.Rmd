@@ -397,4 +397,28 @@ Benign_PTEN <- clinvar_PTEN_missense %>%
 
 ```
 
+```{r}
+
+
+clinvar_SMARCB1_filtered4 <- clinvar_SMARCB1_filtered4 %>%
+  mutate(`Protein change` = gsub("fs$", "Fs", `Protein change`), # Replace 'fs' with 'Fs'
+         `Protein change` = gsub("\\*$", "X", `Protein change`)) # Replace '*' with 'X'
+
+clinvar_SMARCB1_missense <- clinvar_SMARCB1_filtered4 %>%
+  filter(str_detect(`Molecular consequence`, "missense"))
+
+
+clinvar_BRCA1_missense$Gene <- "BRCA1"
+
+clinvar_PTEN_missense$Gene <- "PTEN"
+
+clinvar_TP53_missense$Gene <- "TP53"
+
+clinvar_SMARCB1_missense$Gene <- "SMARCB1"
+
+clinvar_data <- rbind(clinvar_BRCA1_missense, clinvar_PTEN_missense, clinvar_TP53_missense, clinvar_SMARCB1_missense)
+
+write_tsv(clinvar_data, "./data/clinvar/clinvar_supp.tsv")
+
+```
 

@@ -393,5 +393,10 @@ legend("bottomright", legend = legend_text, col = c("red", "lightblue", "gainsbo
 dev.off()
 
 
+ROC_supp_data <- integrated_data_missense_only[,c(1,3,4,5,17,18,19,20,21,12,22)]
+
+write_tsv(ROC_supp_data, "./results/ROC_curve_analysis/ROC_supp_data.tsv")
+
+
 ```
 
