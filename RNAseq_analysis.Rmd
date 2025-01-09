@@ -1,0 +1,539 @@
+```{r, results = 'hide'}
+
+library(org.Hs.eg.db)
+library(fgsea)
+library(ggplot2)
+library(readr)
+library(scales)
+library(base)
+library(datasets)
+library(graphics)
+library(grDevices)
+library(methods)
+library(stats)
+library(tools)
+library(utils)
+library(dplyr)
+library(rmarkdown)
+library(zoo)
+library(RColorBrewer)
+library(viridis)
+library(VennDiagram)
+library(tidyverse)
+library(BiocManager)
+library(tximport)
+library(umap)
+library(DESeq2)
+library(readxl)
+library(tibble)
+library(gplots)
+library(tximport)
+library(writexl)
+library(biomaRt)
+library(ggrepel)
+
+
+
+
+
+
+
+
+```
+
+
+Load in gene to transcript conversion files
+```{r}
+
+#Load in files
+mart <- useEnsembl(biomart="ensembl", dataset="hsapiens_gene_ensembl")
+
+t2g <- getBM(attributes = c("ensembl_transcript_id", "external_gene_name"), mart = mart)
+
+```
+
+RPT2 Mutant PCA Analysis
+
+```{r}
+
+meta_data_pca = read.csv("./data/rnaseq_analysis/RPT2_metadata_nov5_pca.txt")
+
+file_names = meta_data_pca$Filename
+
+file_names = file.path("./data/rnaseq_analysis/quants", file_names)
+
+names(file_names) = meta_data_pca$Filename
+
+tx_data = tximport(file_names,
+                   type = c("salmon"),
+                   tx2gene = t2g,
+                   abundanceCol = "TPM",
+                   countsCol = "NumReads",
+                   lengthCol = "EffectiveLength",
+                   ignoreTxVersion = T,
+                   ignoreAfterBar = T)
+
+dds = DESeqDataSetFromTximport(tx_data,
+                               colData = meta_data_pca,
+                               design = ~ 1)
+
+dds <- estimateSizeFactors(dds)
+
+
+sizeFactors(dds)
+
+normlzd_dds <- as.data.frame(counts(dds, normalized=TRUE))
+
+
+
+keep = rowSums(counts(dds)) >= 10
+dds = dds[keep,]
+
+dds_norm = vst(dds)
+
+normalized_counts = assay(dds_norm) %>%
+  t()
+
+normalized_counts_df <- as.data.frame(normalized_counts)
+
+pca_res <- prcomp(normalized_counts_df)
+
+
+pca_samples <- as.data.frame(pca_res$x)
+
+
+pca_samples <- data.frame(pca_samples) %>%
+  tibble::rownames_to_column("Filename") %>%
+  dplyr::inner_join(meta_data_pca, by = "Filename")
+
+
+pca_samples$Residue <- as.character(pca_samples$Residue)
+
+
+pca_samples$Mutant <- factor(pca_samples$Mutant, levels = c("WT", "I315I", "W281P", "I315R", "W281*", "I315*"))
+
+plot3 <- ggplot(pca_samples,
+  aes(
+    x = PC1,
+    y = PC2,
+    color = Mutant
+    # label points with different colors for each `subgroup`
+  )
+) +
+  geom_point(size=4) +
+  theme(
+  # Hide panel borders and remove grid lines
+  panel.background = element_blank(),
+  panel.border = element_blank(),
+  panel.grid.major = element_blank(),
+  panel.grid.minor = element_blank(),
+  axis.line = element_line(colour = "black")
+  ) +
+  labs(title="RNA-seq", x="PC1: (46.65%)", y="PC2: (14.81%)") +
+    theme(plot.title = element_text(hjust = 0.5),
+          legend.position = c(0.14, 0.85),
+          legend.background = element_rect(fill = "white", color = "white"),
+          legend.key = element_rect(fill = "white", color = NA),
+          legend.box.background = element_rect(fill = NA, color = NA),
+          legend.text=element_text(size=15)) +
+  theme(axis.text=element_text(size=20),
+        axis.title=element_text(size=20),
+        plot.title = element_text(size = 25),
+        legend.title=element_text(size=20))
+
+plot3
+
+
+ggsave("./plots/rnaseq_analysis/pca.tiff", plot = plot3, width = 6, height = 6, dpi=600)
+
+
+
+```
+
+W281 DESeq2 RNA Analysis
+
+```{r}
+
+
+meta_data <- read.csv("./data/rnaseq_analysis/RPT2_metadata_nov5.txt")
+
+
+residue_281Pv281X <- dplyr::filter(meta_data,
+       meta_data$Mutant == "zW281P" | meta_data$Mutant == "W281X")
+
+residue_WTv281X <- dplyr::filter(meta_data,
+       meta_data$Mutant == "zWT" | meta_data$Mutant == "W281X")
+
+residue_WTvW281P <- dplyr::filter(meta_data,
+       meta_data$Mutant == "zWT" | meta_data$Mutant == "zW281P")
+
+
+
+file_names_281Pv281X = residue_281Pv281X$Filename
+
+file_names_281Pv281X = file.path("./data/rnaseq_analysis/quants/", file_names_281Pv281X)
+
+names(file_names_281Pv281X) = residue_281Pv281X$Filename
+
+tx_data_281Pv281X = tximport(file_names_281Pv281X,
+                   type = c("salmon"),
+                   tx2gene = t2g,
+                   abundanceCol = "TPM",
+                   countsCol = "NumReads",
+                   lengthCol = "EffectiveLength",
+                   ignoreTxVersion = T,
+                   ignoreAfterBar = T)
+
+
+
+
+
+file_names_WTv281X = residue_WTv281X$Filename
+
+file_names_WTv281X = file.path("./data/rnaseq_analysis/quants", file_names_WTv281X)
+
+names(file_names_WTv281X) = residue_WTv281X$Filename
+
+tx_data_WTv281X = tximport(file_names_WTv281X,
+                   type = c("salmon"),
+                   tx2gene = t2g,
+                   abundanceCol = "TPM",
+                   countsCol = "NumReads",
+                   lengthCol = "EffectiveLength",
+                   ignoreTxVersion = T,
+                   ignoreAfterBar = T)
+
+
+dds_WT = DESeqDataSetFromTximport(tx_data_WTv281X,
+                               colData = residue_WTv281X,
+                               design = ~ Mutant)
+
+dds_WT <- estimateSizeFactors(dds_WT)
+
+
+sizeFactors(dds_WT)
+
+normlzd_dds_WT <- as.data.frame(counts(dds_WT, normalized=TRUE))
+normlzd_dds_WT <- rownames_to_column(normlzd_dds_WT)
+
+
+
+
+
+
+keep = rowSums(counts(dds_WT)) >= 10
+dds_WT = dds_WT[keep,]
+
+dds_norm_WT = vst(dds_WT)
+
+normalized_counts_WT = assay(dds_norm_WT) %>%
+  t()
+
+normalized_counts_df_WT <- as.data.frame(normalized_counts_WT)
+
+normalized_counts_df_WT <- normalized_counts_df_WT %>% 
+  t()
+
+normalized_counts_df_WT <- rownames_to_column(as.data.frame(normalized_counts_df_WT))
+
+dds_diff_WT <- DESeq(dds_WT)
+
+res_WT <- results(dds_diff_WT)
+
+res_df_WT <- as.data.frame(res_WT)
+
+head(res_WT)
+
+res_df_WT$ENSEMBL <- rownames(res_df_WT)
+
+res_df_WT$ENSEMBL <- sub('\\.[0-9]*$', '', res_df_WT$ENSEMBL)
+
+write_xlsx(res_df_WT, "./results/rna_analysis/WTvW281X_all_genes.xlsx")
+
+
+WTvW281X_up <- filter(res_df_WT,
+       res_df_WT$padj < 0.05 & res_df_WT$log2FoldChange > 2)
+
+WTvW281X_down <- filter(res_df_WT,
+       res_df_WT$padj < 0.05 & res_df_WT$log2FoldChange < -2)
+
+WTvW281X_signif <- rbind(WTvW281X_down, WTvW281X_up)
+
+
+write_xlsx(WTvW281X_signif, "./results/rna_analysis/WTvW281X_significant_genes.xlsx")
+
+
+dds_w281p = DESeqDataSetFromTximport(tx_data_281Pv281X,
+                               colData = residue_281Pv281X,
+                               design = ~ Mutant)
+
+dds_w281p <- estimateSizeFactors(dds_w281p)
+
+
+sizeFactors(dds_w281p)
+
+normlzd_dds_w281p <- as.data.frame(counts(dds_w281p, normalized=TRUE))
+normlzd_dds_w281p <- rownames_to_column(normlzd_dds_w281p)
+
+
+
+
+
+
+keep = rowSums(counts(dds_w281p)) >= 10
+dds_w281p = dds_w281p[keep,]
+
+dds_norm_w281p = vst(dds_w281p)
+
+normalized_counts_w281p = assay(dds_norm_w281p) %>%
+  t()
+
+normalized_counts_df_w281p <- as.data.frame(normalized_counts_w281p)
+
+normalized_counts_df_w281p <- normalized_counts_df_w281p %>% 
+  t()
+
+normalized_counts_df_w281p <- rownames_to_column(as.data.frame(normalized_counts_df_w281p))
+
+dds_diff_w281p <- DESeq(dds_w281p)
+
+res_w281p <- results(dds_diff_w281p)
+
+res_df_w281p <- as.data.frame(res_w281p)
+
+
+
+
+res_df_w281p$ENSEMBL <- rownames(res_df_w281p)
+
+res_df_w281p$ENSEMBL <- sub('\\.[0-9]*$', '', res_df_w281p$ENSEMBL)
+
+write_xlsx(res_df_w281p, "./results/rna_analysis/W281PvW281X_all_genes.xlsx")
+
+#write_csv(res_df2, "~/Google\ Drive/My\ Drive/Hong\ Lab\ Project\ Folders.gdrive/Results\ GC/2-SMARCB1\ MITE-seq/quants/W281PvW281X.csv")
+
+
+W281PvW281X_up <- filter(res_df_w281p,
+       res_df_w281p$padj < 0.05 & res_df_w281p$log2FoldChange > 2)
+
+W281PvW281X_down <- filter(res_df_w281p,
+       res_df_w281p$padj < 0.05 & res_df_w281p$log2FoldChange < -2)
+
+W281PvW281X_signif <- rbind(W281PvW281X_down, W281PvW281X_up)
+
+
+write_xlsx(W281PvW281X_signif, "./results/rna_analysis/W281PvW281X_significant_genes.xlsx")
+
+
+
+
+file_names_WTvW281P = residue_WTvW281P$Filename
+
+file_names_WTvW281P = file.path("./data/rnaseq_analysis/quants", file_names_WTvW281P)
+
+names(file_names_WTvW281P) = residue_WTvW281P$Filename
+
+tx_data_WTvW281P = tximport(file_names_WTvW281P,
+                   type = c("salmon"),
+                   tx2gene = t2g,
+                   abundanceCol = "TPM",
+                   countsCol = "NumReads",
+                   lengthCol = "EffectiveLength",
+                   ignoreTxVersion = T,
+                   ignoreAfterBar = T)
+
+residue_WTvW281P$Mutant <- factor(residue_WTvW281P$Mutant)
+
+residue_WTvW281P$Mutant <- relevel(residue_WTvW281P$Mutant, ref = "zWT")
+
+levels(residue_WTvW281P$Mutant)
+
+dds_WTvW281P = DESeqDataSetFromTximport(tx_data_WTvW281P,
+                               colData = residue_WTvW281P,
+                               design = ~ Mutant)
+
+dds_WTvW281P <- estimateSizeFactors(dds_WTvW281P)
+
+
+keep = rowSums(counts(dds_WTvW281P)) >= 10
+dds_WTvW281P = dds_WTvW281P[keep,]
+
+dds_diff_WTvW281P <- DESeq(dds_WTvW281P)
+
+res_WTvW281P <- results(dds_diff_WTvW281P)
+
+res_WTvW281P_df <- as.data.frame(res_WTvW281P)
+
+res_WTvW281P_df$ENSEMBL <- rownames(res_WTvW281P_df)
+
+```
+
+I315 DESeq2 RNA Analysis
+
+```{r}
+
+residue_315Rv315X <- dplyr::filter(meta_data,
+       meta_data$Mutant == "zI315R" | meta_data$Mutant == "I315X")
+
+residue_315Iv315X <- dplyr::filter(meta_data,
+       meta_data$Mutant == "zI315I" | meta_data$Mutant == "I315X")
+
+residue_315Iv315R <- dplyr::filter(meta_data,
+       meta_data$Mutant == "zI315I" | meta_data$Mutant == "zI315R")
+
+
+
+file_names_315Rv315X = residue_315Rv315X$Filename
+
+file_names_315Rv315X = file.path("./data/rnaseq_analysis/quants", file_names_315Rv315X)
+
+names(file_names_315Rv315X) = residue_315Rv315X$Filename
+
+tx_data_315Rv315X = tximport(file_names_315Rv315X,
+                   type = c("salmon"),
+                   tx2gene = t2g,
+                   abundanceCol = "TPM",
+                   countsCol = "NumReads",
+                   lengthCol = "EffectiveLength",
+                   ignoreTxVersion = T,
+                   ignoreAfterBar = T)
+
+
+
+
+
+file_names_315Iv315X = residue_315Iv315X$Filename
+
+file_names_315Iv315X = file.path("./data/rnaseq_analysis/quants", file_names_315Iv315X)
+
+names(file_names_315Iv315X) = residue_315Iv315X$Filename
+
+tx_data_315Iv315X = tximport(file_names_315Iv315X,
+                   type = c("salmon"),
+                   tx2gene = t2g,
+                   abundanceCol = "TPM",
+                   countsCol = "NumReads",
+                   lengthCol = "EffectiveLength",
+                   ignoreTxVersion = T,
+                   ignoreAfterBar = T)
+
+
+dds_i315i = DESeqDataSetFromTximport(tx_data_315Iv315X,
+                               colData = residue_315Iv315X,
+                               design = ~ Mutant)
+
+dds_i315i <- estimateSizeFactors(dds_i315i)
+
+
+sizeFactors(dds_i315i)
+
+normlzd_dds_i315i <- as.data.frame(counts(dds_i315i, normalized=TRUE))
+normlzd_dds_i315i <- rownames_to_column(normlzd_dds_i315i)
+
+
+
+
+
+
+#keep = rowSums(counts(dds_i315i)) >= 5
+#dds_i315i = dds_i315i[keep,]
+
+dds_norm_i315i = vst(dds_i315i)
+
+normalized_counts_i315i = assay(dds_norm_i315i) %>%
+  t()
+
+normalized_counts_df_i315i <- as.data.frame(normalized_counts_i315i)
+
+normalized_counts_df_i315i <- normalized_counts_df_i315i %>% 
+  t()
+
+normalized_counts_df_i315i <- rownames_to_column(as.data.frame(normalized_counts_df_i315i))
+
+dds_diff_i315i <- DESeq(dds_i315i)
+
+res_i315i <- results(dds_diff_i315i)
+
+res_df_i315i <- as.data.frame(res_i315i)
+
+head(res_i315i)
+
+
+res_df_i315i$ENSEMBL <- rownames(res_df_i315i)
+
+res_df_i315i$ENSEMBL <- sub('\\.[0-9]*$', '', res_df_i315i$ENSEMBL)
+
+
+I315IvI315X_up <- filter(res_df_i315i,
+       res_df_i315i$padj < 0.05 & res_df_i315i$log2FoldChange > 2)
+
+I315IvI315X_down <- filter(res_df_i315i,
+       res_df_i315i$padj < 0.05 & res_df_i315i$log2FoldChange < -2)
+
+I315IvI315X_signif <- rbind(I315IvI315X_down, I315IvI315X_up)
+
+
+write_xlsx(I315IvI315X_signif, "./results/rna_analysis/I315IvI315X_significant_genes.xlsx")
+
+
+write_xlsx(res_df_i315i, "./results/rna_analysis/I315IvI315X_all_genes.xlsx")
+
+
+
+dds_i315r = DESeqDataSetFromTximport(tx_data_315Rv315X,
+                               colData = residue_315Rv315X,
+                               design = ~ Mutant)
+
+dds_i315r <- estimateSizeFactors(dds_i315r)
+
+
+sizeFactors(dds_i315r)
+
+normlzd_dds_i315r <- as.data.frame(counts(dds_i315r, normalized=TRUE))
+normlzd_dds_i315r <- rownames_to_column(normlzd_dds_i315r)
+
+
+dds_norm_i315r = vst(dds_i315r)
+
+normalized_counts_i315r = assay(dds_norm_i315r) %>%
+  t()
+
+normalized_counts_df_i315r <- as.data.frame(normalized_counts_i315r)
+
+normalized_counts_df_i315r <- normalized_counts_df_i315r %>% 
+  t()
+
+normalized_counts_df_i315r <- rownames_to_column(as.data.frame(normalized_counts_df_i315r))
+
+dds_diff_i315r <- DESeq(dds_i315r)
+
+res_i315r <- results(dds_diff_i315r)
+
+res_df_i315r <- as.data.frame(res_i315r)
+
+
+
+
+res_df_i315r$ENSEMBL <- rownames(res_df_i315r)
+
+res_df_i315r$ENSEMBL <- sub('\\.[0-9]*$', '', res_df_i315r$ENSEMBL)
+
+write_xlsx(res_df_i315r, "./results/rna_analysis/I315RvI315X_all_genes.xlsx")
+
+#write_csv(res_df2, "~/Google\ Drive/My\ Drive/Hong\ Lab\ Project\ Folders.gdrive/Results\ GC/2-SMARCB1\ MITE-seq/quants/W281PvW281X.csv")
+
+
+I315RvI315X_up <- filter(res_df_i315r,
+       res_df_i315r$padj < 0.05 & res_df_i315r$log2FoldChange > 2)
+
+I315RvI315X_down <- filter(res_df_i315r,
+       res_df_i315r$padj < 0.05 & res_df_i315r$log2FoldChange < -2)
+
+I315RvI315X_signif <- rbind(I315RvI315X_down, I315RvI315X_up)
+
+
+write_xlsx(I315RvI315X_signif, "./results/rna_analysis/I315RvI315X_significant_genes.xlsx")
+
+
+```
+

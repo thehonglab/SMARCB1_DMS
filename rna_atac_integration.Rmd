@@ -563,3 +563,34 @@ W281PvW281X_atacrna_plot_filtered
 ggsave("./plots/rna_atac_integration/W281PvI315X_integrated_filtered.tiff", plot = W281PvW281X_atacrna_plot_filtered, width = 5, height = 2.5, dpi=600)
 
 ```
+
+
+```{r}
+
+I315R_genes <- unique(promoters_I315R$ENSEMBL)
+
+W281P_genes <- unique(promoters_W281$ENSEMBL)
+
+common_genes <- intersect(I315R_genes, W281P_genes)
+
+# Find genes unique to each list
+unique_to_I315R <- setdiff(I315R_genes, W281P_genes)
+unique_to_W281P <- setdiff(W281P_genes, I315R_genes)
+
+# View results
+common_genes
+unique_to_I315R
+unique_to_W281P
+
+common_genes_df <- data.frame(Gene = common_genes)
+unique_to_I315R_df <- data.frame(Gene = unique_to_I315R)
+unique_to_W281P_df <- data.frame(Gene = unique_to_W281P)
+W281P_genes_df <- data.frame(Gene = W281P_genes)
+
+write.table(common_genes_df, "./data/rna_atac_integration/common_genes.tsv", sep = "\t", row.names = FALSE, quote = FALSE)
+
+write.table(unique_to_I315R_df, "./data/rna_atac_integration/unique_to_I315R.tsv", sep = "\t", row.names = FALSE, quote = FALSE)
+
+write.table(unique_to_W281P_df, "./data/rna_atac_integration/unique_to_W281P.tsv", sep = "\t", row.names = FALSE, quote = FALSE)
+
+```
