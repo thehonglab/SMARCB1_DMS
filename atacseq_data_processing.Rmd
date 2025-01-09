@@ -118,7 +118,7 @@ library(readr)
 ```
 
 
-### I315I v I315* comparison first
+### I315I v I315* comparison
 
 ```{r}
 #Read in the metadata file (BAMS are not provided in GitHub repo, however can be obtained in dbGAP)
@@ -193,7 +193,7 @@ write_tsv(gain_I315IvI315X_bed, "./data/atacseq_data_processing/bed_files/gain_I
 
 
 
-I315RvI315* Comparison
+### I315RvI315* Comparison
 
 ```{r}
 
@@ -268,7 +268,7 @@ write_tsv(gain_I315RvI315X_bed, "./data/atacseq_data_processing/bed_files/gain_I
 
 
 
-WTvW281* Comparison
+### WTvW281* Comparison
 
 ```{r}
 
@@ -342,7 +342,7 @@ write_tsv(gain_WTvW281X_bed, "./data/atacseq_data_processing/bed_files/gain_WTvW
 
 
 
-W281PvW281* Comparison
+### W281PvW281* Comparison
 
 ```{r}
 
@@ -412,6 +412,20 @@ write_tsv(gain_W281PvW281X_bed, "./data/atacseq_data_processing/bed_files/gain_W
 
 
 ```
+
+
+## Step 3: Unifying bed files from WT v nonsense comparison for plotting in Figure 4A
+
+
+```{bash}
+
+cat ./data/atacseq_data_processing/bed_files/loss_WTvW281X.bed ./data/atacseq_data_processing/bed_files/loss_I315IvI315X.bed | sort -k1,1 -k2,2n | bedtools merge > ./data/atacseq_data_processing/bed_files/unified_WTvX_regions_loss.bed
+
+cat ./data/atacseq_data_processing/bed_files/gain_WTvW281X.bed ./data/atacseq_data_processing/bed_files/gain_I315IvI315X.bed | sort -k1,1 -k2,2n | bedtools merge > ./data/atacseq_data_processing/bed_files/unified_WTvX_regions_gain.bed
+
+```
+
+
 
 
 
