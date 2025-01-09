@@ -1,0 +1,565 @@
+# RNA and ATAC Integration
+### Garrett Cooper
+### January 9th, 2025
+
+
+First we need to annotate the significantly lost or gained regions to the closest gene TSS. These regions can be obtained from atacseq_data_processing.Rmd or in ./data/atacseq_data_processing/bed_files/
+
+```{bash}
+
+annotatePeaks.pl gain_WTvW281X.bed hg38 > gain_WTvW281X_annotated.txt &
+
+annotatePeaks.pl loss_WTvW281X.bed hg38 > loss_WTvW281X_annotated.txt &
+
+annotatePeaks.pl gain_I315IvI315X.bed hg38 > gain_I315IvI315X_annotated.txt &
+
+annotatePeaks.pl loss_I315IvI315X.bed hg38 > loss_I315IvI315X_annotated.txt &
+
+annotatePeaks.pl gain_W281PvW281X.bed hg38 > gain_W281PvW281X_annotated.txt &
+
+annotatePeaks.pl gain_I315RvI315X.bed hg38 > gain_I315RvI315X_annotated.txt &
+
+```
+
+
+```{r}
+
+library(readr)
+library(dplyr)
+library(readxl)
+library(ggplot2)
+
+
+I315IvI315X_atac_annotated_gain <- read_tsv("./results/rna_atac_integration/annotated_significant_peaks/gain_I315IvI315X_annotated.txt")
+
+I315IvI315X_stats_gain <- read_tsv("./data/atacseq_data_processing/sig_peaks/gain_I315IvI315X_stats.tsv")
+
+I315IvI315X_rna <- read_xlsx("./results/rna_analysis/I315IvI315X_all_genes.xlsx")
+
+
+
+names(I315IvI315X_stats_gain)[names(I315IvI315X_stats_gain) == "end"] <- "End"
+
+
+I315IvI315X_merged_gain <- I315IvI315X_stats_gain %>%
+  left_join(I315IvI315X_atac_annotated_gain %>% dplyr::select(End, `Gene Name`, `Distance to TSS`, Annotation), by = "End")
+
+
+names(I315IvI315X_merged_gain)[names(I315IvI315X_merged_gain) == "Gene Name"] <- "ENSEMBL"
+
+I315IvI315X_rna_atac_merged_gain <- I315IvI315X_merged_gain %>%
+  left_join(I315IvI315X_rna %>% dplyr::select(ENSEMBL, log2FoldChange, padj), by = "ENSEMBL")
+
+names(I315IvI315X_rna_atac_merged_gain)[names(I315IvI315X_rna_atac_merged_gain) == "padj"] <- "FDR_RNA"
+
+names(I315IvI315X_rna_atac_merged_gain)[names(I315IvI315X_rna_atac_merged_gain) == "FDR"] <- "FDR_ATAC"
+
+names(I315IvI315X_rna_atac_merged_gain)[names(I315IvI315X_rna_atac_merged_gain) == "Fold"] <- "LFC_ATAC"
+
+names(I315IvI315X_rna_atac_merged_gain)[names(I315IvI315X_rna_atac_merged_gain) == "log2FoldChange"] <- "LFC_RNA"
+
+
+
+#Now lets merge the lost peaks
+
+I315IvI315X_atac_annotated_lost <- read_tsv("./results/rna_atac_integration/annotated_significant_peaks/loss_I315IvI315X_annotated.txt")
+
+I315IvI315X_stats_lost <- read_tsv("./data/atacseq_data_processing/sig_peaks/loss_I315IvI315X_stats.tsv")
+
+
+
+names(I315IvI315X_stats_lost)[names(I315IvI315X_stats_lost) == "end"] <- "End"
+
+
+I315IvI315X_merged_lost <- I315IvI315X_stats_lost %>%
+  left_join(I315IvI315X_atac_annotated_lost %>% dplyr::select(End, `Gene Name`, `Distance to TSS`, Annotation), by = "End")
+
+
+names(I315IvI315X_merged_lost)[names(I315IvI315X_merged_lost) == "Gene Name"] <- "ENSEMBL"
+
+I315IvI315X_rna_atac_merged_lost <- I315IvI315X_merged_lost %>%
+  left_join(I315IvI315X_rna %>% dplyr::select(ENSEMBL, log2FoldChange, padj), by = "ENSEMBL")
+
+names(I315IvI315X_rna_atac_merged_lost)[names(I315IvI315X_rna_atac_merged_lost) == "padj"] <- "FDR_RNA"
+
+names(I315IvI315X_rna_atac_merged_lost)[names(I315IvI315X_rna_atac_merged_lost) == "FDR"] <- "FDR_ATAC"
+
+names(I315IvI315X_rna_atac_merged_lost)[names(I315IvI315X_rna_atac_merged_lost) == "Fold"] <- "LFC_ATAC"
+
+names(I315IvI315X_rna_atac_merged_lost)[names(I315IvI315X_rna_atac_merged_lost) == "log2FoldChange"] <- "LFC_RNA"
+
+
+#Now lets combine both the lost and the gained peak files together
+
+I315IvI315X_atac_rna_combined <- rbind(I315IvI315X_rna_atac_merged_lost, I315IvI315X_rna_atac_merged_gain)
+
+
+
+
+```
+
+
+```{r}
+
+
+promoters_I315 <- I315IvI315X_atac_rna_combined %>%
+  filter(I315IvI315X_atac_rna_combined$LFC_RNA < -1 | I315IvI315X_atac_rna_combined$LFC_RNA > 1,
+         I315IvI315X_atac_rna_combined$FDR_RNA < 0.05,
+         I315IvI315X_atac_rna_combined$LFC_RNA != 0)
+
+
+promoters_I315 <- promoters_I315 %>%
+  mutate(quadrant = case_when(
+    LFC_ATAC > 0 & LFC_RNA > 0 ~ "++",
+    LFC_ATAC < 0 & LFC_RNA < 0 ~ "--",
+    LFC_ATAC > 0 & LFC_RNA < 0 ~ "+-",
+    LFC_ATAC < 0 & LFC_RNA > 0 ~ "-+"
+  ))
+
+
+# Count observed points in each quadrant
+observed_counts <- table(promoters_I315$quadrant)
+print(observed_counts)
+
+# Calculate total number of points
+total_points <- nrow(promoters_I315)
+
+# Expected counts under null hypothesis
+expected_counts <- rep(total_points / 4, 4)
+names(expected_counts) <- names(observed_counts)
+print(expected_counts)
+
+contingency_table <- matrix(
+  c(observed_counts["++"], observed_counts["--"],
+    expected_counts["++"], expected_counts["--"]),
+  nrow = 2,
+  byrow = TRUE,
+  dimnames = list(
+    c("Observed", "Expected"),
+    c("++", "--")
+  )
+)
+
+# Perform Fisher's Exact Test
+fisher_test <- fisher.test(contingency_table)
+print(fisher_test)
+
+
+# Create scatter plot with R-squared annotation
+I315IvI315X_atacrna_plot <- ggplot(promoters_I315, aes(x = LFC_RNA, y = LFC_ATAC)) +
+  geom_point(aes(color = (LFC_ATAC > 0 & LFC_RNA > 0) | (LFC_ATAC < 0 & LFC_RNA < 0)), alpha = 0.6) +  # Conditional color
+  scale_color_manual(values = c("TRUE" = "blue", "FALSE" = "gray")) +  # Define colors
+  labs(title = "Scatter Plot of ATAC LFC vs RNA LFC: I315IvI315*",
+       x = "RNA Log Fold Change",
+       y = "ATAC Log Fold Change") +
+  theme_minimal() +  # Use a minimal theme
+  geom_hline(yintercept = 0, color = "gray", linetype = "dashed") +  # Add a horizontal line at y=0
+  geom_vline(xintercept = 0, color = "gray", linetype = "dashed") +  # Add a vertical line at x=0
+  guides(color = "none") +
+  ylim(-2.5,5) +
+  xlim(-7.5,13) +
+  theme_minimal() +
+  theme(
+    panel.grid = element_blank(),
+    axis.line = element_line(color = "black"),            # Adds color to axis lines
+    axis.line.x.top = element_blank(),                    # Removes top border
+    axis.line.y.right = element_blank()                   # Removes right border
+  )
+
+I315IvI315X_atacrna_plot
+
+ggsave("./plots/rna_atac_integration/I315IvI315X_integrated_filtered.tiff", plot = I315IvI315X_atacrna_plot, width = 5, height = 2.5, dpi=600)
+
+```
+
+
+
+```{r}
+
+library(readr)
+library(dplyr)
+
+
+#First merge the gained peaks
+
+WTvW281X_atac_annotated_gain <- read_tsv("./results/rna_atac_integration/annotated_significant_peaks/gain_WTvW281X_annotated.txt")
+
+WTvW281X_stats_gain <- read_tsv("./data/atacseq_data_processing/sig_peaks/gain_WTvW281X_stats.tsv")
+
+WTvW281X_rna <- read_xlsx("./results/rna_analysis/WTvW281X_all_genes.xlsx")
+
+
+
+names(WTvW281X_stats_gain)[names(WTvW281X_stats_gain) == "end"] <- "End"
+
+
+WTvW281X_merged_gain <- WTvW281X_stats_gain %>%
+  left_join(WTvW281X_atac_annotated_gain %>% dplyr::select(End, `Gene Name`, `Distance to TSS`, Annotation), by = "End")
+
+
+names(WTvW281X_merged_gain)[names(WTvW281X_merged_gain) == "Gene Name"] <- "ENSEMBL"
+
+WTvW281X_rna_atac_merged_gain <- WTvW281X_merged_gain %>%
+  left_join(WTvW281X_rna %>% dplyr::select(ENSEMBL, log2FoldChange, padj), by = "ENSEMBL")
+
+names(WTvW281X_rna_atac_merged_gain)[names(WTvW281X_rna_atac_merged_gain) == "padj"] <- "FDR_RNA"
+
+names(WTvW281X_rna_atac_merged_gain)[names(WTvW281X_rna_atac_merged_gain) == "FDR"] <- "FDR_ATAC"
+
+names(WTvW281X_rna_atac_merged_gain)[names(WTvW281X_rna_atac_merged_gain) == "Fold"] <- "LFC_ATAC"
+
+names(WTvW281X_rna_atac_merged_gain)[names(WTvW281X_rna_atac_merged_gain) == "log2FoldChange"] <- "LFC_RNA"
+
+
+
+#Now lets merge the lost peaks
+
+WTvW281X_atac_annotated_lost <- read_tsv("./results/rna_atac_integration/annotated_significant_peaks/loss_WTvW281X_annotated.txt")
+
+WTvW281X_stats_lost <- read_tsv("./data/atacseq_data_processing/sig_peaks/loss_WTvW281X_stats.tsv")
+
+
+
+names(WTvW281X_stats_lost)[names(WTvW281X_stats_lost) == "end"] <- "End"
+
+
+WTvW281X_merged_lost <- WTvW281X_stats_lost %>%
+  left_join(WTvW281X_atac_annotated_lost %>% dplyr::select(End, `Gene Name`, `Distance to TSS`, Annotation), by = "End")
+
+
+names(WTvW281X_merged_lost)[names(WTvW281X_merged_lost) == "Gene Name"] <- "ENSEMBL"
+
+WTvW281X_rna_atac_merged_lost <- WTvW281X_merged_lost %>%
+  left_join(WTvW281X_rna %>% dplyr::select(ENSEMBL, log2FoldChange, padj), by = "ENSEMBL")
+
+names(WTvW281X_rna_atac_merged_lost)[names(WTvW281X_rna_atac_merged_lost) == "padj"] <- "FDR_RNA"
+
+names(WTvW281X_rna_atac_merged_lost)[names(WTvW281X_rna_atac_merged_lost) == "FDR"] <- "FDR_ATAC"
+
+names(WTvW281X_rna_atac_merged_lost)[names(WTvW281X_rna_atac_merged_lost) == "Fold"] <- "LFC_ATAC"
+
+names(WTvW281X_rna_atac_merged_lost)[names(WTvW281X_rna_atac_merged_lost) == "log2FoldChange"] <- "LFC_RNA"
+
+
+#Now lets combine both the lost and the gained peak files together
+
+WTvW281X_atac_rna_combined <- rbind(WTvW281X_rna_atac_merged_lost, WTvW281X_rna_atac_merged_gain)
+
+```
+
+```{r}
+
+promoters_W281 <- WTvW281X_atac_rna_combined %>%
+  filter(WTvW281X_atac_rna_combined$LFC_RNA < -1 | WTvW281X_atac_rna_combined$LFC_RNA > 1,
+         WTvW281X_atac_rna_combined$FDR_RNA < 0.05,
+         WTvW281X_atac_rna_combined$LFC_RNA != 0)
+
+
+promoters_W281 <- promoters_W281 %>%
+  mutate(quadrant = case_when(
+    LFC_ATAC > 0 & LFC_RNA > 0 ~ "++",
+    LFC_ATAC < 0 & LFC_RNA < 0 ~ "--",
+    LFC_ATAC > 0 & LFC_RNA < 0 ~ "+-",
+    LFC_ATAC < 0 & LFC_RNA > 0 ~ "-+"
+  ))
+
+# Count observed points in each quadrant
+observed_counts <- table(promoters_W281$quadrant)
+print(observed_counts)
+
+# Calculate total number of points
+total_points <- nrow(promoters_W281)
+
+# Expected counts under null hypothesis
+expected_counts <- rep(total_points / 4, 4)
+names(expected_counts) <- names(observed_counts)
+print(expected_counts)
+
+contingency_table <- matrix(
+  c(observed_counts["++"], observed_counts["--"],
+    expected_counts["++"], expected_counts["--"]),
+  nrow = 2,
+  byrow = TRUE,
+  dimnames = list(
+    c("Observed", "Expected"),
+    c("++", "--")
+  )
+)
+
+# Perform Fisher's Exact Test
+fisher_test <- fisher.test(contingency_table)
+print(fisher_test)
+
+
+# Create scatter plot with R-squared annotation
+WTvW281X_atacrna_plot_filtered <- ggplot(promoters_W281, aes(x = LFC_RNA, y = LFC_ATAC)) +
+  geom_point(aes(color = (LFC_ATAC > 0 & LFC_RNA > 0) | (LFC_ATAC < 0 & LFC_RNA < 0)), alpha = 0.6) +  # Conditional color
+  scale_color_manual(values = c("TRUE" = "blue", "FALSE" = "gray")) +  # Define colors
+  labs(title = "WT v W281*",
+       x = "RNA Log2 Fold Change",
+       y = "ATAC Log2 Fold Change") +
+  theme_minimal() +  # Use a minimal theme
+  geom_hline(yintercept = 0, color = "gray", linetype = "dashed") +  # Add a horizontal line at y=0
+  geom_vline(xintercept = 0, color = "gray", linetype = "dashed") +  # Add a vertical line at x=0
+  guides(color = "none") +
+  ylim(-2.5,5) +
+  xlim(-7.5,13) +
+  theme_minimal() +
+  theme(
+    panel.grid = element_blank(),
+    axis.line = element_line(color = "black"),            # Adds color to axis lines
+    axis.line.x.top = element_blank(),                    # Removes top border
+    axis.line.y.right = element_blank()                   # Removes right border
+  )
+
+WTvW281X_atacrna_plot_filtered
+
+ggsave("./plots/rna_atac_integration/WTvI315X_integrated_filtered.tiff", plot = WTvW281X_atacrna_plot_filtered, width = 5, height = 2.5, dpi=600)
+
+
+```
+
+
+
+```{r}
+
+library(readr)
+library(dplyr)
+library(readxl)
+library(ggplot2)
+
+
+
+#First merge the gained peaks
+
+I315RvI315X_atac_annotated_gain <- read_tsv("./results/rna_atac_integration/annotated_significant_peaks/gain_I315RvI315X_annotated.txt")
+
+I315RvI315X_stats_gain <- read_tsv("./data/atacseq_data_processing/sig_peaks/gain_I315RvI315X_stats.tsv")
+
+I315RvI315X_rna <- read_xlsx("./results/rna_analysis/I315RvI315X_all_genes.xlsx")
+
+
+
+names(I315RvI315X_stats_gain)[names(I315RvI315X_stats_gain) == "end"] <- "End"
+
+
+I315RvI315X_merged_gain <- I315RvI315X_stats_gain %>%
+  left_join(I315RvI315X_atac_annotated_gain %>% dplyr::select(End, `Gene Name`, `Distance to TSS`, Annotation), by = "End")
+
+
+names(I315RvI315X_merged_gain)[names(I315RvI315X_merged_gain) == "Gene Name"] <- "ENSEMBL"
+
+I315RvI315X_rna_atac_merged_gain <- I315RvI315X_merged_gain %>%
+  left_join(I315RvI315X_rna %>% dplyr::select(ENSEMBL, log2FoldChange, padj), by = "ENSEMBL")
+
+names(I315RvI315X_rna_atac_merged_gain)[names(I315RvI315X_rna_atac_merged_gain) == "padj"] <- "FDR_RNA"
+
+names(I315RvI315X_rna_atac_merged_gain)[names(I315RvI315X_rna_atac_merged_gain) == "FDR"] <- "FDR_ATAC"
+
+names(I315RvI315X_rna_atac_merged_gain)[names(I315RvI315X_rna_atac_merged_gain) == "Fold"] <- "LFC_ATAC"
+
+names(I315RvI315X_rna_atac_merged_gain)[names(I315RvI315X_rna_atac_merged_gain) == "log2FoldChange"] <- "LFC_RNA"
+
+
+
+#Now lets merge the lost peaks
+
+I315RvI315X_atac_annotated_lost <- read_tsv("./results/rna_atac_integration/annotated_significant_peaks/loss_I315RvI315X_annotated.txt")
+
+I315RvI315X_stats_lost <- read_tsv("./data/atacseq_data_processing/sig_peaks/loss_I315RvI315X_stats.tsv")
+
+
+
+names(I315RvI315X_stats_lost)[names(I315RvI315X_stats_lost) == "end"] <- "End"
+
+
+I315RvI315X_merged_lost <- I315RvI315X_stats_lost %>%
+  left_join(I315RvI315X_atac_annotated_lost %>% dplyr::select(End, `Gene Name`, `Distance to TSS`, Annotation), by = "End")
+
+
+names(I315RvI315X_merged_lost)[names(I315RvI315X_merged_lost) == "Gene Name"] <- "ENSEMBL"
+
+I315RvI315X_rna_atac_merged_lost <- I315RvI315X_merged_lost %>%
+  left_join(I315RvI315X_rna %>% dplyr::select(ENSEMBL, log2FoldChange, padj), by = "ENSEMBL")
+
+names(I315RvI315X_rna_atac_merged_lost)[names(I315RvI315X_rna_atac_merged_lost) == "padj"] <- "FDR_RNA"
+
+names(I315RvI315X_rna_atac_merged_lost)[names(I315RvI315X_rna_atac_merged_lost) == "FDR"] <- "FDR_ATAC"
+
+names(I315RvI315X_rna_atac_merged_lost)[names(I315RvI315X_rna_atac_merged_lost) == "Fold"] <- "LFC_ATAC"
+
+names(I315RvI315X_rna_atac_merged_lost)[names(I315RvI315X_rna_atac_merged_lost) == "log2FoldChange"] <- "LFC_RNA"
+
+
+#Now lets combine both the lost and the gained peak files together
+
+I315RvI315X_atac_rna_combined <- rbind(I315RvI315X_rna_atac_merged_lost, I315RvI315X_rna_atac_merged_gain)
+
+```
+
+```{r}
+
+
+promoters_I315R <- I315RvI315X_atac_rna_combined %>%
+  filter(I315RvI315X_atac_rna_combined$LFC_RNA < -1 | I315RvI315X_atac_rna_combined$LFC_RNA > 1,
+         I315RvI315X_atac_rna_combined$FDR_RNA < 0.05,
+         I315RvI315X_atac_rna_combined$LFC_RNA != 0)
+
+
+
+# Create scatter plot with R-squared annotation
+I315RvI315X_atacrna_plot <- ggplot(promoters_I315R, aes(x = LFC_RNA, y = LFC_ATAC)) +
+  geom_point(aes(color = (LFC_ATAC > 0 & LFC_RNA > 0) | (LFC_ATAC < 0 & LFC_RNA < 0)), alpha = 0.6) +  # Conditional color
+  scale_color_manual(values = c("TRUE" = "blue", "FALSE" = "gray")) +  # Define colors
+  labs(title = "Scatter Plot of ATAC LFC vs RNA LFC: I315RvI315*",
+       x = "RNA Log Fold Change",
+       y = "ATAC Log Fold Change") +
+  theme_minimal() +  # Use a minimal theme
+  geom_hline(yintercept = 0, color = "gray", linetype = "dashed") +  # Add a horizontal line at y=0
+  geom_vline(xintercept = 0, color = "gray", linetype = "dashed") +  # Add a vertical line at x=0
+  guides(color = "none") +
+  ylim(-2.5,5) +
+  xlim(-7.5,13) +
+  theme_minimal() +
+  theme(
+    panel.grid = element_blank(),
+    axis.line = element_line(color = "black"),            # Adds color to axis lines
+    axis.line.x.top = element_blank(),                    # Removes top border
+    axis.line.y.right = element_blank()                   # Removes right border
+  )
+
+I315RvI315X_atacrna_plot
+
+ggsave("./plots/rna_atac_integration/I315RvI315X_integrated_filtered.tiff", plot = I315RvI315X_atacrna_plot, width = 5, height = 2.5, dpi=600)
+
+```
+
+
+
+
+```{r}
+
+library(readr)
+library(dplyr)
+
+
+
+I315RvI315X_atac_annotated_gain <- read_tsv("./results/rna_atac_integration/annotated_significant_peaks/gain_I315RvI315X_annotated.txt")
+
+I315RvI315X_stats_gain <- read_tsv("./data/atacseq_data_processing/sig_peaks/gain_I315RvI315X_stats.tsv")
+
+I315RvI315X_rna <- read_xlsx("./results/rna_analysis/I315RvI315X_all_genes.xlsx")
+
+
+#First merge the gained peaks
+
+W281PvW281X_atac_annotated_gain <- read_tsv("./results/rna_atac_integration/annotated_significant_peaks/gain_W281PvW281X_annotated.txt")
+
+W281PvW281X_stats_gain <- read_tsv("./data/atacseq_data_processing/sig_peaks/gain_W281PvW281X_stats.tsv")
+
+W281PvW281X_rna <- read_xlsx("./results/rna_analysis/W281PvW281X_all_genes.xlsx")
+
+
+
+names(W281PvW281X_stats_gain)[names(W281PvW281X_stats_gain) == "end"] <- "End"
+
+
+W281PvW281X_merged_gain <- W281PvW281X_stats_gain %>%
+  left_join(W281PvW281X_atac_annotated_gain %>% dplyr::select(End, `Gene Name`, `Distance to TSS`, Annotation), by = "End")
+
+
+names(W281PvW281X_merged_gain)[names(W281PvW281X_merged_gain) == "Gene Name"] <- "ENSEMBL"
+
+W281PvW281X_rna_atac_merged_gain <- W281PvW281X_merged_gain %>%
+  left_join(W281PvW281X_rna %>% dplyr::select(ENSEMBL, log2FoldChange, padj), by = "ENSEMBL")
+
+names(W281PvW281X_rna_atac_merged_gain)[names(W281PvW281X_rna_atac_merged_gain) == "padj"] <- "FDR_RNA"
+
+names(W281PvW281X_rna_atac_merged_gain)[names(W281PvW281X_rna_atac_merged_gain) == "FDR"] <- "FDR_ATAC"
+
+names(W281PvW281X_rna_atac_merged_gain)[names(W281PvW281X_rna_atac_merged_gain) == "Fold"] <- "LFC_ATAC"
+
+names(W281PvW281X_rna_atac_merged_gain)[names(W281PvW281X_rna_atac_merged_gain) == "log2FoldChange"] <- "LFC_RNA"
+
+
+
+#Now lets merge the lost peaks
+
+W281PvW281X_atac_annotated_lost <- read_tsv("./results/rna_atac_integration/annotated_significant_peaks/loss_W281PvW281X_annotated.txt")
+
+W281PvW281X_stats_lost <- read_tsv("./data/atacseq_data_processing/sig_peaks/loss_W281PvW281X_stats.tsv")
+
+
+
+names(W281PvW281X_stats_lost)[names(W281PvW281X_stats_lost) == "end"] <- "End"
+
+
+W281PvW281X_merged_lost <- W281PvW281X_stats_lost %>%
+  left_join(W281PvW281X_atac_annotated_lost %>% dplyr::select(End, `Gene Name`, `Distance to TSS`, Annotation), by = "End")
+
+
+names(W281PvW281X_merged_lost)[names(W281PvW281X_merged_lost) == "Gene Name"] <- "ENSEMBL"
+
+W281PvW281X_rna_atac_merged_lost <- W281PvW281X_merged_lost %>%
+  left_join(W281PvW281X_rna %>% dplyr::select(ENSEMBL, log2FoldChange, padj), by = "ENSEMBL")
+
+names(W281PvW281X_rna_atac_merged_lost)[names(W281PvW281X_rna_atac_merged_lost) == "padj"] <- "FDR_RNA"
+
+names(W281PvW281X_rna_atac_merged_lost)[names(W281PvW281X_rna_atac_merged_lost) == "FDR"] <- "FDR_ATAC"
+
+names(W281PvW281X_rna_atac_merged_lost)[names(W281PvW281X_rna_atac_merged_lost) == "Fold"] <- "LFC_ATAC"
+
+names(W281PvW281X_rna_atac_merged_lost)[names(W281PvW281X_rna_atac_merged_lost) == "log2FoldChange"] <- "LFC_RNA"
+
+
+#Now lets combine both the lost and the gained peak files together
+
+W281PvW281X_atac_rna_combined <- rbind(W281PvW281X_rna_atac_merged_lost, W281PvW281X_rna_atac_merged_gain)
+
+```
+
+
+```{r}
+
+promoters_W281 <- W281PvW281X_atac_rna_combined %>%
+  filter(W281PvW281X_atac_rna_combined$LFC_RNA < -1 | W281PvW281X_atac_rna_combined$LFC_RNA > 1,
+         W281PvW281X_atac_rna_combined$FDR_RNA < 0.05,
+         W281PvW281X_atac_rna_combined$LFC_RNA != 0)
+
+
+# Fit a linear model
+model <- lm(LFC_ATAC ~ LFC_RNA, data = promoters_W281)
+
+# Get the summary of the model
+model_summary <- summary(model)
+
+# Extract the R^2 value
+r_squared <- model_summary$r.squared
+
+
+# Create scatter plot with R-squared annotation
+W281PvW281X_atacrna_plot_filtered <- ggplot(promoters_W281, aes(x = LFC_RNA, y = LFC_ATAC)) +
+  geom_point(aes(color = (LFC_ATAC > 0 & LFC_RNA > 0) | (LFC_ATAC < 0 & LFC_RNA < 0)), alpha = 0.6) +  # Conditional color
+  scale_color_manual(values = c("TRUE" = "blue", "FALSE" = "gray")) +  # Define colors
+  labs(title = "W281P v W281*",
+       x = "RNA Log2 Fold Change",
+       y = "ATAC Log2 Fold Change") +
+  theme_minimal() +  # Use a minimal theme
+  geom_hline(yintercept = 0, color = "gray", linetype = "dashed") +  # Add a horizontal line at y=0
+  geom_vline(xintercept = 0, color = "gray", linetype = "dashed") +  # Add a vertical line at x=0
+  guides(color = "none") +
+  ylim(-2.5,5) +
+  xlim(-7.5,13) +
+  theme_minimal() +
+  theme(
+    panel.grid = element_blank(),
+    axis.line = element_line(color = "black"),            # Adds color to axis lines
+    axis.line.x.top = element_blank(),                    # Removes top border
+    axis.line.y.right = element_blank()                   # Removes right border
+  )
+
+W281PvW281X_atacrna_plot_filtered
+
+ggsave("./plots/rna_atac_integration/W281PvI315X_integrated_filtered.tiff", plot = W281PvW281X_atacrna_plot_filtered, width = 5, height = 2.5, dpi=600)
+
+```

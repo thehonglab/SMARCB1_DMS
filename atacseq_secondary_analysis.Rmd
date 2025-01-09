@@ -1,0 +1,694 @@
+# DMS Mutants ATACSeq Secondary Analysis January 9th, 2024
+
+We first looked at each replicate individually, and results looks consistent. Therefore we combined each biological replicate for final representation using the DeepTools tool called bigwigCompare. Bigwigs are not available on Github Repo due to size contraints.
+
+
+## Part 1: Signal Intensity Heatmaps
+
+```{bash}
+
+bigwigCompare -b1 I315R-R1_final.bw -b2 I315R-R2_final.bw -o I315R_final_merged.bw --operation mean
+bigwigCompare -b1 I315X-R1_final.bw -b2 I315X-R2_final.bw -o I315X_final_merged.bw --operation mean
+bigwigCompare -b1 WT281-R1_final.bw -b2 WT281-R2_final.bw -o WT281_final_merged.bw --operation mean
+bigwigCompare -b1 W281P-R1_final.bw -b2 W281P-R2_final.bw -o W281P_final_merged.bw --operation mean
+bigwigCompare -b1 W281X-R1_final.bw -b2 W281X-R2_final.bw -o W281X_final_merged.bw --operation mean
+
+```
+
+
+Generate signal intensity heatmap for significant lost and gained peaks when performing WTv across all conditions (Figure presented in Fig 4A)
+
+```{bash}
+
+computeMatrix reference-point \
+ -S WT281_final_merged.bw \
+    W281P_final_merged.bw \
+    W281X_final_merged.bw \
+    I315I_final_merged.bw \
+    I315R_final_merged.bw \
+    I315X_final_merged.bw \
+ -R ./data/atacseq_data_processing/bed_files/unified_WTvX_regions_loss.bed ./data/atacseq_data_processing/bed_files/unified_WTvX_regions_gain.bed  \
+ --referencePoint center --verbose \
+ -a 2500 -b 2500 --outFileName matrix_compute_unified_merged.tab.gz
+
+plotHeatmap \
+ -m matrix_compute_unified_merged.tab.gz \
+ -out unified_heatmap.png \
+ --heatmapHeight 15  \
+ --zMax 20 \
+ --missingDataColor "#B22222" \
+
+```
+
+
+
+Generate signal intensity heatmap for missense mutant specific significant peaks (presented in Extended Fig 5A)
+```{bash}
+computeMatrix reference-point \
+ -S WT281_final_merged.bw \
+    W281P_final_merged.bw \
+    W281X_final_merged.bw \
+    I315I_final_merged.bw \
+    I315R_final_merged.bw \
+    I315X_final_merged.bw \
+ -R ./data/atacseq_data_processing/bed_files/gain_W281PvW281X.bed ./data/atacseq_data_processing/bed_files/gain_I315RvI315X.bed  \
+ --referencePoint center --verbose \
+ -a 2500 -b 2500 --outFileName matrix_compute_unified_merged_missense.tab.gz
+
+plotHeatmap \
+ -m matrix_compute_unified_merged_missense.tab.gz \
+ -out mutant_specific_heatmap_missense.png \
+ --heatmapHeight 15  \
+ --zMax 20 \
+ --missingDataColor "#B22222" \
+
+```
+
+
+## Part 2: Motif Enrichment
+
+We used HOMER to perform motif enrichment on the same regions presented in Fig 4A. HTML of the regions can be found in 
+
+```{bash}
+
+findMotifsGenome.pl unified_WTvX_regions_loss.bed hg38 output_directory/ -p 8
+
+findMotifsGenome.pl unified_WTvX_regions_gain.bed hg38 output_directory/ -p 8
+
+findMotifsGenome.pl gain_W281PvW281X.bed hg38 output_directory/ -p 8
+
+findMotifsGenome.pl gain_I315RvI315X.bed hg38 output_directory/ -p 8
+
+```
+
+
+## Part 3: Motif Density Plots
+
+### AP-1 Motif Density Calculations using HOMER
+
+Motifs were downloaded from https://github.com/javrodriguez/HOMER/blob/master/data/knownTFs/vertebrates/known.motifs
+
+
+AP-1_motif.txt contains:
+>ATGACTCATC	AP-1(bZIP)/ThioMac-PU.1-ChIP-Seq(GSE21512)/Homer	6.049537	-1.782996e+03	0	9805.3,5781.0,3085.1,2715.0,0.00e+00
+0.419	0.275	0.277	0.028
+0.001	0.001	0.001	0.997
+0.010	0.002	0.965	0.023
+0.984	0.003	0.001	0.012
+0.062	0.579	0.305	0.054
+0.026	0.001	0.001	0.972
+0.043	0.943	0.001	0.012
+0.980	0.005	0.001	0.014
+0.050	0.172	0.307	0.471
+0.149	0.444	0.211	0.195
+
+```{bash}
+
+annotatePeaks.pl /home/ec2-user/atac_analysis_gorkin/heatmaps/new_figure/motif_density_plots/I315I-R1_peaks.narrowPeak hg38 -m AP-1_motif.txt -hist 10 -size 1000 > AP-1_density_I315I_R1.txt
+
+annotatePeaks.pl /home/ec2-user/atac_analysis_gorkin/heatmaps/new_figure/motif_density_plots/I315I-R2_peaks.narrowPeak hg38 -m AP-1_motif.txt -hist 10 -size 1000 > AP-1_density_I315I_R2.txt
+
+annotatePeaks.pl /home/ec2-user/atac_analysis_gorkin/heatmaps/new_figure/motif_density_plots/I315R-R1_peaks.narrowPeak hg38 -m AP-1_motif.txt -hist 10 -size 1000 > AP-1_density_I315R_R1.txt
+
+annotatePeaks.pl /home/ec2-user/atac_analysis_gorkin/heatmaps/new_figure/motif_density_plots/I315R-R2_peaks.narrowPeak hg38 -m AP-1_motif.txt -hist 10 -size 1000 > AP-1_density_I315R_R2.txt
+
+annotatePeaks.pl /home/ec2-user/atac_analysis_gorkin/heatmaps/new_figure/motif_density_plots/I315X-R1_peaks.narrowPeak hg38 -m AP-1_motif.txt -hist 10 -size 1000 > AP-1_density_I315X_R1.txt
+
+annotatePeaks.pl /home/ec2-user/atac_analysis_gorkin/heatmaps/new_figure/motif_density_plots/I315X-R2_peaks.narrowPeak hg38 -m AP-1_motif.txt -hist 10 -size 1000 > AP-1_density_I315X_R2.txt
+
+annotatePeaks.pl /home/ec2-user/atac_analysis_gorkin/heatmaps/new_figure/motif_density_plots/WT281-R1_peaks.narrowPeak hg38 -m AP-1_motif.txt -hist 10 -size 1000 > AP-1_density_WT_R1.txt
+
+annotatePeaks.pl /home/ec2-user/atac_analysis_gorkin/heatmaps/new_figure/motif_density_plots/WT281-R2_peaks.narrowPeak hg38 -m AP-1_motif.txt -hist 10 -size 1000 > AP-1_density_WT_R2.txt
+
+annotatePeaks.pl /home/ec2-user/atac_analysis_gorkin/heatmaps/new_figure/motif_density_plots/W281P-R1_peaks.narrowPeak hg38 -m AP-1_motif.txt -hist 10 -size 1000 > AP-1_density_W281P_R1.txt
+
+annotatePeaks.pl /home/ec2-user/atac_analysis_gorkin/heatmaps/new_figure/motif_density_plots/W281P-R2_peaks.narrowPeak hg38 -m AP-1_motif.txt -hist 10 -size 1000 > AP-1_density_W281P_R2.txt
+
+annotatePeaks.pl /home/ec2-user/atac_analysis_gorkin/heatmaps/new_figure/motif_density_plots/W281X-R1_peaks.narrowPeak hg38 -m AP-1_motif.txt -hist 10 -size 1000 > AP-1_density_W281X_R1.txt
+
+annotatePeaks.pl /home/ec2-user/atac_analysis_gorkin/heatmaps/new_figure/motif_density_plots/W281X-R2_peaks.narrowPeak hg38 -m AP-1_motif.txt -hist 10 -size 1000 > AP-1_density_W281X_R2.txt
+
+
+```
+
+
+
+```{r}
+
+library(readr)
+
+#I31I_R1
+data_I315I_R1 <- read_tsv("./results/motif_analysis/density_plots/AP-1_density_I315I_R1.txt")
+
+data_I315I_R1$Mutation <- "I315I"
+
+data_I315I_R1 <- data_I315I_R1[,c(1,2,9)]
+
+colnames(data_I315I_R1) <- c("Distance", "Frequency", "Mutation")
+
+#I315I_R2
+
+data_I315I_R2 <- read_tsv("./results/motif_analysis/density_plots/AP-1_density_I315I_R2.txt")
+
+data_I315I_R2$Mutation <- "I315I"
+
+data_I315I_R2 <- data_I315I_R2[,c(1,2,9)]
+
+colnames(data_I315I_R2) <- c("Distance", "Frequency", "Mutation")
+
+#I315R_R1
+
+data_I315R_R1 <- read_tsv("./results/motif_analysis/density_plots/AP-1_density_I315R_R1.txt")
+
+data_I315R_R1$Mutation <- "I315R"
+
+data_I315R_R1 <- data_I315R_R1[,c(1,2,9)]
+
+colnames(data_I315R_R1) <- c("Distance", "Frequency", "Mutation")
+
+#I315R_R2
+
+data_I315R_R2 <- read_tsv("./results/motif_analysis/density_plots/AP-1_density_I315R_R2.txt")
+
+data_I315R_R2$Mutation <- "I315R"
+
+data_I315R_R2 <- data_I315R_R2[,c(1,2,9)]
+
+colnames(data_I315R_R2) <- c("Distance", "Frequency", "Mutation")
+
+#I315X_R1
+
+data_I315X_R1 <- read_tsv("./results/motif_analysis/density_plots/AP-1_density_I315X_R1.txt")
+
+data_I315X_R1$Mutation <- "I315*"
+
+data_I315X_R1 <- data_I315X_R1[,c(1,2,9)]
+
+colnames(data_I315X_R1) <- c("Distance", "Frequency", "Mutation")
+
+#I315X_R2
+
+data_I315X_R2 <- read_tsv("./results/motif_analysis/density_plots/AP-1_density_I315X_R2.txt")
+
+data_I315X_R2$Mutation <- "I315*"
+
+data_I315X_R2 <- data_I315X_R2[,c(1,2,9)]
+
+colnames(data_I315X_R2) <- c("Distance", "Frequency", "Mutation")
+
+#WT_R1
+
+data_WT_R1 <- read_tsv("./results/motif_analysis/density_plots/AP-1_density_WT_R1.txt")
+
+data_WT_R1$Mutation <- "WT"
+
+data_WT_R1 <- data_WT_R1[,c(1,2,9)]
+
+colnames(data_WT_R1) <- c("Distance", "Frequency", "Mutation")
+
+#WT_R2
+
+data_WT_R2 <- read_tsv("./results/motif_analysis/density_plots/AP-1_density_WT_R2.txt")
+
+data_WT_R2$Mutation <- "WT"
+
+data_WT_R2 <- data_WT_R2[,c(1,2,9)]
+
+colnames(data_WT_R2) <- c("Distance", "Frequency", "Mutation")
+
+#W281P_R1
+
+data_W281P_R1 <- read_tsv("./results/motif_analysis/density_plots/AP-1_density_W281P_R1.txt")
+
+data_W281P_R1$Mutation <- "W281P"
+
+data_W281P_R1 <- data_W281P_R1[,c(1,2,9)]
+
+colnames(data_W281P_R1) <- c("Distance", "Frequency", "Mutation")
+
+#W281P_R2
+
+data_W281P_R2 <- read_tsv("./results/motif_analysis/density_plots/AP-1_density_W281P_R2.txt")
+
+data_W281P_R2$Mutation <- "W281P"
+
+data_W281P_R2 <- data_W281P_R2[,c(1,2,9)]
+
+colnames(data_W281P_R2) <- c("Distance", "Frequency", "Mutation")
+
+#W281X_R1
+
+data_W281X_R1 <- read_tsv("./results/motif_analysis/density_plots/AP-1_density_W281X_R1.txt")
+
+data_W281X_R1$Mutation <- "W281*"
+
+data_W281X_R1 <- data_W281X_R1[,c(1,2,9)]
+
+colnames(data_W281X_R1) <- c("Distance", "Frequency", "Mutation")
+
+#W281X_R2
+
+data_W281X_R2 <- read_tsv("./results/motif_analysis/density_plots/AP-1_density_W281X_R2.txt")
+
+data_W281X_R2$Mutation <- "W281*"
+
+data_W281X_R2 <- data_W281X_R2[,c(1,2,9)]
+
+colnames(data_W281X_R2) <- c("Distance", "Frequency", "Mutation")
+
+data <- rbind(data_I315I_R1, data_I315I_R2, data_I315R_R1, data_I315R_R2, data_I315X_R1, data_I315X_R1, data_WT_R1, data_WT_R2, data_W281P_R1, data_W281P_R2, data_W281X_R1, data_W281X_R2)
+
+```
+
+
+```{r}
+
+library(ggplot2)
+
+AP1 <- ggplot(data, aes(x = Distance, y = Frequency, color = Mutation)) +
+  geom_line(size =1) +
+  labs(title = "Density Plot of AP-1 Motifs",
+       x = "Distance from Center", 
+       y = "Frequency") +
+  scale_color_manual(values = c("WT" = "#E69F00", "I315I" = "#56B4E9", "W281P" = "#009E73", "I315R" = "#F0E442", "W281*" = "#D55E00", "I315*" = "#CC79A7"), 
+                     breaks = c("WT", "I315I", "W281P", "I315R", "W281*", "I315*")) +
+  theme_minimal() +
+  theme(panel.grid = element_blank()) +
+  theme(
+    plot.title = element_text(size = 30, hjust = 0.5),
+    axis.text.x = element_text(size = 18),  # Change x-axis text size
+    axis.text.y = element_text(size = 18),  # Change y-axis text size
+    axis.title.x = element_text(size = 18),  # Change x-axis title size
+    axis.title.y = element_text(size = 18),
+    legend.text = element_text(size = 24),    # Change legend text size
+    legend.title = element_text(size = 24)# Change y-axis title size
+  )
+
+AP1
+
+ggsave("./plots/motif_analysis/AP-1_enrichment.png", AP1, width = 7, height = 5, dpi = 300)
+
+```
+
+
+
+### TEAD2 Motif Density Plots using Homer
+
+TEAD2_motif.txt contain:
+
+>CCWGGAATGY	TEAD2(TEA)/Py2T-Tead2-ChIP-Seq(GSE55709)/Homer	7.347983	-1011.246502	0	T:602.0(30.60%),B:1246.2(2.67%),P:1e-439
+0.061	0.485	0.296	0.158
+0.046	0.804	0.036	0.114
+0.471	0.006	0.036	0.487
+0.025	0.001	0.973	0.001
+0.001	0.001	0.997	0.001
+0.914	0.017	0.001	0.068
+0.997	0.001	0.001	0.001
+0.001	0.005	0.001	0.993
+0.001	0.027	0.787	0.185
+0.001	0.443	0.001	0.555
+
+
+```{bash}
+annotatePeaks.pl /home/ec2-user/atac_analysis_gorkin/heatmaps/new_figure/motif_density_plots/I315I-R1_peaks.narrowPeak hg38 -m TEAD2_motif.txt -hist 10 -size 1000 > TEAD2_density_I315I_R1.txt
+
+annotatePeaks.pl /home/ec2-user/atac_analysis_gorkin/heatmaps/new_figure/motif_density_plots/I315I-R2_peaks.narrowPeak hg38 -m TEAD2_motif.txt -hist 10 -size 1000 > TEAD2_density_I315I_R2.txt
+
+annotatePeaks.pl /home/ec2-user/atac_analysis_gorkin/heatmaps/new_figure/motif_density_plots/I315R-R1_peaks.narrowPeak hg38 -m TEAD2_motif.txt -hist 10 -size 1000 > TEAD2_density_I315R_R1.txt
+
+annotatePeaks.pl /home/ec2-user/atac_analysis_gorkin/heatmaps/new_figure/motif_density_plots/I315R-R2_peaks.narrowPeak hg38 -m TEAD2_motif.txt -hist 10 -size 1000 > TEAD2_density_I315R_R2.txt
+
+annotatePeaks.pl /home/ec2-user/atac_analysis_gorkin/heatmaps/new_figure/motif_density_plots/I315X-R1_peaks.narrowPeak hg38 -m TEAD2_motif.txt -hist 10 -size 1000 > TEAD2_density_I315X_R1.txt
+
+annotatePeaks.pl /home/ec2-user/atac_analysis_gorkin/heatmaps/new_figure/motif_density_plots/I315X-R2_peaks.narrowPeak hg38 -m TEAD2_motif.txt -hist 10 -size 1000 > TEAD2_density_I315X_R2.txt
+
+annotatePeaks.pl /home/ec2-user/atac_analysis_gorkin/heatmaps/new_figure/motif_density_plots/WT281-R1_peaks.narrowPeak hg38 -m TEAD2_motif.txt -hist 10 -size 1000 > TEAD2_density_WT_R1.txt
+
+annotatePeaks.pl /home/ec2-user/atac_analysis_gorkin/heatmaps/new_figure/motif_density_plots/WT281-R2_peaks.narrowPeak hg38 -m TEAD2_motif.txt -hist 10 -size 1000 > TEAD2_density_WT_R2.txt
+
+annotatePeaks.pl /home/ec2-user/atac_analysis_gorkin/heatmaps/new_figure/motif_density_plots/W281P-R1_peaks.narrowPeak hg38 -m TEAD2_motif.txt -hist 10 -size 1000 > TEAD2_density_W281P_R1.txt
+
+annotatePeaks.pl /home/ec2-user/atac_analysis_gorkin/heatmaps/new_figure/motif_density_plots/W281P-R2_peaks.narrowPeak hg38 -m TEAD2_motif.txt -hist 10 -size 1000 > TEAD2_density_W281P_R2.txt
+
+annotatePeaks.pl /home/ec2-user/atac_analysis_gorkin/heatmaps/new_figure/motif_density_plots/W281X-R1_peaks.narrowPeak hg38 -m TEAD2_motif.txt -hist 10 -size 1000 > TEAD2_density_W281X_R1.txt
+
+annotatePeaks.pl /home/ec2-user/atac_analysis_gorkin/heatmaps/new_figure/motif_density_plots/W281X-R2_peaks.narrowPeak hg38 -m TEAD2_motif.txt -hist 10 -size 1000 > TEAD2_density_W281X_R2.txt
+```
+
+
+
+```{r}
+
+#I31I_R1
+data_I315I_R1 <- read_tsv("./results/motif_analysis/density_plots/TEAD2_density_I315I_R1.txt")
+
+data_I315I_R1$Mutation <- "I315I"
+
+data_I315I_R1 <- data_I315I_R1[,c(1,2,9)]
+
+colnames(data_I315I_R1) <- c("Distance", "Frequency", "Mutation")
+
+#I315I_R2
+
+data_I315I_R2 <- read_tsv("./results/motif_analysis/density_plots/TEAD2_density_I315I_R2.txt")
+
+data_I315I_R2$Mutation <- "I315I"
+
+data_I315I_R2 <- data_I315I_R2[,c(1,2,9)]
+
+colnames(data_I315I_R2) <- c("Distance", "Frequency", "Mutation")
+
+#I315R_R1
+
+data_I315R_R1 <- read_tsv("./results/motif_analysis/density_plots/TEAD2_density_I315R_R1.txt")
+
+data_I315R_R1$Mutation <- "I315R"
+
+data_I315R_R1 <- data_I315R_R1[,c(1,2,9)]
+
+colnames(data_I315R_R1) <- c("Distance", "Frequency", "Mutation")
+
+#I315R_R2
+
+data_I315R_R2 <- read_tsv("./results/motif_analysis/density_plots/TEAD2_density_I315R_R2.txt")
+
+data_I315R_R2$Mutation <- "I315R"
+
+data_I315R_R2 <- data_I315R_R2[,c(1,2,9)]
+
+colnames(data_I315R_R2) <- c("Distance", "Frequency", "Mutation")
+
+#I315X_R1
+
+data_I315X_R1 <- read_tsv("./results/motif_analysis/density_plots/TEAD2_density_I315X_R1.txt")
+
+data_I315X_R1$Mutation <- "I315*"
+
+data_I315X_R1 <- data_I315X_R1[,c(1,2,9)]
+
+colnames(data_I315X_R1) <- c("Distance", "Frequency", "Mutation")
+
+#I315X_R2
+
+data_I315X_R2 <- read_tsv("./results/motif_analysis/density_plots/TEAD2_density_I315X_R2.txt")
+
+data_I315X_R2$Mutation <- "I315*"
+
+data_I315X_R2 <- data_I315X_R2[,c(1,2,9)]
+
+colnames(data_I315X_R2) <- c("Distance", "Frequency", "Mutation")
+
+#WT_R1
+
+data_WT_R1 <- read_tsv("./results/motif_analysis/density_plots/TEAD2_density_WT_R1.txt")
+
+data_WT_R1$Mutation <- "WT"
+
+data_WT_R1 <- data_WT_R1[,c(1,2,9)]
+
+colnames(data_WT_R1) <- c("Distance", "Frequency", "Mutation")
+
+#WT_R2
+
+data_WT_R2 <- read_tsv("./results/motif_analysis/density_plots/TEAD2_density_WT_R2.txt")
+
+data_WT_R2$Mutation <- "WT"
+
+data_WT_R2 <- data_WT_R2[,c(1,2,9)]
+
+colnames(data_WT_R2) <- c("Distance", "Frequency", "Mutation")
+
+#W281P_R1
+
+data_W281P_R1 <- read_tsv("./results/motif_analysis/density_plots/TEAD2_density_W281P_R1.txt")
+
+data_W281P_R1$Mutation <- "W281P"
+
+data_W281P_R1 <- data_W281P_R1[,c(1,2,9)]
+
+colnames(data_W281P_R1) <- c("Distance", "Frequency", "Mutation")
+
+#W281P_R2
+
+data_W281P_R2 <- read_tsv("./results/motif_analysis/density_plots/TEAD2_density_W281P_R2.txt")
+
+data_W281P_R2$Mutation <- "W281P"
+
+data_W281P_R2 <- data_W281P_R2[,c(1,2,9)]
+
+colnames(data_W281P_R2) <- c("Distance", "Frequency", "Mutation")
+
+#W281X_R1
+
+data_W281X_R1 <- read_tsv("./results/motif_analysis/density_plots/TEAD2_density_W281X_R1.txt")
+
+data_W281X_R1$Mutation <- "W281*"
+
+data_W281X_R1 <- data_W281X_R1[,c(1,2,9)]
+
+colnames(data_W281X_R1) <- c("Distance", "Frequency", "Mutation")
+
+#W281X_R2
+
+data_W281X_R2 <- read_tsv("./results/motif_analysis/density_plots/TEAD2_density_W281X_R2.txt")
+
+data_W281X_R2$Mutation <- "W281*"
+
+data_W281X_R2 <- data_W281X_R2[,c(1,2,9)]
+
+colnames(data_W281X_R2) <- c("Distance", "Frequency", "Mutation")
+
+
+TEAD2_data <- rbind(data_I315I_R1, data_I315I_R2, data_I315R_R1, data_I315R_R2, data_I315X_R1, data_I315X_R1, data_WT_R1, data_WT_R2, data_W281P_R1, data_W281P_R2, data_W281X_R1, data_W281X_R2)
+
+
+```
+
+```{r}
+
+TEAD2 <- ggplot(TEAD2_data, aes(x = Distance, y = Frequency, color = Mutation)) +
+  geom_line(size = 1) +
+  labs(title = "Density Plot of TEAD2 Motifs",
+       x = "Distance from Center", 
+       y = "Frequency") +
+  scale_color_manual(values = c("WT" = "#E69F00", "I315I" = "#56B4E9", "W281P" = "#009E73", "I315R" = "#F0E442", "W281*" = "#D55E00", "I315*" = "#CC79A7"), 
+                     breaks = c("WT", "I315I", "W281P", "I315R", "W281*", "I315*")) +
+  theme_minimal() +
+  theme(panel.grid = element_blank()) +
+  theme(
+    plot.title = element_text(size = 30, hjust = 0.5),
+    axis.text.x = element_text(size = 18),  # Change x-axis text size
+    axis.text.y = element_text(size = 18),  # Change y-axis text size
+    axis.title.x = element_text(size = 18),  # Change x-axis title size
+    axis.title.y = element_text(size = 18),
+    legend.text = element_text(size = 24),    # Change legend text size
+    legend.title = element_text(size = 24)   # Change y-axis title size
+  )
+
+TEAD2
+
+ggsave("./plots/motif_analysis/TEAD2_enrichment.png", TEAD2, width = 7, height = 5, dpi = 300)
+
+```
+
+
+
+### CTCF Density Plots using Homer 
+
+```{bash}
+
+annotatePeaks.pl /home/ec2-user/atac_analysis_gorkin/heatmaps/new_figure/motif_density_plots/I315I-R1_peaks.narrowPeak hg38 -m CTCF_motif.txt -hist 10 -size 500 > CTCF_density_I315I_R1.txt
+
+annotatePeaks.pl /home/ec2-user/atac_analysis_gorkin/heatmaps/new_figure/motif_density_plots/I315I-R2_peaks.narrowPeak hg38 -m CTCF_motif.txt -hist 10 -size 500 > CTCF_density_I315I_R2.txt
+
+annotatePeaks.pl /home/ec2-user/atac_analysis_gorkin/heatmaps/new_figure/motif_density_plots/I315R-R1_peaks.narrowPeak hg38 -m CTCF_motif.txt -hist 10 -size 500 > CTCF_density_I315R_R1.txt
+
+annotatePeaks.pl /home/ec2-user/atac_analysis_gorkin/heatmaps/new_figure/motif_density_plots/I315R-R2_peaks.narrowPeak hg38 -m CTCF_motif.txt -hist 10 -size 500 > CTCF_density_I315R_R2.txt
+
+annotatePeaks.pl /home/ec2-user/atac_analysis_gorkin/heatmaps/new_figure/motif_density_plots/I315X-R1_peaks.narrowPeak hg38 -m CTCF_motif.txt -hist 10 -size 500 > CTCF_density_I315X_R1.txt
+
+annotatePeaks.pl /home/ec2-user/atac_analysis_gorkin/heatmaps/new_figure/motif_density_plots/I315X-R2_peaks.narrowPeak hg38 -m CTCF_motif.txt -hist 10 -size 500 > CTCF_density_I315X_R2.txt
+
+annotatePeaks.pl /home/ec2-user/atac_analysis_gorkin/heatmaps/new_figure/motif_density_plots/WT281-R1_peaks.narrowPeak hg38 -m CTCF_motif.txt -hist 10 -size 500 > CTCF_density_WT_R1.txt
+
+annotatePeaks.pl /home/ec2-user/atac_analysis_gorkin/heatmaps/new_figure/motif_density_plots/WT281-R2_peaks.narrowPeak hg38 -m CTCF_motif.txt -hist 10 -size 500 > CTCF_density_WT_R2.txt
+
+annotatePeaks.pl /home/ec2-user/atac_analysis_gorkin/heatmaps/new_figure/motif_density_plots/W281P-R1_peaks.narrowPeak hg38 -m CTCF_motif.txt -hist 10 -size 500 > CTCF_density_W281P_R1.txt
+
+annotatePeaks.pl /home/ec2-user/atac_analysis_gorkin/heatmaps/new_figure/motif_density_plots/W281P-R2_peaks.narrowPeak hg38 -m CTCF_motif.txt -hist 10 -size 500 > CTCF_density_W281P_R2.txt
+
+annotatePeaks.pl /home/ec2-user/atac_analysis_gorkin/heatmaps/new_figure/motif_density_plots/W281X-R1_peaks.narrowPeak hg38 -m CTCF_motif.txt -hist 10 -size 500 > CTCF_density_W281X_R1.txt
+
+annotatePeaks.pl /home/ec2-user/atac_analysis_gorkin/heatmaps/new_figure/motif_density_plots/W281X-R2_peaks.narrowPeak hg38 -m CTCF_motif.txt -hist 10 -size 500 > CTCF_density_W281X_R2.txt
+
+```
+
+
+```{r}
+
+library(readr)
+
+#I31I_R1
+data_I315I_R1 <- read_tsv("./results/motif_analysis/density_plots/CTCF_density_I315I_R1.txt")
+
+data_I315I_R1$Mutation <- "I315I"
+
+data_I315I_R1 <- data_I315I_R1[,c(1,2,9)]
+
+colnames(data_I315I_R1) <- c("Distance", "Frequency", "Mutation")
+
+#I315I_R2
+
+data_I315I_R2 <- read_tsv("./results/motif_analysis/density_plots/CTCF_density_I315I_R2.txt")
+
+data_I315I_R2$Mutation <- "I315I"
+
+data_I315I_R2 <- data_I315I_R2[,c(1,2,9)]
+
+colnames(data_I315I_R2) <- c("Distance", "Frequency", "Mutation")
+
+#I315R_R1
+
+data_I315R_R1 <- read_tsv("./results/motif_analysis/density_plots/CTCF_density_I315R_R1.txt")
+
+data_I315R_R1$Mutation <- "I315R"
+
+data_I315R_R1 <- data_I315R_R1[,c(1,2,9)]
+
+colnames(data_I315R_R1) <- c("Distance", "Frequency", "Mutation")
+
+#I315R_R2
+
+data_I315R_R2 <- read_tsv("./results/motif_analysis/density_plots/CTCF_density_I315R_R2.txt")
+
+data_I315R_R2$Mutation <- "I315R"
+
+data_I315R_R2 <- data_I315R_R2[,c(1,2,9)]
+
+colnames(data_I315R_R2) <- c("Distance", "Frequency", "Mutation")
+
+#I315X_R1
+
+data_I315X_R1 <- read_tsv("./results/motif_analysis/density_plots/CTCF_density_I315X_R1.txt")
+
+data_I315X_R1$Mutation <- "I315*"
+
+data_I315X_R1 <- data_I315X_R1[,c(1,2,9)]
+
+colnames(data_I315X_R1) <- c("Distance", "Frequency", "Mutation")
+
+#I315X_R2
+
+data_I315X_R2 <- read_tsv("./results/motif_analysis/density_plots/CTCF_density_I315X_R2.txt")
+
+data_I315X_R2$Mutation <- "I315*"
+
+data_I315X_R2 <- data_I315X_R2[,c(1,2,9)]
+
+colnames(data_I315X_R2) <- c("Distance", "Frequency", "Mutation")
+
+#WT_R1
+
+data_WT_R1 <- read_tsv("./results/motif_analysis/density_plots/CTCF_density_WT_R1.txt")
+
+data_WT_R1$Mutation <- "WT"
+
+data_WT_R1 <- data_WT_R1[,c(1,2,9)]
+
+colnames(data_WT_R1) <- c("Distance", "Frequency", "Mutation")
+
+#WT_R2
+
+data_WT_R2 <- read_tsv("./results/motif_analysis/density_plots/CTCF_density_WT_R2.txt")
+
+data_WT_R2$Mutation <- "WT"
+
+data_WT_R2 <- data_WT_R2[,c(1,2,9)]
+
+colnames(data_WT_R2) <- c("Distance", "Frequency", "Mutation")
+
+#W281P_R1
+
+data_W281P_R1 <- read_tsv("./results/motif_analysis/density_plots/CTCF_density_W281P_R1.txt")
+
+data_W281P_R1$Mutation <- "W281P"
+
+data_W281P_R1 <- data_W281P_R1[,c(1,2,9)]
+
+colnames(data_W281P_R1) <- c("Distance", "Frequency", "Mutation")
+
+#W281P_R2
+
+data_W281P_R2 <- read_tsv("./results/motif_analysis/density_plots/CTCF_density_W281P_R2.txt")
+
+data_W281P_R2$Mutation <- "W281P"
+
+data_W281P_R2 <- data_W281P_R2[,c(1,2,9)]
+
+colnames(data_W281P_R2) <- c("Distance", "Frequency", "Mutation")
+
+#W281X_R1
+
+data_W281X_R1 <- read_tsv("./results/motif_analysis/density_plots/CTCF_density_W281X_R1.txt")
+
+data_W281X_R1$Mutation <- "W281*"
+
+data_W281X_R1 <- data_W281X_R1[,c(1,2,9)]
+
+colnames(data_W281X_R1) <- c("Distance", "Frequency", "Mutation")
+
+#W281X_R2
+
+data_W281X_R2 <- read_tsv("./results/motif_analysis/density_plots/CTCF_density_W281X_R2.txt")
+
+data_W281X_R2$Mutation <- "W281*"
+
+data_W281X_R2 <- data_W281X_R2[,c(1,2,9)]
+
+colnames(data_W281X_R2) <- c("Distance", "Frequency", "Mutation")
+
+
+data <- rbind(data_I315I_R1, data_I315I_R2, data_I315R_R1, data_I315R_R2, data_I315X_R1, data_I315X_R1, data_WT_R1, data_WT_R2, data_W281P_R1, data_W281P_R2, data_W281X_R1, data_W281X_R2)
+
+
+
+
+```
+
+
+```{r}
+
+library(ggplot2)
+
+CTCF <- ggplot(data, aes(x = Distance, y = Frequency, color = Mutation)) +
+  geom_line(size =1) +
+  labs(title = "Density Plot of CTCF Motifs",
+       x = "Distance from Center", 
+       y = "Frequency") +
+  scale_color_manual(values = c("WT" = "#E69F00", "I315I" = "#56B4E9", "W281P" = "#009E73", "I315R" = "#F0E442", "W281*" = "#D55E00", "I315*" = "#CC79A7"), 
+                     breaks = c("WT", "I315I", "W281P", "I315R", "W281*", "I315*")) +
+  theme_minimal() +
+  theme(panel.grid = element_blank()) +
+  theme(
+    plot.title = element_text(size = 30, hjust = 0.5),
+    axis.text.x = element_text(size = 18),  # Change x-axis text size
+    axis.text.y = element_text(size = 18),  # Change y-axis text size
+    axis.title.x = element_text(size = 18),  # Change x-axis title size
+    axis.title.y = element_text(size = 18),
+    legend.text = element_text(size = 24),    # Change legend text size
+    legend.title = element_text(size = 24)   # Change y-axis title size
+  )
+
+CTCF
+
+ggsave("./plots/motif_analysis/CTCF_enrichment.png", CTCF, width = 7, height = 5, dpi = 300)
+
+```
+
+
+
+
+
+
+
+

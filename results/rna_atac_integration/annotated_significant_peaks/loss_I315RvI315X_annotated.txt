@@ -1,0 +1,2 @@
+PeakID (cmd=annotatePeaks.pl loss_I315RvI315X.bed hg38)	Chr	Start	End	Strand	Peak Score	Focus Ratio/Region Size	Annotation	Detailed Annotation	Distance to TSS	Nearest PromoterID	Entrez ID	Nearest Unigene	Nearest Refseq	Nearest Ensembl	Gene Name	Gene Alias	Gene Description	Gene Type
+1	chr12	47165903	47166402	+	0	NA	intron (NM_001281429, intron 2 of 2)	MER67A|LTR|ERV1	-21660	NR_039847	100616486		NR_039847	ENSG00000263838	MIR4698	-	microRNA 4698	ncRNA
