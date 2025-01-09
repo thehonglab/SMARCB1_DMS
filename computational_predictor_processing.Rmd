@@ -409,8 +409,20 @@ merged_df3 <- merged_df2[,c(1,2,5,21,36)]
 merged_df3 <- merged_df3 %>%
   rename(Mutation_type = Mutation_type_combined)
 
-
 write_tsv(merged_df3, "./data/computational_predictors/computational_predictor_supp.tsv")
+
+mite_data <- read_csv("./results/functional_scores/DMS_collapsed_data.csv")
+
+mite_data <- mite_data %>%
+  rename(AA_Substitution = Substitution)
+
+
+merged_df4 <- left_join(merged_df3, mite_data, by = "AA_Substitution") %>%
+  select(AA_Substitution, Mutation_type, am_pathogenicity, REVEL, PHRED, all_reps_zscore)
+
+
+
+
 
 
 
