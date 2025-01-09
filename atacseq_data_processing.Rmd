@@ -1,0 +1,418 @@
+# DMS Mutants ATACSeq Data Processing January 9th, 2024
+
+### Garrett Cooper
+
+## Part 1: DRAGEN Alignment BAM Filtering, Peak Calling
+
+### Step 1: Adapter trimming, alignment, and duplicate removal using Illumina Dragen v4.2.4
+
+
+Samples are aligned to GrCh38p13 using v9 reference hash table.
+
+Used this command to perform aligning in dragen (*adapter_sequences file is already preloaded onto instance upon launch).
+
+Takes about ~2.5 minutes per sample
+
+Repeat this code chunk but change raw fastq files for each ATAC sample
+
+```{r, eval=FALSE}
+
+dragen -r GRCh38p13v9 \
+-1 DNA/I315I-R1_S1_R1_001.fastq.gz \
+-2 DNA/I315I-R1_S1_R2_001.fastq.gz \
+--trim-adapter-read1 /opt/edico/config/adapter_sequences.fasta \
+--trim-adapter-read2 /opt/edico/config/adapter_sequences.fasta \
+--read-trimmers adapter \
+--soft-read-trimmers none \
+--remove-duplicates true \
+--output-directory alignments \
+--output-file-prefix I315I-R1 \
+--RGID I315I-R1_01 \
+--RGSM I315I-R1_01_S1;
+
+```
+
+Move all the bam files off of your dragen instance onto S3 and then back to another standard Linux instance to perform the next downstream steps.
+
+```{r, eval=FALSE}
+
+filenames_final.txt contains:
+  
+I315I-R1
+I315I-R2
+I315R-R1
+I315R-R2
+I315X-R1
+I315X-R2
+W281P-R1
+W281P-R2
+W281X-R1
+W281X-R2
+WT281-R1
+WT281-R2
+
+
+
+
+
+for i in $(cat /home/ec2-user/filenames_final.txt);
+do
+
+#Sort by query name instead of read coordinate
+samtools sort -n "$i".bam -o "$i"_sort.bam
+
+#Performed bam file metadata fixing
+samtools fixmate "$i"_sort.bam "$i"_sort_fix.bam
+
+rm "$i"_sort.bam
+
+#Read filtering focusing on quality and other metrics
+samtools view -F 3852 -f 2 -q 30 -h -o "$i"_sort_filt.bam "$i"_sort_fix.bam
+
+rm "$i"_sort_fix.bam
+
+#Perfomed some filtering removing reads that are mapped to non chromosomal regions and regions that are blacklisted.
+
+#The blacklisted regions (ENCFF356LFX.bed.gz) were obtained from here: https://www.encodeproject.org/annotations/ENCSR636HFF/
+
+bedtools intersect -v -a "$i"_sort_filt.bam -b ./ENCFF356LFX.bed.gz | samtools view -h - | awk -F '\t' '{if(!($3~/chrM/ || $3~/chrUn/ || $3~/random/ || $3~/chrEBV/)){print($0)}}' | samtools view -bh > "$i"_sort_filt2.bam
+
+rm "$i"_sort_filt.bam
+
+
+#Resort the bam file
+samtools sort "$i"_sort_filt2.bam -o "$i"_final.bam
+
+rm "$i"_sort_filt2.bam
+
+#Index this final bam file
+samtools index "$i"_final.bam
+
+#Convert the bam to a bed file for easier processing for peak calling
+bedtools bamtobed -i "$i"_final.bam | gzip -c > "$i"_final.bed.gz
+
+#Adjust bed file to account for Tn5 chemistry
+zcat "$i"_final.bed.gz | awk '{if($6=="+"){start=$2+4}; if($6=="-"){start=$2-5}; print($1"\t"start"\t"$3"\t"$4"\t"$5"\t"$6)}' | gzip -c > "$i"_final_shift.bed.gz
+
+#Perform peak calling using MACS3
+macs3 callpeak -t "$i"_final_shift.bed.gz -g hs -q 0.01 --nomodel --shift -100 --extsize 200 -B --call-summits -n "$i" >& "$i"_MACS.log &
+
+#Convert bam files to .bw files to be used in later steps
+bamCoverage --binSize 10 -b "$i"_final.bam -o "$i"_final.bw
+
+done
+
+```
+
+
+## Part 2: Performing Differential Peak Analysis Using DiffBind
+
+```{r, eval=FALSE}
+
+library(DiffBind)
+library(profileplyr)
+library(BiocParallel)
+library(dplyr)
+library(readr)
+
+```
+
+
+### I315I v I315* comparison first
+
+```{r}
+#Read in the metadata file (BAMS are not provided in GitHub repo, however can be obtained in dbGAP)
+I315IvI315X_samples <- read.csv("./data/atacseq_data_processing/metadata/I315IvI315X_metadata.txt")
+
+print(I315IvI315X_samples)
+
+#Read in the bam and narrowpeak files into diffbind
+I315IvI315X_induction <- dba(sampleSheet=I315IvI315X_samples)
+
+#Here is the preliminary correlation
+dba.plotHeatmap(I315IvI315X_induction)
+
+#count the reads in each of the binding site windows and provide coverage at each site
+I315IvI315X_induction.counted <- dba.count(I315IvI315X_induction, summits=250)
+
+#Here's the final correlation
+
+plot(I315IvI315X_induction.counted)
+
+I315IvI315X_induction.counted_contrast <- dba.contrast(I315IvI315X_induction.counted, 
+                                           group1=I315IvI315X_induction.counted$masks$WT, # MUTANT as numerator
+                                           group2=I315IvI315X_induction.counted$masks$MUTANT,     # WT as denominator
+                                           name1="WT",                        # Naming group1
+                                           name2="MUTANT")  
+
+dba.show(induction.counted_contrast, bContrasts=TRUE)
+
+I315IvI315X_induction.analyzed <- dba.analyze(I315IvI315X_induction.counted_contrast, method=DBA_ALL_METHODS, bParallel=FALSE)
+
+#Plot the pca 
+dba.plotPCA(I315IvI315X_induction.analyzed, contrast=1, method=DBA_DESEQ2, attributes=DBA_TREATMENT, label=DBA_ID)
+
+#Plot number of differential peaks based on each methodology
+dba.plotVenn(I315IvI315X_induction.analyzed, contrast=1, method=DBA_ALL_METHODS)
+
+#Export DESeq2 results
+I315IvI315X_induction.DB <- dba.report(I315IvI315X_induction.analyzed)
+
+#Convert DESeq2 results to a dataframe
+I315IvI315X_induction_deseq2 <- as.data.frame(I315IvI315X_induction.DB)
+
+#Plot a volcano
+dba.plotVolcano(I315IvI315X_induction.analyzed)
+
+#Write DESeq2 object to a csv file
+write.csv(I315IvI315X_induction_deseq2, "./data/atacseq_data_processing/sig_peaks/I315IvI315X_differential_peak_coverage_deseq2.csv")
+
+I315IvI315X <- read.csv("./data/atacseq_data_processing/sig_peaks/I315IvI315X_differential_peak_coverage_deseq2.csv")
+
+
+loss_I315IvI315X <- I315IvI315X %>%
+  filter(I315IvI315X$Fold < -1)
+
+write_tsv(loss_I315IvI315X, "./data/atacseq_data_processing/sig_peaks/loss_I315IvI315X_stats.tsv")
+
+loss_I315IvI315X_bed <- loss_I315IvI315X[,c(2,3,4)]
+
+gain_I315IvI315X <- I315IvI315X %>%
+  filter(I315IvI315X$Fold > 1)
+
+write_tsv(gain_I315IvI315X, "./data/atacseq_data_processing/sig_peaks/gain_I315IvI315X_stats.tsv")
+
+gain_I315IvI315X_bed <- gain_I315IvI315X[,c(2,3,4)]
+
+write_tsv(loss_I315IvI315X_bed, "./data/atacseq_data_processing/bed_files/loss_I315IvI315X.bed")
+
+write_tsv(gain_I315IvI315X_bed, "./data/atacseq_data_processing/bed_files/gain_I315IvI315X.bed")
+
+```
+
+
+
+
+I315RvI315* Comparison
+
+```{r}
+
+#Read in the metadata file (BAMS are not provided in GitHub repo, however can be obtained in dbGAP)
+I315RvI315X_samples <- read.csv("./data/atacseq_data_processing/metadata/I315RvI315X_metadata.txt")
+
+#Read in the bam and narrowpeak files into diffbind
+I315RvI315X_induction <- dba(sampleSheet=I315RvI315X_samples)
+
+#Here is the preliminary correlation
+dba.plotHeatmap(I315RvI315X_induction)
+
+#count the reads in each of the binding site windows and provide coverage at each site
+I315RvI315X_induction.counted <- dba.count(I315RvI315X_induction, summits=250)
+
+#Here's the final correlation
+plot(I315RvI315X_induction.counted)
+
+I315RvI315X_induction.counted_contrast <- dba.contrast(I315RvI315X_induction.counted, 
+                                           group1=I315RvI315X_induction.counted$masks$WT, # MUTANT as numerator
+                                           group2=I315RvI315X_induction.counted$masks$MUTANT,     # WT as denominator
+                                           name1="WT",                        # Naming group1
+                                           name2="MUTANT")  
+
+dba.show(I315RvI315X_induction.counted_contrast, bContrasts=TRUE)
+
+I315RvI315X_induction.analyzed <- dba.analyze(I315RvI315X_induction.counted_contrast, method=DBA_ALL_METHODS, bParallel=FALSE)
+
+#Plot the pca 
+dba.plotPCA(I315RvI315X_induction.analyzed, contrast=1, method=DBA_DESEQ2, attributes=DBA_TREATMENT, label=DBA_ID)
+
+#Plot number of differential peaks based on each methodology
+dba.plotVenn(I315RvI315X_induction.analyzed, contrast=1, method=DBA_ALL_METHODS)
+
+#Export DESeq2 results
+I315RvI315X_induction.DB <- dba.report(I315RvI315X_induction.analyzed)
+
+#Convert DESeq2 results to a dataframe
+I315RvI315X_induction_deseq2 <- as.data.frame(I315RvI315X_induction.DB)
+
+#Plot a volcano
+dba.plotVolcano(I315RvI315X_induction.analyzed)
+
+#Write DESeq2 object to a csv file
+write.csv(I315RvI315X_induction_deseq2, "./data/atacseq_data_processing/sig_peaks/I315RvI315X_differential_peak_coverage_deseq2.csv")
+
+I315RvI315X <- read.csv("./data/atacseq_data_processing/sig_peaks/I315RvI315X_differential_peak_coverage_deseq2.csv")
+
+
+loss_I315RvI315X <- I315RvI315X %>%
+  filter(I315RvI315X$Fold < -1)
+
+write_tsv(loss_I315RvI315X, "./data/atacseq_data_processing/sig_peaks/loss_I315RvI315X_stats.tsv")
+
+loss_I315RvI315X_bed <- loss_I315RvI315X[,c(2,3,4)]
+
+gain_I315RvI315X <- I315RvI315X %>%
+  filter(I315RvI315X$Fold > 1)
+
+write_tsv(gain_I315RvI315X, "./data/atacseq_data_processing/sig_peaks/gain_I315RvI315X_stats.tsv")
+
+gain_I315RvI315X_bed <- gain_I315RvI315X[,c(2,3,4)]
+
+write_tsv(loss_I315RvI315X_bed, "./data/atacseq_data_processing/bed_files/loss_I315RvI315X.bed")
+
+write_tsv(gain_I315RvI315X_bed, "./data/atacseq_data_processing/bed_files/gain_I315RvI315X.bed")
+
+
+```
+
+
+
+
+
+WTvW281* Comparison
+
+```{r}
+
+#Read in the metadata file
+WTvW281X_samples <- read.csv("./data/atacseq_data_processing/metadata/WTvW281X_metadata.txt") 
+
+#Read in the bam and narrowpeak files into diffbind
+WTvW281X_induction <- dba(sampleSheet=WTvW281X_samples)
+
+#Here is the preliminary correlation
+dba.plotHeatmap(WTvW281X_induction)
+
+#count the reads in each of the binding site windows and provide coverage at each site
+WTvW281X_induction.counted <- dba.count(WTvW281X_induction, summits=250)
+
+#Here's the final correlation
+plot(WTvW281X_induction.counted)
+
+WTvW281X_induction.counted_contrast <- dba.contrast(WTvW281X_induction.counted, 
+                                           group1=WTvW281X_induction.counted$masks$WT, # MUTANT as numerator
+                                           group2=WTvW281X_induction.counted$masks$MUTANT,     # WT as denominator
+                                           name1="WT",                        # Naming group1
+                                           name2="MUTANT")  
+
+dba.show(WTvW281X_induction.counted_contrast, bContrasts=TRUE)
+
+WTvW281X_induction.analyzed <- dba.analyze(WTvW281X_induction.counted_contrast, method=DBA_ALL_METHODS, bParallel=FALSE)
+
+#Plot the pca 
+dba.plotPCA(WTvW281X_induction.analyzed, contrast=1, method=DBA_DESEQ2, attributes=DBA_TREATMENT, label=DBA_ID)
+
+#Plot number of differential peaks based on each methodology
+dba.plotVenn(WTvW281X_induction.analyzed, contrast=1, method=DBA_ALL_METHODS)
+
+#Export DESeq2 results
+WTvW281X_induction.DB <- dba.report(WTvW281X_induction.analyzed)
+
+#Convert DESeq2 results to a dataframe
+WTvW281X_induction_deseq2 <- as.data.frame(WTvW281X_induction.DB)
+
+#Plot a volcano
+dba.plotVolcano(WTvW281X_induction.analyzed)
+
+#Write DESeq2 object to a csv file
+write.csv(WTvW281X_induction_deseq2, "./data/atacseq_data_processing/sig_peaks/WTvW281X_differential_peak_coverage_deseq2.csv")
+
+WTvW281X <- read.csv("./data/atacseq_data_processing/sig_peaks/WTvW281X_differential_peak_coverage_deseq2.csv")
+
+
+loss_WTvW281X <- WTvW281X %>%
+  filter(WTvW281X$Fold < -1)
+
+write_tsv(loss_WTvW281X, "./data/atacseq_data_processing/sig_peaks/loss_WTvW281X_stats.tsv")
+
+loss_WTvW281X_bed <- loss_WTvW281X[,c(2,3,4)]
+
+gain_WTvW281X <- WTvW281X %>%
+  filter(WTvW281X$Fold > 1)
+
+write_tsv(gain_WTvW281X, "./data/atacseq_data_processing/sig_peaks/gain_WTvW281X_stats.tsv")
+
+gain_WTvW281X_bed <- gain_WTvW281X[,c(2,3,4)]
+
+write_tsv(loss_WTvW281X_bed, "./data/atacseq_data_processing/bed_files/loss_WTvW281X.bed")
+
+write_tsv(gain_WTvW281X_bed, "./data/atacseq_data_processing/bed_files/gain_WTvW281X.bed")
+
+
+```
+
+
+
+
+W281PvW281* Comparison
+
+```{r}
+
+#Read in the metadata file
+W281PvW281X_samples <- read.csv("./data/atacseq_data_processing/metadata/W281PvW281X_metadata.txt") 
+
+#Read in the bam and narrowpeak files into diffbind
+W281PvW281X_induction <- dba(sampleSheet=W281PvW281X_samples)
+
+#Here is the preliminary correlation
+dba.plotHeatmap(W281PvW281X_induction)
+
+#count the reads in each of the binding site windows and provide coverage at each site
+W281PvW281X_induction.counted <- dba.count(W281PvW281X_induction, summits=250)
+
+#Here's the final correlation
+plot(W281PvW281X_induction.counted)
+
+W281PvW281X_induction.counted_contrast <- dba.contrast(W281PvW281X_induction.counted, 
+                                           group1=W281PvW281X_induction.counted$masks$WT, # MUTANT as numerator
+                                           group2=W281PvW281X_induction.counted$masks$MUTANT,     # WT as denominator
+                                           name1="WT",                        # Naming group1
+                                           name2="MUTANT")  
+
+dba.show(W281PvW281X_induction.counted_contrast, bContrasts=TRUE)
+
+W281PvW281X_induction.analyzed <- dba.analyze(W281PvW281X_induction.counted_contrast, method=DBA_ALL_METHODS, bParallel=FALSE)
+
+#Plot the pca 
+dba.plotPCA(W281PvW281X_induction.analyzed, contrast=1, method=DBA_DESEQ2, attributes=DBA_TREATMENT, label=DBA_ID)
+
+#Plot number of differential peaks based on each methodology
+dba.plotVenn(W281PvW281X_induction.analyzed, contrast=1, method=DBA_ALL_METHODS)
+
+#Export DESeq2 results
+W281PvW281X_induction.DB <- dba.report(W281PvW281X_induction.analyzed)
+
+#Convert DESeq2 results to a dataframe
+W281PvW281X_induction_deseq2 <- as.data.frame(W281PvW281X_induction.DB)
+
+#Plot a volcano
+dba.plotVolcano(W281PvW281X_induction.analyzed)
+
+#Write DESeq2 object to a csv file
+write.csv(W281PvW281X_induction_deseq2, "./data/atacseq_data_processing/sig_peaks/W281PvW281X_differential_peak_coverage_deseq2.csv")
+
+W281PvW281X <- read.csv("./data/atacseq_data_processing/sig_peaks/W281PvW281X_differential_peak_coverage_deseq2.csv")
+
+
+loss_W281PvW281X <- W281PvW281X %>%
+  filter(W281PvW281X$Fold < -1)
+
+write_tsv(loss_W281PvW281X, "./data/atacseq_data_processing/sig_peaks/loss_W281PvW281X_stats.tsv")
+
+loss_W281PvW281X_bed <- loss_W281PvW281X[,c(2,3,4)]
+
+gain_W281PvW281X <- W281PvW281X %>%
+  filter(W281PvW281X$Fold > 1)
+
+write_tsv(gain_W281PvW281X, "./data/atacseq_data_processing/sig_peaks/gain_W281PvW281X_stats.tsv")
+
+gain_W281PvW281X_bed <- gain_W281PvW281X[,c(2,3,4)]
+
+write_tsv(loss_W281PvW281X_bed, "./data/atacseq_data_processing/bed_files/loss_W281PvW281X.bed")
+
+write_tsv(gain_W281PvW281X_bed, "./data/atacseq_data_processing/bed_files/gain_W281PvW281X.bed")
+
+
+```
+
+
+
+

@@ -1,0 +1,17 @@
+SampleID,Treatment,Replicate,bamReads,Peaks,PeakCaller
+WT281_R1,WT,1,~/Documents/temp/WT281-R1_final.bam,~/Documents/temp/WT281-R1_peaks.narrowPeak,narrow
+WT281_R2,WT,2,~/Documents/temp/WT281-R2_final.bam,~/Documents/temp/WT281-R2_peaks.narrowPeak,narrow
+W281X_R1,MUTANT,1,~/Documents/temp/W281X-R1_final.bam,~/Documents/temp/W281X-R1_peaks.narrowPeak,narrow
+W281X_R2,MUTANT,2,~/Documents/temp/W281X-R2_final.bam,~/Documents/temp/W281X-R2_peaks.narrowPeak,narrow
+
+
+
+
+
+
+
+
+
+
+
+

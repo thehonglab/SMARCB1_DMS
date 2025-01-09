@@ -1,0 +1,17 @@
+SampleID,Treatment,Replicate,bamReads,Peaks,PeakCaller
+I315I_R1,WT,1,~/Documents/temp/I315I-R1_final.bam,~/Documents/temp/I315I-R1_peaks.narrowPeak,narrow
+I315I_R2,WT,2,~/Documents/temp/I315I-R2_final.bam,~/Documents/temp/I315I-R2_peaks.narrowPeak,narrow
+I315X_R1,MUTANT,1,~/Documents/temp/I315X-R1_final.bam,~/Documents/temp/I315X-R1_peaks.narrowPeak,narrow
+I315X_R2,MUTANT,2,~/Documents/temp/I315X-R2_final.bam,~/Documents/temp/I315X-R2_peaks.narrowPeak,narrow
+
+
+
+
+
+
+
+
+
+
+
+
