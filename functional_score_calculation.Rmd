@@ -1446,6 +1446,8 @@ missense_mite_data_2sd_lof <- missense_mite_data %>%
 zscore_lof <- missense_mite_data %>%
   filter(missense_mite_data$all_reps_zscore > 2)
 
+write_tsv(zscore_lof, "./results/functional_scores/LOF_mutants.tsv")
+
 counts <- table(zscore_lof$Residue)
 
 counts_df <- as.data.frame(counts)
