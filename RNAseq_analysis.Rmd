@@ -1,5 +1,4 @@
 ```{r, results = 'hide'}
-
 library(org.Hs.eg.db)
 library(fgsea)
 library(ggplot2)
@@ -31,14 +30,6 @@ library(tximport)
 library(writexl)
 library(biomaRt)
 library(ggrepel)
-
-
-
-
-
-
-
-
 ```
 
 
