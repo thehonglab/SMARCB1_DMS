@@ -1,0 +1,11 @@
+PeakID (cmd=annotatePeaks.pl loss_W281PvW281X.bed hg38)	Chr	Start	End	Strand	Peak Score	Focus Ratio/Region Size	Annotation	Detailed Annotation	Distance to TSS	Nearest PromoterID	Entrez ID	Nearest Unigene	Nearest Refseq	Nearest Ensembl	Gene Name	Gene Alias	Gene Description	Gene Type
+2	chr22	49481712	49482211	+	0	NA	intron (NR_110523, intron 1 of 4)	intron (NR_110523, intron 1 of 4)	61505	NR_037440	100500882		NR_037440	ENSG00000264139	MIR3667	-	microRNA 3667	ncRNA
+8	chr6	137738067	137738566	+	0	NA	intron (NR_121618, intron 1 of 2)	intron (NR_121618, intron 1 of 2)	721	NR_121618	100507406	Hs.556703	NR_121618	ENSG00000234956	LINC02539	-	long intergenic non-protein coding RNA 2539	ncRNA
+7	chr13	79807555	79808054	+	0	NA	Intergenic	MER52A|LTR|ERV1	3418	NR_125785	102724076	Hs.208617	NR_125785	ENSG00000229011	LINC01038	-	long intergenic non-protein coding RNA 1038	ncRNA
+6	chr7	25714066	25714565	+	0	NA	intron (NR_157808, intron 1 of 4)	L2b|LINE|L2	36717	NR_157814	646588	Hs.72068	NR_157808	ENSG00000223561	LOC646588	-	uncharacterized LOC646588	ncRNA
+9	chr3	17967811	17968310	+	0	NA	intron (NR_161333, intron 1 of 4)	intron (NR_161333, intron 1 of 4)	5508	NR_161333	339862	Hs.652981	NR_046199		LOC339862	-	uncharacterized LOC339862	ncRNA
+5	chrX	84501623	84502122	+	0	NA	intron (NM_001177478, intron 1 of 9)	intron (NM_001177478, intron 1 of 9)	581	NM_001177478	139324	Hs.559546	NM_144657	ENSG00000165259	HDX	CXorf43|D030011N01Rik	highly divergent homeobox	protein-coding
+4	chr6	137739075	137739574	+	0	NA	promoter-TSS (NR_121618)	promoter-TSS (NR_121618)	-287	NR_121619	100507406	Hs.556703	NR_121618	ENSG00000234956	LINC02539	-	long intergenic non-protein coding RNA 2539	ncRNA
+3	chr2	150047556	150048055	+	0	NA	Intergenic	Intergenic	-188614	NR_145421	150596	Hs.470217	NM_153041	ENSG00000162947	LINC01931	-	long intergenic non-protein coding RNA 1931	ncRNA
+1	chr2	150118626	150119125	+	0	NA	Intergenic	AluY|SINE|Alu	138132	NR_146972	105373683		NR_146972	ENSG00000231420	LINC01817	-	long intergenic non-protein coding RNA 1817	ncRNA
+10	chr6	137779384	137779883	+	0	NA	Intergenic	MER31B|LTR|ERV1	-40596	NR_121619	100507406	Hs.556703	NR_121618	ENSG00000234956	LINC02539	-	long intergenic non-protein coding RNA 2539	ncRNA
