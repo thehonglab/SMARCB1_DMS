@@ -1,22 +1,31 @@
-# SMARCB1_DMS
+# SMARCB1 Deep Mutational Scanning
 Deep mutational scanning of the SMARCB1 coding sequence to evaluate mutations which disrupt its tumor suppressor function
 
-Study and analyis by Garrett Cooper, Benjamin Lee, Andrew Hong, and co authors.
+Study and analyis by Garrett Cooper, Benjamin Lee, [Andrew Hong](https://www.thehonglab.org/), and co authors.
 
 For the full paper, see X
 
+## Repository Contents
+
+1. Raw Data 
+All raw data used to generate the analyses presented in the manuscript. Files such as .bam and .fastq can be obtained from dbGAP (X).
+
+2. Analysis Code
+Computer scripts and tools required to reproduce the analysis.
+
+3. AWS Processing Instructions
+Step-by-step guidance for setting up and running data processing on an AWS instance.
+
 ## Running the Analysis
 
-This repository contains:
+### Overview
+- Cloud Computing (AWS): Portions of the analysis utilize AWS cloud servers, with corresponding code labeled as "bash" within .Rmd files.
 
-1. Raw data used to generate analysis in manuscript
+- Local Computing: Other analyses are performed locally using R or Python. The repository is organized to allow users to run these analyses after downloading the repository. **Exception:** Differential accessibility analysis requires BAM files, which are too large to store in this repository. Refer to dbGAP ([X]) for access.
 
-2. Computer code to run the analysis.
 
-Much of the computational analysis was performed using cloud computing servers on Amazon Web Services (AWS). For portions of analysis which utilize AWS cloud computing, code is denoted in .Rmd files as "bash".
 
-The rest of the analysis was completed locally using either R or Python. The repository is set up in such a way that all local analysis done in R or Python can be run by those who download this repository on their local computer. The only exception is differential accessibility analysis, which requires bam files, which are too large to store on Git LFS. To download these bam files, please refer to dbGAP (X).
-
+### Setting up cloud computing
 To set up cloud computing environment:
 
 1. Set up your Linux AWS instance
@@ -24,7 +33,7 @@ To set up cloud computing environment:
   
 2. Install software necessary to run analysis
 
-a)Install miniconda on your instance
+a) Install miniconda on your instance
 ```
 wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
 bash Miniconda3-latest-Linux-x86_64.sh
@@ -64,16 +73,17 @@ source ~/.bashrc
 To perform genome alignment using Illumina Dragen, launch an in instance using AWS Marketplace.
 We utilized version v4.2.4 for ATACseq processing and v3.7.5 for RNAseq alignment and transcript quantification. Of note these different version use different hash tables for their reference genome. Instructions on making of this hash table are provided below.
 
-### ATACSeq Analysis (Dragen v4.2.4)
-Raw FASTQ files were transferred into the preloaded /ephemeral directory on the instance (computational resources only work in this directory).
+### ATACSeq Analysis (v4.2.4)
+1. Transfer raw FASTQ files into the /ephemeral directory on the instance.
+**NOTE** Computational resources are limited to this directory. 
 
-We then generated v9 hash tables for the reference GrCh38p13 using:
+2. Build v9 hash tables for the GrCh38p13 reference genome:
 
 ```
 dragen --build-hash-table true --ht-reference hashref/GRCh38.p13.genome.fa --ht-build-rna-hashtable true --output-directory ref/  --enable-cnv true
 ```
 
-For ATACseq analysis, alignment, adaptor trimming, and duplicate removal were completed using the following command for each sample. An example script for one of the samples is shown below.
+3. Align, trim, and remove duplicates:
 
 ```
 dragen -r GRCh38p13v9 \
@@ -90,14 +100,14 @@ dragen -r GRCh38p13v9 \
 --RGSM I315I-R1_01_S1;
 ```
 
-### RNAseq Analysis (Dragen v3.7.5)
-Raw FASTQ files were transferred into the preloaded /ephemeral directory on the instance (computational resources only work in this directory).
+### RNAseq Analysis (v3.7.5)
+1. Build v8 hash tables for the GrCh38p13 reference genome:
 
-We then generated v8 hash tables for the reference GrCh38p13 using:
-
+```
 dragen --build-hash-table true --ht-reference hashref/GRCh38.p13.genome.fa --ht-build-rna-hashtable true --output-directory hashref/ --enable-cnv true --enable-rna true
+```
 
-For RNAseq analysis, alignment and read quantification was performed using this following command:
+2. Align and quantify reads:
 
 ```
 dragen -f -r GrCh38p13 \
@@ -115,16 +125,17 @@ dragen -f -r GrCh38p13 \
 ```
 
 
-## Reading input files
+## Configurations and Input Files
 
-The analysis configuration is defined in the config.yaml file, which specifies key variables for the analysis. The file is designed to be straightforward and easy to understand. To customize the analysis, simply update the values in this configuration file.
+- The analysis configuration is defined in the ```config.yaml``` file.
+- Input files referenced in ```config.yaml``` are located in the ```./data/``` subdirectory.
+To customize the analysis, edit the ```config.yaml``` file as needed.
 
-The input files referenced in config.yaml are located in the ./data/ subdirectory.
 
 ## Utilizing Code in this Repository
 
-All Jupyter notebooks and R markdown scripts are contained within the top level of this repository with the extension ```*.ipynb``` or ```*.Rmd```.
-
+- Jupyter Notebooks (```*.ipynb```) and R Markdown scripts (```*.Rmd```) are located at the top level of this repository.
+- Follow the instructions provided in the code comments and documentation for execution.
 
 
 
