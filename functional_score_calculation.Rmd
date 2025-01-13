@@ -1054,6 +1054,7 @@ library(readr)
 library(dplyr)
 library(tidyr)
 library(ggplot2)
+library(data.table)
 
 single_mutants_data <- read_csv("./results/functional_scores/DMS_single_mutant_data.csv")
 
@@ -1061,6 +1062,8 @@ single_mutants_data <- read_csv("./results/functional_scores/DMS_single_mutant_d
 
 single_mutants_data_nofs <- single_mutants_data %>% 
   filter(single_mutants_data$mut_1_type_final != "F")
+
+na <- subset(single_mutants_data_nofs, StdNom.Vt.aa.By.Ted == "T381X")
          
 
 average_mutation_zscore = c()
@@ -1109,7 +1112,11 @@ average_mutation_zscore$BT16_average_zscore <- rowMeans(average_mutation_zscore[
 
 average_mutation_zscore$RCRF1009T_average_zscore <- rowMeans(average_mutation_zscore[,c('RCRF1009T_R1_av_zscore.average_allmolec_allrep_zscore',"RCRF1009T_R2_av_zscore.average_allmolec_allrep_zscore" )], na.rm=TRUE)
 
-average_mutation_zscore <- average_mutation_zscore %>% separate(G401_R1_av_zscore.StdNom.Vt.aa.By.Ted, into = c('wildtype', 'amino acid'), sep = "(?<=[A-Za-z])(?=[0-9])", remove = FALSE)
+
+setDT(average_mutation_zscore)
+
+average_mutation_zscore[, c("wildtype", "amino acid") := tstrsplit(G401_R1_av_zscore.StdNom.Vt.aa.By.Ted, "(?<=[A-Za-z])(?=[0-9])", perl = TRUE)]
+#average_mutation_zscore <- average_mutation_zscore %>% separate(G401_R1_av_zscore.StdNom.Vt.aa.By.Ted, into = c('wildtype', 'amino acid'), sep = "(?<=[A-Za-z])(?=[0-9])", remove = FALSE)
 
 silents <- average_mutation_zscore %>%
   filter(average_mutation_zscore$G401_R2_av_zscore.mut_1_type_final == "S")
@@ -1125,9 +1132,9 @@ average_mutation_zscore <- rbind(average_mutation_zscore, silents)
 
 average_mutation_zscore$G401_R1_av_zscore.new_aa_1_final <- gsub("X", "Stop", average_mutation_zscore$G401_R1_av_zscore.new_aa_1_final)
 
-average_mutation_zscore_bind = average_mutation_zscore[,c(1,2,3,5,4,7,12,17,22,27,32,33,34,35,36,37)]
+average_mutation_zscore_bind = average_mutation_zscore[,c(1,4,36,3,2,5,10,15,20,25,30,33,34,35,31,32)]
 
-names(average_mutation_zscore_bind)[names(average_mutation_zscore_bind) == "wildtype"] <- "G401_R1_av_zscore.wildtype"
+#names(average_mutation_zscore_bind)[names(average_mutation_zscore_bind) == "wildtype"] <- "G401_R1_av_zscore.wildtype"
 
 names(average_mutation_zscore_bind)[names(average_mutation_zscore_bind) == "G401_R1_av_zscore.new_aa_1_final"] <- "G401_R1_av_zscore.new_aa_1_final_silents"
 
@@ -1142,7 +1149,12 @@ Collapsing Frameshift Data
 frameshift_data <- filter(single_mutants_data,
        single_mutants_data$mut_1_type_final == "F")
 
-frameshift_data <- frameshift_data %>% separate(StdNom.Vt.aa.By.Ted, into = c('wildtype', 'amino acid'), sep = "(?<=[A-Za-z])(?=[0-9])", remove = FALSE)
+setDT(frameshift_data)
+
+frameshift_data[, c("wildtype", "amino acid") := tstrsplit(StdNom.Vt.aa.By.Ted, "(?<=[A-Za-z])(?=[0-9])", perl = TRUE)]
+
+
+#frameshift_data <- frameshift_data %>% separate(StdNom.Vt.aa.By.Ted, into = c('wildtype', 'amino acid'), sep = "(?<=[A-Za-z])(?=[0-9])", remove = FALSE)
 
 frameshift_data$new_aa_1_final_silents <- gsub("Z", "Fs", frameshift_data$new_aa_1_final_silents)
 
@@ -1155,22 +1167,22 @@ frameshift_data$StdNom.Vt.aa.By.Ted <- gsub(" ","", paste(frameshift_data$wildty
 frameshift_combine = c()
 
 
-frameshift_combine$G401_R1_av_zscore <- frameshift_data %>% dplyr::group_by(mut_1_final, mut_1_type_final, new_aa_1_final_silents, wildtype, StdNom.Vt.aa.By.Ted) %>%
+frameshift_combine$G401_R1_av_zscore <- frameshift_data %>% dplyr::group_by(mut_1_final, mut_1_type_final, new_aa_1_final_silents) %>%
   dplyr::summarise(average_allmolec_allrep_zscore = mean(g401_rep1_zscore, na.rm=TRUE))
 
-frameshift_combine$G401_R2_av_zscore <- frameshift_data %>% dplyr::group_by(mut_1_final, mut_1_type_final, new_aa_1_final_silents, wildtype, StdNom.Vt.aa.By.Ted) %>%
+frameshift_combine$G401_R2_av_zscore <- frameshift_data %>% dplyr::group_by(mut_1_final, mut_1_type_final, new_aa_1_final_silents) %>%
   dplyr::summarise(average_allmolec_allrep_zscore = mean(g401_rep2_zscore, na.rm=TRUE))
 
-frameshift_combine$BT16_R1_av_zscore <- frameshift_data %>% dplyr::group_by(mut_1_final, mut_1_type_final, new_aa_1_final_silents, wildtype, StdNom.Vt.aa.By.Ted) %>%
+frameshift_combine$BT16_R1_av_zscore <- frameshift_data %>% dplyr::group_by(mut_1_final, mut_1_type_final, new_aa_1_final_silents) %>%
   dplyr::summarise(average_allmolec_allrep_zscore = mean(bt16_rep1_zscore, na.rm=TRUE))
 
-frameshift_combine$BT16_R2_av_zscore <- frameshift_data %>% dplyr::group_by(mut_1_final, mut_1_type_final, new_aa_1_final_silents, wildtype, StdNom.Vt.aa.By.Ted) %>%
+frameshift_combine$BT16_R2_av_zscore <- frameshift_data %>% dplyr::group_by(mut_1_final, mut_1_type_final, new_aa_1_final_silents) %>%
   dplyr::summarise(average_allmolec_allrep_zscore = mean(bt16_rep2_zscore, na.rm=TRUE))
 
-frameshift_combine$RCRF1009T_R1_av_zscore <- frameshift_data %>% dplyr::group_by(mut_1_final, mut_1_type_final, new_aa_1_final_silents, wildtype, StdNom.Vt.aa.By.Ted) %>%
+frameshift_combine$RCRF1009T_R1_av_zscore <- frameshift_data %>% dplyr::group_by(mut_1_final, mut_1_type_final, new_aa_1_final_silents) %>%
   dplyr::summarise(average_allmolec_allrep_zscore = mean(rcrf1009t_rep1_zscore, na.rm=TRUE))
 
-frameshift_combine$RCRF1009T_R2_av_zscore <- frameshift_data %>% dplyr::group_by(mut_1_final, mut_1_type_final, new_aa_1_final_silents, wildtype, StdNom.Vt.aa.By.Ted) %>%
+frameshift_combine$RCRF1009T_R2_av_zscore <- frameshift_data %>% dplyr::group_by(mut_1_final, mut_1_type_final, new_aa_1_final_silents) %>%
   dplyr::summarise(average_allmolec_allrep_zscore = mean(rcrf1009t_rep2_zscore, na.rm=TRUE))
 
 frameshift_combine <- as.data.frame(frameshift_combine)
@@ -1194,11 +1206,6 @@ frameshift_combine$all_reps_zscore_sd = matrixStats::rowSds(as.matrix(dplyr::sel
                                                na.rm = TRUE)
 
 
-
-
-frameshift_combine <- frameshift_combine[,c(1,2,3,4,5,6,12,18,24,30,36,37,38)]
-
-
 #Calculate average between two replicates in each cell line
 
 frameshift_combine$G401_average_zscore <- rowMeans(frameshift_combine[,c('G401_R1_av_zscore.average_allmolec_allrep_zscore',"G401_R2_av_zscore.average_allmolec_allrep_zscore" )], na.rm=TRUE)
@@ -1207,10 +1214,24 @@ frameshift_combine$BT16_average_zscore <- rowMeans(frameshift_combine[,c('BT16_R
 
 frameshift_combine$RCRF1009T_average_zscore <- rowMeans(frameshift_combine[,c('RCRF1009T_R1_av_zscore.average_allmolec_allrep_zscore',"RCRF1009T_R2_av_zscore.average_allmolec_allrep_zscore" )], na.rm=TRUE)
 
+protein_sequence <- "MMMMALSKTFGQKPVKFQLEDDGEFYMIGSEVGNYLRMFRGSLYKRYPSLWRRLATVEERKKIVASSHGKKTKPNTKDHGYTTLATSVTLLKASEVEEILDGNDEKYKAVSISTEPPTYLREQKAKRNSQWVPTLPNSSHHLDAVPCSTTINRNRMGRDKKRTFPLCFDDHDPAVIHENASQPEVLVPIRLDMEIDGQKLRDAFTWNMNEKLMTPEMFSEILCDDLDLNPLTFVPAIASAIRQQIESYPTDSILEDQSDQRVIIKLNIHVGNISLVDQFEWDMSEKENSPEKFALKLCSELGLGGEFVTTIAYSIRGQLSWHQKTYAFSENPLPTVEIAIRNTGDADQWCPLLETLTDAEMEKKIRDQDRNTRRMRRLANTAPAW"
+
+frameshift_combine$wildtype <- sapply(frameshift_combine$G401_R1_av_zscore.mut_1_final, function(x) substr(protein_sequence, x, x))
+
+frameshift_combine$G401_R1_av_zscore.StdNom.Vt.aa.By.Ted <- paste0(
+  frameshift_combine$wildtype,  # Wildtype
+  frameshift_combine$G401_R1_av_zscore.mut_1_final,  # Mutation position
+  "Fs"  # Add the string "Fs"
+)
+
+frameshift_combine_filt <- frameshift_combine[,c(1,31,30,3,2,4,8,12,16,20,24,27,28,29,25,26)]
+
+
+
 
 #Combine both the frameshift and the missense, nonsense, silent data from above
 
-all_mutants_averaged <- rbind(average_mutation_zscore_bind, frameshift_combine)
+all_mutants_averaged <- rbind(average_mutation_zscore_bind, frameshift_combine_filt)
 
 ```
 
@@ -1229,7 +1250,7 @@ all_mutants_averaged <- all_mutants_averaged %>%
   rename(Mutant_Amino_Acid = G401_R1_av_zscore.new_aa_1_final_silents)
 
 all_mutants_averaged <- all_mutants_averaged %>%
-  rename(Wildtype_Amino_Acid = G401_R1_av_zscore.wildtype)
+  rename(Wildtype_Amino_Acid = wildtype)
 
 all_mutants_averaged <- all_mutants_averaged %>%
   rename(Substitution = G401_R1_av_zscore.StdNom.Vt.aa.By.Ted)
@@ -1252,11 +1273,15 @@ all_mutants_averaged <- all_mutants_averaged %>%
 all_mutants_averaged <- all_mutants_averaged %>%
   rename(RCRF1009T_R2_zscore = RCRF1009T_R2_av_zscore.average_allmolec_allrep_zscore)
 
+all_mutants_averaged <- all_mutants_averaged[order(all_mutants_averaged$Residue), ]
+
 ```
 
 
 Saving the Final Data Frame for Further Analysis
 ```{r, message = FALSE}
+
+all_mutants_averaged <- all_mutants_averaged[!is.na(all_mutants_averaged$all_reps_zscore), ]
 
 write_csv(all_mutants_averaged, "./results/functional_scores/DMS_collapsed_data.csv")
 
@@ -1494,7 +1519,9 @@ write_tsv(top_mutants, "./results/functional_scores/top_LOF_mutants.tsv")
 
 
 ```{r}
+
 sessionInfo()
+
 ```
 
 
