@@ -59,7 +59,7 @@ echo 'export PATH=/path/to/homer/bin:$PATH' >> ~/.bashrc
 source ~/.bashrc
 ```
 
-## Genome Analignment Using Illumina Dragen
+## Genome Alignment Using Illumina Dragen
 
 To perform genome alignment using Illumina Dragen, launch an in instance using AWS Marketplace.
 We utilized version v4.2.4 for ATACseq processing and v3.7.5 for RNAseq alignment and transcript quantification. Of note these different version use different hash tables for their reference genome. Instructions on making of this hash table are provided below.
