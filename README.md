@@ -8,7 +8,7 @@ For the full paper, see X
 ## Repository Contents
 
 1. Raw Data 
-All raw data used to generate the analyses presented in the manuscript. Files such as .bam and .fastq can be obtained from dbGAP (X).
+All raw data used to generate the analyses presented in the manuscript. Files such as ```.bam``` and ```.fastq`` can be obtained from dbGAP (X).
 
 2. Analysis Code
 Computer scripts and tools required to reproduce the analysis.
