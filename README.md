@@ -84,7 +84,7 @@ dragen --build-hash-table true --ht-reference hashref/GRCh38.p13.genome.fa --ht-
 ```
 
 3. Align, trim, and remove duplicates:
-
+This code needs to be run for each sample
 ```
 dragen -r GRCh38p13v9 \
 -1 DNA/I315I-R1_S1_R1_001.fastq.gz \
@@ -108,7 +108,7 @@ dragen --build-hash-table true --ht-reference hashref/GRCh38.p13.genome.fa --ht-
 ```
 
 2. Align and quantify reads:
-
+This code needs to be run for each sample
 ```
 dragen -f -r GrCh38p13 \
 -1 RNA/G401_P16_STT21_MRT00_SEQ61_I315I_NOV5_1.fq.gz \
