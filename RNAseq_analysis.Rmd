@@ -394,6 +394,9 @@ res_df_WT <- res_df_WT %>%
     TRUE ~ "nonsig"
   ))
 
+res_df_WT$Significance <- factor(res_df_WT$Significance, levels = c("nonsig","up", "down"))
+res_df_WT <- res_df_WT[order(res_df_WT$Significance), ]
+
 g1 <- res_df_WT %>%
   filter(res_df_WT$ENSEMBL == "SMARCB1")
 
@@ -410,7 +413,7 @@ plot_WTvW281X <- ggplot(data = res_df_WT, aes(x = log2FoldChange, y = -log10(pad
   theme(text = element_text(family = "Arial", size = 15),
         axis.text = element_text(size = 15),
         plot.title = element_text(size = 15, hjust = 0.5)) +
-  scale_color_manual(values = c("#F32316", "#CCCDCD", "#6495ED")) +
+  scale_color_manual(values = c("#CCCDCD", "#6495ED", "#F32316")) +
   theme(
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank(),
