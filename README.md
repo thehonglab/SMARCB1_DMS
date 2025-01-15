@@ -10,7 +10,7 @@ For the full paper, see X
 1. Raw Data 
 All raw data used to generate the analyses presented in the manuscript. Files such as ```.bam``` and ```.fastq``` and ```.bw``` can be obtained from dbGAP (X).
 
-For Hong Lab members, data files can be accessed via the lab's secure s3 storage system. Contact the administrator for details.
+  - For Hong Lab members, data files can be accessed via the lab's secure s3 storage system. Contact the administrator for details.
 
 2. Analysis Code
 Computer scripts and tools required to reproduce the analysis.
