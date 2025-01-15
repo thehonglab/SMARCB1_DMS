@@ -1,0 +1,5 @@
+	Upregulated	Downregulated
+W281P	11	11*
+W281*	5	5*
+I315R	12	9*
+I315*	14	27*
