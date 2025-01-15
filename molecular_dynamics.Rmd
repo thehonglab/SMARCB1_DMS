@@ -1,0 +1,306 @@
+**Molecular Dynamics Simulation Guide**
+
+**System Setup**
+- **Platform:** Linux-based system running Amber v24
+- **Hardware:** NVIDIA RTX A6000 with 49,140 MiB of memory
+- **CUDA Version:** 12.6
+**Input Structure**
+**SMARCB1 PDB:** Obtained from AlphaFold Q12824
+**Mutations:** WT structure mutated to W281P and I315R using PyMOL.
+**Processing:** All structures (WT, W281P, and I315R) processed using Amber v24 in the same way as described below.
+
+
+
+1. Prepare the PDB File
+```{bash}
+pdb4amber WT.pdb > WT.amber.pdb
+```
+
+
+
+2.	Set up the topology
+
+Create a file called leap.in containing the following:
+```{bash}
+source leaprc.protein.ff19SB
+source leaprc.water.tip3p
+mol = loadPDB WT.amber.pdb
+solvateBox mol TIP3PBOX 10.0
+addIons mol Na+ 0
+saveAmberParm mol system.prmtop system.inpcrd
+quit
+```
+
+Run the following command to generate the topology:
+```{bash}
+tleap -f leap.in
+```
+
+
+
+3.	Energy Minimization (This takes a while to run)
+
+Create a file called min.in for energy minimization:
+```{bash}
+Energy minimization
+&cntrl
+  imin=1,        ! Perform minimization
+  maxcyc=5000,  ! Maximum number of cycles
+  ncyc=2500,    ! Number of cycles for steepest descent
+  cut=10.0,
+&end
+```
+
+Run the minimization:
+```{bash}
+nohup pmemd.cuda -O -i min.in -o min.out -p system.prmtop -c system.inpcrd -r min.crd -ref system.inpcrd &
+```
+
+
+
+4.	Equilibration
+
+a) NVT Equilibriation
+
+Create a file called nvt.in for NVT equilibration:
+```{bash}
+NVT equilibration
+&cntrl
+  imin=0,        ! No minimization
+  ntt=3,         ! Temperature coupling
+  temp0=300.0,   ! Target temperature
+  ntpr=100,      ! Print every 100 steps
+  ntwx=100,      ! Write coordinates every 100 steps
+  ntf=2,
+  ntb=1,
+  cut=10.0,
+&end
+```
+
+Run the equilibration:
+```{bash}
+nohup pmemd.cuda -O -i nvt.in -o nvt.out -p system.prmtop -c min.crd -r nvt.crd -x nvt.mdcrd &
+```
+
+b) NPT Equilibriation
+
+Create a file called npt.in for NPT equilibration:
+```{bash}
+NPT equilibration
+&cntrl
+  imin=0,          ! No minimization
+  ntt=3,           ! Temperature coupling
+  ntp=1,           ! Pressure coupling
+  ntpr=100,
+  ntwx=100,
+  cut=10.0,
+  taup=2.0,        ! Pressure relaxation time
+  temp0=300.0,     ! Target temperature
+  gamma_ln=1.0,    ! Friction coefficient for Langevin dynamics
+&end
+```
+
+Run the equilibration:
+```{bash}
+nohup pmemd.cuda -O -i npt.in -o npt.out -p system.prmtop -c nvt.crd -r npt.crd -x npt.mdcrd &
+```
+
+
+
+5.	Run Molecular Dynamics Simulation
+
+Create a file called md.in for the MD simulation:
+```{bash}
+Production MD simulation
+&cntrl
+  imin=0,
+  ntt=3,
+  ntp=1,
+  ntpr=100,
+  ntwx=100,
+  cut=10.0,
+  nstlim=200000000,  ! Number of steps to run
+  dt=0.001,       ! Reduced time step
+  temp0=300.0,
+  gamma_ln=5.0,   ! Higher friction coefficient
+  restraint_wt=2.0,  ! Restraint weight on solute atoms
+  restraintmask=":1-385@CA"  ! Apply restraints to only alpha carbons
+&end
+```
+
+Run the MD simulation:
+```{bash}
+nohup pmemd.cuda -O -i md.in -o md.out -p system.prmtop -c npt.crd -r md.crd -x md.mdcrd &
+```
+
+
+
+6.	Analyze Results
+
+RMSD Analysis:
+```{bash}
+cpptraj -p system.prmtop -y md.mdcrd
+rmsd :1-385@CA out rmsd.dat
+run
+```
+
+RMSF Analysis:
+```{bash}
+cpptraj -p system.prmtop -y md.mdcrd
+trajin md.mdcrd
+atomicfluct out rmsf.dat byres :1-385
+run
+```
+
+
+
+7. Convert trajectory to VMD readable format
+```{bash}
+cpptraj
+parm system.prmtop 
+trajin md.mdcrd
+trajout md.dcd
+run
+```
+To load into VMD, first load system.prmtop, then load the md.dcd file.
+
+
+
+8. Plotting Trajectory Results
+
+a)RMSD
+
+```{r}
+library(readr)
+library(ggplot2)
+
+WT_RMSD <- read.table("./results/molecular_dynamics_simulation/rmsd_WT_200ns.dat", header=FALSE)
+colnames(WT_RMSD) <- c("Time", "RMSD")
+
+
+I315R_RMSD <- read.table("./results/molecular_dynamics_simulation/rmsd_I315R_200ns.dat", header=FALSE)
+colnames(I315R_RMSD) <- c("Time", "RMSD")
+
+W281P_RMSD <- read.table("./results/molecular_dynamics_simulation/rmsd_W281P_200ns.dat", header=FALSE)
+colnames(W281P_RMSD) <- c("Time", "RMSD")
+
+WT_RMSD$Variant <- "WT"
+I315R_RMSD$Variant <- "I315R"
+W281P_RMSD$Variant <- "W281P"
+
+combined_RMSD <- rbind(WT_RMSD, I315R_RMSD, W281P_RMSD)
+
+# Reorder the columns for better readability
+combined_RMSD <- combined_RMSD[, c("Time", "RMSD", "Variant")]
+
+# View the combined dataframe
+head(combined_RMSD)
+
+#Save for later use
+write_xlsx(combined_RMSD, "./results/molecular_dynamics_simulation/combined_rmsd.xlsx")
+
+
+
+
+time_per_frame_ns <- 0.005
+
+combined_RMSD$Time_ns <- combined_RMSD$Time * time_per_frame_ns
+
+# Create the plot
+rmsd <- ggplot(combined_RMSD, aes(x = Time_ns, y = RMSD, color = factor(Variant, levels = c("WT", "W281P", "I315R")))) +
+  geom_line(size= 1.5) +  
+  labs(title = "RMSD vs. Time",
+       x = "Time (ns)",
+       y = "RMSD (Å)",
+       color = "Variant") +     # Legend title
+  theme_minimal() +           # Use a minimal theme
+  theme(legend.position = "top",
+        axis.text = element_text(size = 30),
+        axis.title = element_text(size = 34),
+        legend.text = element_text(size = 26),
+        legend.title = element_text(size = 34),
+        plot.title = element_text(size = 36)) +
+  scale_color_manual(values = c("WT" = "gray", "I315R" = "red", "W281P" = "blue"))  # Customize colors
+
+rmsd
+
+
+
+ggsave("./plots/molecular_dynamics_simulation/rmsd_200ns.tif", plot = rmsd, width = 34, height =20, units = "cm", device = tiff ,res = 600)
+
+```
+
+b) RMSF
+
+```{r}
+
+#Read in RMSF data
+WT_RMSF <- read.table("./results/molecular_dynamics_simulation/rmsf_WT_200ns.dat", header=FALSE)
+colnames(WT_RMSF) <- c("Residue", "RMSF")
+W281P_RMSF <- read.table("./results/molecular_dynamics_simulation/rmsf_W281P_200ns.dat", header=FALSE)
+colnames(W281P_RMSF) <- c("Residue", "RMSF")
+I315R_RMSF <- read.table("./results/molecular_dynamics_simulation/rmsf_I315R_200ns.dat", header=FALSE)
+colnames(I315R_RMSF) <- c("Residue", "RMSF")
+WT_RMSF$Variant <- "WT"
+I315R_RMSF$Variant <- "I315R"
+W281P_RMSF$Variant <- "W281P"
+
+combined_RMSF <- rbind(WT_RMSF, I315R_RMSF, W281P_RMSF)
+
+# Reorder the columns for better readability
+combined_RMSF <- combined_RMSF[, c("Residue", "RMSF", "Variant")]
+
+# View the combined dataframe
+head(combined_RMSF)
+
+domain_data <- data.frame(
+  Domain = c( "WHD","RPT1", "RPT2", "CCD"),
+  Start = c( 10,183, 259, 335),
+  End = c(110, 245, 319, 378),
+  Color = c("gray70","green", "orange", "blue")  # Colors for each domain
+)
+
+# Create the plot
+rmsf <- ggplot() +
+  # Add rectangles for domains
+  geom_rect(data = domain_data,
+            aes(xmin = Start, xmax = End, ymin = -Inf, ymax = Inf, fill = Domain),
+            alpha = 0.3) +  # Make rectangles slightly transparent
+  # First add mutant points
+  geom_point(data = subset(combined_RMSF, Variant != "WT"), 
+             aes(x = Residue, y = RMSF, color = Variant), 
+             size = 1) +  # Mutant points
+  # Then add WT points, this ensures they are on top
+  geom_point(data = subset(combined_RMSF, Variant == "WT"), 
+             aes(x = Residue, y = RMSF, color = Variant), 
+             size = 1) +  # WT points on top
+  geom_line(data = combined_RMSF, aes(x = Residue, y = RMSF, color = Variant), 
+            linewidth = 2, alpha = 0.9) + 
+  labs(title = "RMSF by Residue with Domains",
+       x = "Residue Number",
+       y = "RMSF Value",
+       color = "Variant",
+       fill = "Domain") +  # Legend title for fill
+  theme_minimal() +  # Use a minimal theme
+  theme(legend.position = "top",
+  axis.text = element_text(size = 30),
+        axis.title = element_text(size = 34),
+        legend.text = element_text(size = 26),
+        legend.title = element_text(size = 34),
+        plot.title = element_text(size = 36)) +
+  scale_fill_manual(values = domain_data$Color, 
+                    limits = c("WHD","RPT1", "RPT2", "CCD")) + 
+  scale_color_manual(values = c("WT" = "gray", "W281P" = "blue", "I315R" = "red" ),  # Adjust colors if needed
+                     limits = c("WT","W281P", "I315R")) +
+  scale_x_continuous(limits = c(0, 385)) + 
+  scale_y_continuous(limits = c(5, 25))  
+
+rmsf
+
+ggsave("./plots/molecular_dynamics_simulation/rmsf_200ns.tif", plot = rmsf, width = 34, height =20, units = "cm", device = tiff ,res = 600)
+```
+
+```
+
+
+
