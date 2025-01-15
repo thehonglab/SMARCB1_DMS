@@ -1,6 +1,6 @@
 # DMS Mutants ATACSeq Secondary Analysis January 9th, 2024
 
-We first looked at each replicate individually, and results looks consistent. Therefore we combined each biological replicate for final representation using the DeepTools tool called bigwigCompare. Bigwigs are not available on Github Repo due to size contraints.
+We first looked at each replicate individually, and results looks consistent. Therefore we combined each biological replicate for final representation using the DeepTools tool called bigwigCompare. Bigwigs are not available on Github Repo due to size constraints.
 
 
 ## Part 1: Signal Intensity Heatmaps
