@@ -587,6 +587,8 @@ unique_to_I315R_df <- data.frame(Gene = unique_to_I315R)
 unique_to_W281P_df <- data.frame(Gene = unique_to_W281P)
 W281P_genes_df <- data.frame(Gene = W281P_genes)
 
+
+#These data will be used in RNAseq_analysis.Rmd to plot a normalized count heatmap of these concordant gene groups
 write.table(common_genes_df, "./data/rna_atac_integration/common_genes.tsv", sep = "\t", row.names = FALSE, quote = FALSE)
 
 write.table(unique_to_I315R_df, "./data/rna_atac_integration/unique_to_I315R.tsv", sep = "\t", row.names = FALSE, quote = FALSE)

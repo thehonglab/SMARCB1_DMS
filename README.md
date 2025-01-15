@@ -1,14 +1,16 @@
 # SMARCB1 Deep Mutational Scanning
 Deep mutational scanning of the SMARCB1 coding sequence to evaluate mutations which disrupt its tumor suppressor function
 
-Study and analyis by Garrett Cooper, Benjamin Lee, [Andrew Hong](https://www.thehonglab.org/), and co authors.
+Study and analysis by Garrett Cooper, Benjamin Lee, [Andrew Hong](https://www.thehonglab.org/), and co authors.
 
 For the full paper, see X
 
 ## Repository Contents
 
 1. Raw Data 
-All raw data used to generate the analyses presented in the manuscript. Files such as ```.bam``` and ```.fastq``` can be obtained from dbGAP (X).
+All raw data used to generate the analyses presented in the manuscript. Files such as ```.bam``` and ```.fastq``` and ```.bw``` can be obtained from dbGAP (X).
+
+For Hong Lab members, data files can be accessed via the lab's secure s3 storage system. Contact the administrator for details.
 
 2. Analysis Code
 Computer scripts and tools required to reproduce the analysis.
