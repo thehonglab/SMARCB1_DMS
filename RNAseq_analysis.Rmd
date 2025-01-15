@@ -34,7 +34,6 @@ t2g[is.na(t2g)] <- ""
 ```
 
 RPT2 Mutant PCA Analysis
-
 ```{r}
 
 meta_data_pca = read.csv("./data/rnaseq_analysis/RPT2_metadata_nov5_pca.txt")
@@ -132,7 +131,6 @@ ggsave("./plots/rnaseq_analysis/pca.tiff", plot = plot3, width = 6, height = 6, 
 ```
 
 W281 DESeq2 RNA Analysis
-
 ```{r}
 
 
@@ -350,7 +348,6 @@ res_WTvW281P_df$ENSEMBL <- rownames(res_WTvW281P_df)
 ```
 
 W281 Volcano Plotting
-
 ```{r}
 
 
@@ -450,7 +447,6 @@ ggsave("./plots/rnaseq_analysis/W281PvW281X_volcano.tiff", plot = plot_W281PvW28
 ```
 
 I315 DESeq2 RNA Analysis
-
 ```{r}
 
 residue_315Rv315X <- dplyr::filter(meta_data,
@@ -619,7 +615,6 @@ write_xlsx(I315RvI315X_signif, "./results/rna_analysis/I315RvI315X_significant_g
 ```
 
 I315 Volcano Plotting
-
 ```{r}
 
 
@@ -722,7 +717,6 @@ ggsave("./plots/rnaseq_analysis/I315RvI315X.tiff", plot = plot_I315RvI315X, widt
 ```
 
 Plotting normalized counts of concordant rna and atac genes
-
 ```{r}
 
 # Transpose and preprocess normalized counts data
