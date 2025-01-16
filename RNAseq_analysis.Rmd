@@ -776,3 +776,80 @@ plot
 ggsave("./plots/rnaseq_analysis/I315R_W281P_common_heatmap.tiff", plot = plot, width = 6, height = 10, dpi=600)
 
 ```
+
+Comparing Each Mutant
+```{r}
+
+residue_281Pv315R <- dplyr::filter(meta_data,
+       meta_data$Mutant == "zW281P" | meta_data$Mutant == "zI315R")
+
+file_names_281Pv315R = residue_281Pv315R$Filename
+
+file_names_281Pv315R = file.path("./data/rnaseq_analysis/quants/", file_names_281Pv315R)
+
+names(file_names_281Pv315R) = residue_281Pv315R$Filename
+
+tx_data_281Pv315R = tximport(file_names_281Pv315R,
+                   type = c("salmon"),
+                   tx2gene = t2g,
+                   abundanceCol = "TPM",
+                   countsCol = "NumReads",
+                   lengthCol = "EffectiveLength",
+                   ignoreTxVersion = T,
+                   ignoreAfterBar = T)
+
+
+dds_281Pv315R = DESeqDataSetFromTximport(tx_data_281Pv315R,
+                               colData = residue_281Pv315R,
+                               design = ~ Mutant)
+
+dds_281Pv315R <- estimateSizeFactors(dds_281Pv315R)
+
+
+sizeFactors(dds_281Pv315R)
+
+normlzd_dds_281Pv315R <- as.data.frame(counts(dds_281Pv315R, normalized=TRUE))
+normlzd_dds_281Pv315R <- rownames_to_column(normlzd_dds_281Pv315R)
+
+
+
+
+
+
+keep = rowSums(counts(dds_281Pv315R)) >= 10
+dds_281Pv315R = dds_281Pv315R[keep,]
+
+dds_norm_281Pv315R = vst(dds_281Pv315R)
+
+normalized_counts_281Pv315R = assay(dds_norm_281Pv315R) %>%
+  t()
+
+normalized_counts_df_281Pv315R <- as.data.frame(normalized_counts_281Pv315R)
+
+normalized_counts_df_281Pv315R <- normalized_counts_df_281Pv315R %>% 
+  t()
+
+normalized_counts_df_281Pv315R <- rownames_to_column(as.data.frame(normalized_counts_df_281Pv315R))
+
+dds_diff_281Pv315R <- DESeq(dds_281Pv315R)
+
+res_281Pv315R <- results(dds_diff_281Pv315R)
+
+res_df_281Pv315R <- as.data.frame(res_281Pv315R)
+
+head(res_281Pv315R)
+
+res_df_281Pv315R$ENSEMBL <- rownames(res_df_281Pv315R)
+
+res_df_281Pv315R$ENSEMBL <- sub('\\.[0-9]*$', '', res_df_281Pv315R$ENSEMBL)
+
+W281PvI315R_up <- filter(res_df_281Pv315R,
+       res_df_281Pv315R$padj < 0.05 & res_df_281Pv315R$log2FoldChange > 2)
+
+W281PvI315R_down <- filter(res_df_281Pv315R,
+       res_df_281Pv315R$padj < 0.05 & res_df_281Pv315R$log2FoldChange < -2)
+
+W281PvI315R_signif <- rbind(W281PvI315R_down, W281PvI315R_up)
+
+```
+
