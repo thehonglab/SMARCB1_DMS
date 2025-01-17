@@ -150,8 +150,8 @@ I315IvI315X_atacrna_plot <- ggplot(promoters_I315, aes(x = LFC_RNA, y = LFC_ATAC
   geom_point(aes(color = (LFC_ATAC > 0 & LFC_RNA > 0) | (LFC_ATAC < 0 & LFC_RNA < 0)), alpha = 0.6) +  # Conditional color
   scale_color_manual(values = c("TRUE" = "blue", "FALSE" = "gray")) +  # Define colors
   labs(title = "Scatter Plot of ATAC LFC vs RNA LFC: I315IvI315*",
-       x = "RNA Log Fold Change",
-       y = "ATAC Log Fold Change") +
+       x = "RNA Log2 Fold Change",
+       y = "ATAC Log2 Fold Change") +
   theme_minimal() +  # Use a minimal theme
   geom_hline(yintercept = 0, color = "gray", linetype = "dashed") +  # Add a horizontal line at y=0
   geom_vline(xintercept = 0, color = "gray", linetype = "dashed") +  # Add a vertical line at x=0
@@ -412,8 +412,8 @@ I315RvI315X_atacrna_plot <- ggplot(promoters_I315R, aes(x = LFC_RNA, y = LFC_ATA
   geom_point(aes(color = (LFC_ATAC > 0 & LFC_RNA > 0) | (LFC_ATAC < 0 & LFC_RNA < 0)), alpha = 0.6) +  # Conditional color
   scale_color_manual(values = c("TRUE" = "blue", "FALSE" = "gray")) +  # Define colors
   labs(title = "Scatter Plot of ATAC LFC vs RNA LFC: I315RvI315*",
-       x = "RNA Log Fold Change",
-       y = "ATAC Log Fold Change") +
+       x = "RNA Log2 Fold Change",
+       y = "ATAC Log2 Fold Change") +
   theme_minimal() +  # Use a minimal theme
   geom_hline(yintercept = 0, color = "gray", linetype = "dashed") +  # Add a horizontal line at y=0
   geom_vline(xintercept = 0, color = "gray", linetype = "dashed") +  # Add a vertical line at x=0

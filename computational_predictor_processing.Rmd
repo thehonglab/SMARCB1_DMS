@@ -421,10 +421,53 @@ merged_df4 <- left_join(merged_df3, mite_data, by = "AA_Substitution") %>%
   select(AA_Substitution, Mutation_type, am_pathogenicity, REVEL, PHRED, all_reps_zscore)
 
 
+```
+
+
+Plotting Correlation between CADD and DMS
+```{r}
+
+NMS_only <- merged_df4 %>%
+  filter(merged_df4$Mutation_type == "M"| merged_df4$Mutation_type == "S"| merged_df4$Mutation_type == "Stop")
+
+CADD_DMS_NMS <- na.omit(NMS_only[,c(1,2,5,6)])
+
+colors <- ifelse(CADD_DMS_NMS$Mutation_type == "S", "black",
+                 ifelse(CADD_DMS_NMS$Mutation_type == "M", "gray", "red"))
+
+tiff("./plots/computational_correlations/CADD_v_DMS_NMS.tiff", width = 10, height = 5, units = "in", res = 300)
+
+
+plot(CADD_DMS_NMS$PHRED, CADD_DMS_NMS$all_reps_zscore,
+     col = colors, pch = 19,  # pch = 19 for solid circles
+     xlab = "PHRED", ylab = "All Reps Z-Score")
+
+dev.off()
 
 
 
+
+
+
+NS_only <- merged_df4 %>%
+  filter(merged_df4$Mutation_type == "S"| merged_df4$Mutation_type == "Stop")
+
+CADD_DMS_NS <- na.omit(NS_only[,c(1,2,5,6)])
+
+colors <- ifelse(CADD_DMS_NS$Mutation_type == "S", "black", "red")
+
+plot(CADD_DMS_NS$PHRED, CADD_DMS_NS$all_reps_zscore,
+     col = colors, pch = 19,  # pch = 19 for solid circles
+     xlab = "PHRED", ylab = "All Reps Z-Score")
+
+lm_model <- lm(all_reps_zscore ~ PHRED, data = CADD_DMS_NS)
+
+r_squared <- summary(lm_model)$r.squared
+
+text(x = max(CADD_DMS_NS$PHRED), y = max(CADD_DMS_NS$all_reps_zscore), 
+     labels = paste("R^2 = ", round(r_squared, 2)), pos = 2, cex = 1.2, col = "blue")
 
 
 ```
+
 
