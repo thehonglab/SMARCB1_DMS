@@ -301,6 +301,24 @@ W281_ms$`N: Student's T-test Difference WT281_W281X` <- W281_ms$`N: Student's T-
 
 W281_ms$`N: Student's T-test Difference W281P_W281X` <- W281_ms$`N: Student's T-test Difference W281P_W281X` * -1
 
+W281_ms <- W281_ms[,c(44,46,8,7,5,10,2,9,4,6,3,34,35,37,38,40,41)]
+
+W281_ms <- W281_ms %>%
+  rename(Accession = 'T: Majority protein IDs') %>%
+  rename('Gene Symbol' = 'T: Gene names') %>%
+  rename('L2FC_WT_R1_LFQ' = 'Intensity 08') %>%
+  rename('L2FC_WT_R2_LFQ' = 'Intensity 07') %>%
+  rename('L2FC_WT_R3_LFQ' = 'Intensity 05') %>%
+  rename('L2FC_W281P_R1_LFQ' = 'Intensity 10') %>%
+  rename('L2FC_W281P_R2_LFQ' = 'Intensity 02') %>%
+  rename('L2FC_W281P_R3_LFQ' = 'Intensity 09') %>%
+  rename('L2FC_W281X_R1_LFQ' = 'Intensity 04') %>%
+  rename('L2FC_W281X_R2_LFQ' = 'Intensity 06') %>%
+  rename('L2FC_W281X_R3_LFQ' = 'Intensity 03')
+
+write_xlsx(W281_ms, "./results/mass_spec/W281_ms_supp_data.xlsx")
+
+
 #WT v W281*
 
 WTvW281X_sig <- W281_ms %>%
