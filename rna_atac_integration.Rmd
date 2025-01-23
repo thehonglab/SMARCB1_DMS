@@ -170,6 +170,9 @@ I315IvI315X_atacrna_plot
 
 ggsave("./plots/rna_atac_integration/I315IvI315X_integrated_filtered.tiff", plot = I315IvI315X_atacrna_plot, width = 5, height = 2.5, dpi=600)
 
+
+write_xlsx(promoters_I315, "./results/rna_atac_integration/I315IvI315X_rna_atac_plot_raw_data.xlsx")
+
 ```
 
 
@@ -316,6 +319,8 @@ WTvW281X_atacrna_plot_filtered
 
 ggsave("./plots/rna_atac_integration/WTvI315X_integrated_filtered.tiff", plot = WTvW281X_atacrna_plot_filtered, width = 5, height = 2.5, dpi=600)
 
+write_xlsx(promoters_W281, "./results/rna_atac_integration/WTvW281X_rna_atac_plot_raw_data.xlsx")
+
 
 ```
 
@@ -432,6 +437,8 @@ I315RvI315X_atacrna_plot
 
 ggsave("./plots/rna_atac_integration/I315RvI315X_integrated_filtered.tiff", plot = I315RvI315X_atacrna_plot, width = 5, height = 2.5, dpi=600)
 
+
+write_xlsx(promoters_I315R, "./results/rna_atac_integration/I315RvI315X_rna_atac_plot_raw_data.xlsx")
 ```
 
 
@@ -561,6 +568,8 @@ W281PvW281X_atacrna_plot_filtered <- ggplot(promoters_W281, aes(x = LFC_RNA, y =
 W281PvW281X_atacrna_plot_filtered
 
 ggsave("./plots/rna_atac_integration/W281PvI315X_integrated_filtered.tiff", plot = W281PvW281X_atacrna_plot_filtered, width = 5, height = 2.5, dpi=600)
+
+write_xlsx(promoters_W281, "./results/rna_atac_integration/W281PW281X_rna_atac_plot_raw_data.xlsx")
 
 ```
 
