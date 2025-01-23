@@ -177,12 +177,18 @@ library(ggplot2)
 WT_RMSD <- read.table("./results/molecular_dynamics_simulation/rmsd_WT_200ns.dat", header=FALSE)
 colnames(WT_RMSD) <- c("Time", "RMSD")
 
+write_xlsx(WT_RMSD, "./results/molecular_dynamics_simulation/rmsd_WT_200ns.xlsx")
+
 
 I315R_RMSD <- read.table("./results/molecular_dynamics_simulation/rmsd_I315R_200ns.dat", header=FALSE)
 colnames(I315R_RMSD) <- c("Time", "RMSD")
 
+write_xlsx(I315R_RMSD, "./results/molecular_dynamics_simulation/rmsd_I315R_200ns.xlsx")
+
 W281P_RMSD <- read.table("./results/molecular_dynamics_simulation/rmsd_W281P_200ns.dat", header=FALSE)
 colnames(W281P_RMSD) <- c("Time", "RMSD")
+
+write_xlsx(W281P_RMSD, "./results/molecular_dynamics_simulation/rmsd_W281P_200ns.xlsx")
 
 WT_RMSD$Variant <- "WT"
 I315R_RMSD$Variant <- "I315R"
@@ -252,6 +258,8 @@ combined_RMSF <- combined_RMSF[, c("Residue", "RMSF", "Variant")]
 
 # View the combined dataframe
 head(combined_RMSF)
+
+write_xlsx(combined_RMSF, "./results/molecular_dynamics_simulation/rmsf_combined.xlsx")
 
 domain_data <- data.frame(
   Domain = c( "WHD","RPT1", "RPT2", "CCD"),
