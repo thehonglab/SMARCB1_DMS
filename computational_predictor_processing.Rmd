@@ -432,6 +432,8 @@ NMS_only <- merged_df4 %>%
 
 CADD_DMS_NMS <- na.omit(NMS_only[,c(1,2,5,6)])
 
+write_tsv(CADD_DMS_NMS, "./results/functional_scores/CADD_DMS_correlation.tsv")
+
 colors <- ifelse(CADD_DMS_NMS$Mutation_type == "S", "black",
                  ifelse(CADD_DMS_NMS$Mutation_type == "M", "gray", "red"))
 
