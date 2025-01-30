@@ -1471,7 +1471,6 @@ missense_mite_data_2sd_lof <- missense_mite_data %>%
 zscore_lof <- missense_mite_data %>%
   filter(missense_mite_data$all_reps_zscore > 2)
 
-write_tsv(zscore_lof, "./results/functional_scores/LOF_mutants.tsv")
 
 counts <- table(zscore_lof$Residue)
 
@@ -1512,6 +1511,65 @@ top_mutants <- rbind(WHD_mutants, IDR_mutants, RPT1_mutants, RPT2_mutants, CCD_m
 write_tsv(top_mutants, "./results/functional_scores/top_LOF_mutants.tsv")
 
 ```
+
+
+```{r}
+
+
+# Function to check if a substitution can be caused by a single nucleotide change
+is_single_nucleotide_change <- function(original_aa, new_aa) {
+  # Standard genetic code
+  genetic_code <- list(
+    A = c("GCT", "GCC", "GCA", "GCG"),
+    C = c("TGT", "TGC"),
+    D = c("GAT", "GAC"),
+    E = c("GAA", "GAG"),
+    F = c("TTT", "TTC"),
+    G = c("GGT", "GGC", "GGA", "GGG"),
+    H = c("CAT", "CAC"),
+    I = c("ATT", "ATC", "ATA"),
+    K = c("AAA", "AAG"),
+    L = c("TTA", "TTG", "CTT", "CTC", "CTA", "CTG"),
+    M = c("ATG"),
+    N = c("AAT", "AAC"),
+    P = c("CCT", "CCC", "CCA", "CCG"),
+    Q = c("CAA", "CAG"),
+    R = c("CGT", "CGC", "CGA", "CGG", "AGA", "AGG"),
+    S = c("TCT", "TCC", "TCA", "TCG", "AGT", "AGC"),
+    T = c("ACT", "ACC", "ACA", "ACG"),
+    V = c("GTT", "GTC", "GTA", "GTG"),
+    W = c("TGG"),
+    Y = c("TAT", "TAC")
+  )
+  
+  # Get the codons for the original and new amino acids
+  original_codons <- genetic_code[[original_aa]]
+  new_codons <- genetic_code[[new_aa]]
+  
+  # Check if any pair of original and new codons differ by exactly one nucleotide
+  for (original_codon in original_codons) {
+    for (new_codon in new_codons) {
+      # Count the number of differing nucleotides
+      diff_count <- sum(strsplit(original_codon, NULL)[[1]] != strsplit(new_codon, NULL)[[1]])
+      if (diff_count == 1) {
+        return(TRUE)
+      }
+    }
+  }
+  
+  return(FALSE)
+}
+
+zscore_lof$Single_Nucleotide_Substitution <- mapply(is_single_nucleotide_change, zscore_lof$Wildtype_Amino_Acid, zscore_lof$Mutant_Amino_Acid)
+
+
+
+sum(zscore_lof$Single_Nucleotide_Substitution)
+
+write_tsv(zscore_lof, "./results/functional_scores/LOF_mutants.tsv")
+```
+
+
 
 
 
