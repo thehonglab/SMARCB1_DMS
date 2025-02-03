@@ -98,21 +98,23 @@ I315RvI315X_sig_final2 <- I315RvI315X_sig_final[, c("N: -Log Student's T-test p-
 write_xlsx(I315RvI315X_sig_final2, "./results/mass_spec/I315RvI315X_sig_proteins.xlsx")
 
 
-I315IvI315R_sig_up_clean_BAF <- I315IvI315R_sig_up_clean %>%
-  filter(I315IvI315R_sig_up_clean$`Gene Symbol` == "ARID1A" |
-         I315IvI315R_sig_up_clean$`Gene Symbol` == "PBRM1" |
-         I315IvI315R_sig_up_clean$`Gene Symbol` == "SMARCD2" |
-         I315IvI315R_sig_up_clean$`Gene Symbol` == "ACTL6A" |
-         I315IvI315R_sig_up_clean$`Gene Symbol` == "SS18" |
-         I315IvI315R_sig_up_clean$`Gene Symbol` == "SMARCD3" |
-         I315IvI315R_sig_up_clean$`Gene Symbol` == "ARID1B" |
-         I315IvI315R_sig_up_clean$`Gene Symbol` == "SMARCC2" |
-         I315IvI315R_sig_up_clean$`Gene Symbol` == "DPF2" |
-         I315IvI315R_sig_up_clean$`Gene Symbol` == "SMARCC1" |
-         I315IvI315R_sig_up_clean$`Gene Symbol` == "SMARCC1" |
-         I315IvI315R_sig_up_clean$`Gene Symbol` == "SMARCE1" |
-         I315IvI315R_sig_up_clean$`Gene Symbol` == "BCL7C" )
-
+I315IvI315R_sig_up_clean_BAF <- I315IvI315R_sig %>%
+  filter(I315IvI315R_sig$`Gene Symbol` == "ARID1A" |
+         I315IvI315R_sig$`Gene Symbol` == "PBRM1" |
+         I315IvI315R_sig$`Gene Symbol` == "SMARCD2" |
+         I315IvI315R_sig$`Gene Symbol` == "ACTL6A" |
+         I315IvI315R_sig$`Gene Symbol` == "SS18" |
+         I315IvI315R_sig$`Gene Symbol` == "SMARCD3" |
+         I315IvI315R_sig$`Gene Symbol` == "ARID1B" |
+         I315IvI315R_sig$`Gene Symbol` == "SMARCC2" |
+         I315IvI315R_sig$`Gene Symbol` == "DPF2" |
+         I315IvI315R_sig$`Gene Symbol` == "SMARCC1" |
+         I315IvI315R_sig$`Gene Symbol` == "SMARCC1" |
+         I315IvI315R_sig$`Gene Symbol` == "SMARCE1" |
+         I315IvI315R_sig$`Gene Symbol` == "BCL7C" |
+         I315IvI315R_sig$`Gene Symbol` == "CABIN1" |
+         I315IvI315R_sig$`Gene Symbol` == "TRIM28" |
+         I315IvI315R_sig$`Gene Symbol` == "QSER1")
 
 
 
@@ -129,7 +131,6 @@ I315_ms <- I315_ms %>%
     `N: Student's T-test Difference I315I_I315R` < -1.5 ~ "down",
     TRUE ~ "nonsig"
   ))
-
 
 
 g3 <- I315_ms %>%
@@ -388,19 +389,24 @@ write_xlsx(W281PvW281X_sig_final2, "./results/mass_spec/W281PvW281X_sig_proteins
 
 
 
-WT281vW281P_sig_up_clean_BAF <- WTvW281P_sig_up_clean %>%
-  filter(WTvW281P_sig_up_clean$`Gene Symbol` == "ARID1A" |
-         WTvW281P_sig_up_clean$`Gene Symbol` == "PBRM1" |
-         WTvW281P_sig_up_clean$`Gene Symbol` == "SMARCD2" |
-         WTvW281P_sig_up_clean$`Gene Symbol` == "SS18" |
-         WTvW281P_sig_up_clean$`Gene Symbol` == "SMARCD3" |
-         WTvW281P_sig_up_clean$`Gene Symbol` == "ARID1B" |
-         WTvW281P_sig_up_clean$`Gene Symbol` == "SMARCB1" |
-         WTvW281P_sig_up_clean$`Gene Symbol` == "DPF2" |
-         WTvW281P_sig_up_clean$`Gene Symbol` == "SMARCC1" |
-         WTvW281P_sig_up_clean$`Gene Symbol` == "SMARCE1" |
-         WTvW281P_sig_up_clean$`Gene Symbol` == "BCL7C" |
-         WTvW281P_sig_up_clean$`Gene Symbol` == "HIST1H1A")
+WT281vW281P_sig_up_clean_BAF <- WTvW281P_sig %>%
+  filter(WTvW281P_sig$`Gene Symbol` == "ARID1A" |
+         WTvW281P_sig$`Gene Symbol` == "PBRM1" |
+         WTvW281P_sig$`Gene Symbol` == "SMARCD2" |
+         WTvW281P_sig$`Gene Symbol` == "SS18" |
+         WTvW281P_sig$`Gene Symbol` == "SMARCD3" |
+         WTvW281P_sig$`Gene Symbol` == "ARID1B" |
+         WTvW281P_sig$`Gene Symbol` == "SMARCB1" |
+         WTvW281P_sig$`Gene Symbol` == "DPF2" |
+         WTvW281P_sig$`Gene Symbol` == "SMARCC1" |
+         WTvW281P_sig$`Gene Symbol` == "SMARCE1" |
+         WTvW281P_sig$`Gene Symbol` == "BCL7C" |
+         WTvW281P_sig$`Gene Symbol` == "HIST1H1A" |
+         WTvW281P_sig$`Gene Symbol` == "RBM28" |
+         WTvW281P_sig$`Gene Symbol` == "RSL24D1" |
+         WTvW281P_sig$`Gene Symbol` == "DHX30" |
+         WTvW281P_sig$`Gene Symbol` == "NOP16" |
+         WTvW281P_sig$`Gene Symbol` == "NIP7")
 
 
 
