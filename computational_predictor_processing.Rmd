@@ -437,39 +437,56 @@ write_tsv(CADD_DMS_NMS, "./results/functional_scores/CADD_DMS_correlation.tsv")
 colors <- ifelse(CADD_DMS_NMS$Mutation_type == "S", "black",
                  ifelse(CADD_DMS_NMS$Mutation_type == "M", "gray", "red"))
 
-tiff("./plots/computational_correlations/CADD_v_DMS_NMS.tiff", width = 10, height = 5, units = "in", res = 300)
+tiff("./plots/computational_correlations/CADD_v_DMS_NMS.tiff", width = 10, height = 7, units = "in", res = 300)
 
 
 plot(CADD_DMS_NMS$PHRED, CADD_DMS_NMS$all_reps_zscore,
      col = colors, pch = 19,  # pch = 19 for solid circles
      xlab = "PHRED", ylab = "All Reps Z-Score")
 
+abline(h = 2, col = "black", lty = 2)  # Horizontal dashed line at Y = 2
+abline(v = 20, col = "black", lty = 2)  # Vertical dashed line at X = 20
+
 dev.off()
 
 
+```
+
+```{r}
+
+N_only <- merged_df4 %>%
+  filter(merged_df4$Mutation_type == "Stop")
+
+
+N_pathogenic_DMS <-  N_only %>%
+  filter(N_only$all_reps_zscore > 2)
+
+N_pathogenic_CADD <-  N_only %>%
+  filter(N_only$PHRED > 20)
 
 
 
 
-NS_only <- merged_df4 %>%
-  filter(merged_df4$Mutation_type == "S"| merged_df4$Mutation_type == "Stop")
+S_only <- merged_df4 %>%
+  filter(merged_df4$Mutation_type == "S")
 
-CADD_DMS_NS <- na.omit(NS_only[,c(1,2,5,6)])
+S_pathogenic_DMS <-  S_only %>%
+  filter(S_only$all_reps_zscore > 2)
 
-colors <- ifelse(CADD_DMS_NS$Mutation_type == "S", "black", "red")
+S_pathogenic_CADD <-  S_only %>%
+  filter(S_only$PHRED > 20)
 
-plot(CADD_DMS_NS$PHRED, CADD_DMS_NS$all_reps_zscore,
-     col = colors, pch = 19,  # pch = 19 for solid circles
-     xlab = "PHRED", ylab = "All Reps Z-Score")
 
-lm_model <- lm(all_reps_zscore ~ PHRED, data = CADD_DMS_NS)
+M_only <- merged_df4 %>%
+  filter(merged_df4$Mutation_type == "M")
 
-r_squared <- summary(lm_model)$r.squared
+M_only <- na.omit(M_only)
 
-text(x = max(CADD_DMS_NS$PHRED), y = max(CADD_DMS_NS$all_reps_zscore), 
-     labels = paste("R^2 = ", round(r_squared, 2)), pos = 2, cex = 1.2, col = "blue")
+M_concordant <-  M_only %>%
+  filter(M_only$all_reps_zscore > 2 & M_only$PHRED >20 | M_only$all_reps_zscore < 2 & M_only$PHRED < 20)
 
 
 ```
+
 
 

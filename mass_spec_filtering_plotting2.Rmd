@@ -1,0 +1,546 @@
+```{r}
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(ggrepel)
+library(writexl)
+
+I315_ms <- read_tsv("./results/mass_spec/I315_statistical_analysis.tsv")
+
+I315_ms$`N: Student's T-test Difference I315I_I315R` <- I315_ms$`N: Student's T-test Difference I315I_I315R` * -1
+
+I315_ms$`N: Student's T-test Difference I315I_I315X` <- I315_ms$`N: Student's T-test Difference I315I_I315X` * -1
+
+I315_ms$`N: Student's T-test Difference I315R_I315X` <- I315_ms$`N: Student's T-test Difference I315R_I315X` * -1
+
+I315_ms <- I315_ms[,c(48,50,9,6,2,8,10,4,7,5,3,34,35,37,38,40,42)]
+
+I315_ms <- I315_ms %>%
+  rename(Accession = 'T: Majority protein IDs') %>%
+  rename('Gene Symbol' = 'T: Gene names') %>%
+  rename('L2FC_I315I_R1_LFQ' = 'Intensity 09') %>%
+  rename('L2FC_I315I_R2_LFQ' = 'Intensity 06') %>%
+  rename('L2FC_I315I_R3_LFQ' = 'Intensity 02') %>%
+  rename('L2FC_I315R_R1_LFQ' = 'Intensity 08') %>%
+  rename('L2FC_I315R_R2_LFQ' = 'Intensity 10') %>%
+  rename('L2FC_I315R_R3_LFQ' = 'Intensity 04') %>%
+  rename('L2FC_I315X_R1_LFQ' = 'Intensity 07') %>%
+  rename('L2FC_I315X_R2_LFQ' = 'Intensity 05') %>%
+  rename('L2FC_I315X_R3_LFQ' = 'Intensity 03')
+
+write_xlsx(I315_ms, "./results/mass_spec/I315_ms_supp_data.xlsx")
+
+
+#I315IvI315X
+
+I315IvI315X_sig <- I315_ms %>%
+  filter(I315_ms$`N: -Log Student's T-test p-value I315I_I315X` > 1.30102999566)
+
+I315IvI315X_sig_up <- I315IvI315X_sig %>%
+  filter(I315IvI315X_sig$`N: Student's T-test Difference I315I_I315X` < -1.5)
+
+I315IvI315X_sig_up_clean <- I315IvI315X_sig_up %>% filter(!is.na(`Gene Symbol`))
+
+I315IvI315X_sig_down <- I315IvI315X_sig %>%
+  filter(I315IvI315X_sig$`N: Student's T-test Difference I315I_I315X` > 1.5)
+
+I315IvI315X_sig_down_clean <- I315IvI315X_sig_down %>% filter(!is.na(`Gene Symbol`))
+
+I315IvI315X_sig_final <- rbind(I315IvI315X_sig_down, I315IvI315X_sig_up)
+
+I315IvI315X_sig_final2 <- I315IvI315X_sig_final[, c("N: -Log Student's T-test p-value I315I_I315X", "N: Student's T-test Difference I315I_I315X", "Gene Symbol")]
+
+write_xlsx(I315IvI315X_sig_final2, "./results/mass_spec/I315IvI315X_sig_proteins.xlsx")
+
+
+#I315IvI315R
+
+I315IvI315R_sig <- I315_ms %>%
+  filter(I315_ms$`N: -Log Student's T-test p-value I315I_I315R` > 1.30102999566)
+
+I315IvI315R_sig_up <- I315IvI315R_sig %>%
+  filter(I315IvI315R_sig$`N: Student's T-test Difference I315I_I315R` < -1.5)
+
+I315IvI315R_sig_up_clean <- I315IvI315R_sig_up %>% filter(!is.na(`Gene Symbol`))
+
+I315IvI315R_sig_down <- I315IvI315R_sig %>%
+  filter(I315IvI315R_sig$`N: Student's T-test Difference I315I_I315R` > 1.5)
+
+I315IvI315R_sig_down_clean <- I315IvI315R_sig_down %>% filter(!is.na(`Gene Symbol`))
+
+I315IvI315R_sig_final <- rbind(I315IvI315R_sig_down, I315IvI315R_sig_up)
+
+I315IvI315R_sig_final2 <- I315IvI315R_sig_final[, c("N: -Log Student's T-test p-value I315I_I315R", "N: Student's T-test Difference I315I_I315R", "Gene Symbol")]
+
+
+
+write_xlsx(I315IvI315R_sig_final2, "./results/mass_spec/I315IvI315R_sig_proteins.xlsx")
+
+#I315RvI315X
+
+I315RvI315X_sig <- I315_ms %>%
+  filter(I315_ms$`N: -Log Student's T-test p-value I315R_I315X` > 1.30102999566)
+
+I315RvI315X_sig_up <- I315RvI315X_sig %>%
+  filter(I315RvI315X_sig$`N: Student's T-test Difference I315R_I315X` < -1.5)
+
+I315RvI315X_sig_up_clean <- I315RvI315X_sig_up %>% filter(!is.na(`Gene Symbol`))
+
+I315RvI315X_sig_down <- I315RvI315X_sig %>%
+  filter(I315RvI315X_sig$`N: Student's T-test Difference I315R_I315X` > 1.5)
+
+I315RvI315X_sig_down_clean <- I315RvI315X_sig_down %>% filter(!is.na(`Gene Symbol`))
+
+I315RvI315X_sig_final <- rbind(I315RvI315X_sig_down, I315RvI315X_sig_up)
+
+I315RvI315X_sig_final2 <- I315RvI315X_sig_final[, c("N: -Log Student's T-test p-value I315R_I315X", "N: Student's T-test Difference I315R_I315X", "Gene Symbol")]
+
+write_xlsx(I315RvI315X_sig_final2, "./results/mass_spec/I315RvI315X_sig_proteins.xlsx")
+
+
+I315IvI315R_sig_up_clean_BAF <- I315IvI315R_sig_up_clean %>%
+  filter(I315IvI315R_sig_up_clean$`Gene Symbol` == "ARID1A" |
+         I315IvI315R_sig_up_clean$`Gene Symbol` == "PBRM1" |
+         I315IvI315R_sig_up_clean$`Gene Symbol` == "SMARCD2" |
+         I315IvI315R_sig_up_clean$`Gene Symbol` == "ACTL6A" |
+         I315IvI315R_sig_up_clean$`Gene Symbol` == "SS18" |
+         I315IvI315R_sig_up_clean$`Gene Symbol` == "SMARCD3" |
+         I315IvI315R_sig_up_clean$`Gene Symbol` == "ARID1B" |
+         I315IvI315R_sig_up_clean$`Gene Symbol` == "SMARCC2" |
+         I315IvI315R_sig_up_clean$`Gene Symbol` == "DPF2" |
+         I315IvI315R_sig_up_clean$`Gene Symbol` == "SMARCC1" |
+         I315IvI315R_sig_up_clean$`Gene Symbol` == "SMARCC1" |
+         I315IvI315R_sig_up_clean$`Gene Symbol` == "SMARCE1" |
+         I315IvI315R_sig_up_clean$`Gene Symbol` == "BCL7C" )
+
+
+
+
+
+
+overlap_I315 <- intersect(I315IvI315R_sig_up$`Gene Symbol`, I315IvI315X_sig_up$`Gene Symbol`)
+
+
+I315_ms <- I315_ms %>%
+  mutate(Significance = case_when(
+    `N: -Log Student's T-test p-value I315I_I315R` >= 1.30102999566 & 
+    `N: Student's T-test Difference I315I_I315R` > 1.5 ~ "up",
+    `N: -Log Student's T-test p-value I315I_I315R` >= 1.30102999566 & 
+    `N: Student's T-test Difference I315I_I315R` < -1.5 ~ "down",
+    TRUE ~ "nonsig"
+  ))
+
+
+
+g3 <- I315_ms %>%
+  filter(I315_ms$`Gene Symbol` == "SMARCB1")
+
+
+plot_I315R <- ggplot(data = I315_ms, aes(x = `N: Student's T-test Difference I315I_I315R`, y = `N: -Log Student's T-test p-value I315I_I315R`)) +
+  geom_point(aes(color = Significance), size = 2) +
+  theme_bw() +
+  ylim(0, 6) +
+  xlim(-8,8) +
+  geom_point(data = g3, color = "#CCCDCD") +
+  geom_text_repel(data = g3, label = g3$`Gene Symbol`, hjust = -0.5, vjust = 1, size = 4) +  # Adjust hjust for text positioning
+  geom_text_repel(data = I315IvI315R_sig_up_clean_BAF, label = I315IvI315R_sig_up_clean_BAF$`Gene Symbol`, hjust = 1 ,vjust = -2, size = 4) +  # Adjust hjust for text positioning
+  labs(title = "SMARCB1 I315R vs I315I", x = "T-test Difference", y = "-log10(pval)") +
+  theme(text = element_text(family = "Arial", size = 15),
+        axis.text = element_text(size = 15),
+        plot.title = element_text(size = 15, hjust = 0.5)) +
+  scale_color_manual(values = c("#F32316", "#CCCDCD", "#6495ED")) +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(colour = "black"),
+    panel.border = element_rect(colour = "black", fill = NA, size = 1)
+  ) +
+  geom_vline(xintercept = 1.5, linetype = "dotted", size = 0.4) +
+  geom_vline(xintercept = -1.5, linetype = "dotted", size = 0.4) + 
+  geom_hline(yintercept = 1.30102999566, linetype = "dotted", size = 0.4) +
+  theme(legend.position = "none")
+
+plot_I315R 
+
+
+
+ggsave("./plots/mass_spec/I315RvsI315I_ms_volcano.tiff", plot =plot_I315R, width = 5, height = 5, dpi=600)
+
+#ggsave("~/Documents/I315IvI315R_ms_volcano.tiff", plot = plot6, width = 5, height = 5, dpi=300)
+
+
+I315_ms2 <- I315_ms %>%
+  mutate(Significance = case_when(
+    `N: -Log Student's T-test p-value I315I_I315X` >= 1.30102999566 & 
+    `N: Student's T-test Difference I315I_I315X` > 1.5 ~ "up",
+    `N: -Log Student's T-test p-value I315I_I315X` >= 1.30102999566 & 
+    `N: Student's T-test Difference I315I_I315X` < -1.5 ~ "down",
+    TRUE ~ "nonsig"
+  ))
+
+
+g4 <- I315_ms2 %>%
+  filter(I315_ms2$`Gene Symbol` == "SMARCB1")
+
+
+
+I315IvI315X_sig_up_clean_BAF <- I315IvI315X_sig_up_clean %>%
+  filter(I315IvI315X_sig_up_clean$`Gene Symbol` == "ARID1A" |
+         I315IvI315X_sig_up_clean$`Gene Symbol` == "PBRM1" |
+         I315IvI315X_sig_up_clean$`Gene Symbol` == "SMARCD2" |
+         I315IvI315X_sig_up_clean$`Gene Symbol` == "ACTL6A" |
+         I315IvI315X_sig_up_clean$`Gene Symbol` == "SS18" |
+         I315IvI315X_sig_up_clean$`Gene Symbol` == "SMARCD3" |
+         I315IvI315X_sig_up_clean$`Gene Symbol` == "ARID1B" |
+         I315IvI315X_sig_up_clean$`Gene Symbol` == "SMARCC2" |
+         I315IvI315X_sig_up_clean$`Gene Symbol` == "DPF2" |
+         I315IvI315X_sig_up_clean$`Gene Symbol` == "SMARCC1" |
+         I315IvI315X_sig_up_clean$`Gene Symbol` == "SMARCE1" |
+         I315IvI315X_sig_up_clean$`Gene Symbol` == "BCL7C" |
+         I315IvI315X_sig_up_clean$`Gene Symbol` == "SMARCB1" |
+         I315IvI315X_sig_up_clean$`Gene Symbol` == "SMARCD1" |  
+         I315IvI315X_sig_up_clean$`Gene Symbol` == "BCL7B;BCL7A")
+
+
+
+
+plot_I315X <- ggplot(data = I315_ms2, aes(x = `N: Student's T-test Difference I315I_I315X`, y = `N: -Log Student's T-test p-value I315I_I315X`)) +
+  geom_point(aes(color = Significance), size = 2) +
+  theme_bw() +
+  ylim(0, 6) +
+  xlim(-8,8) +
+  geom_text_repel(data = I315IvI315X_sig_up_clean_BAF, label = I315IvI315X_sig_up_clean_BAF$`Gene Symbol`, hjust = 1 ,vjust = -2, size = 4) +  # Adjust hjust for text positioning
+  labs(title = "SMARCB1 I315* vs I315I", x = "T-test Difference", y = "-log10(pval)") +
+  theme(text = element_text(family = "Arial", size = 15),
+        axis.text = element_text(size = 15),
+        plot.title = element_text(size = 15, hjust = 0.5)) +
+  scale_color_manual(values = c("#F32316", "#CCCDCD", "#6495ED")) +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(colour = "black"),
+    panel.border = element_rect(colour = "black", fill = NA, size = 1)
+  ) +
+  geom_vline(xintercept = 1.5, linetype = "dotted", size = 0.4) +
+  geom_vline(xintercept = -1.5, linetype = "dotted", size = 0.4) + 
+  geom_hline(yintercept = 1.30102999566, linetype = "dotted", size = 0.4) +
+  theme(legend.position = "none")
+
+plot_I315X
+
+ggsave("./plots/mass_spec/I315XvsI315I_ms_volcano.tiff", plot =plot_I315X, width = 5, height = 5, dpi=600)
+
+
+
+I315_ms3 <- I315_ms %>%
+  mutate(Significance = case_when(
+    `N: -Log Student's T-test p-value I315R_I315X` >= 1.30102999566 & 
+    `N: Student's T-test Difference I315R_I315X` > 1.5 ~ "up",
+    `N: -Log Student's T-test p-value I315R_I315X` >= 1.30102999566 & 
+    `N: Student's T-test Difference I315R_I315X` < -1.5 ~ "down",
+    TRUE ~ "nonsig"
+  ))
+
+
+I315RvI315X_sig_both <- rbind(I315RvI315X_sig_up_clean, I315RvI315X_sig_down_clean)
+
+
+I315RvI315X_sig_up_clean_BAF <- I315RvI315X_sig_both %>%
+  filter(I315RvI315X_sig_both$`Gene Symbol` == "ARID1A" |
+         I315RvI315X_sig_both$`Gene Symbol` == "SMARCB1" |
+         I315RvI315X_sig_both$`Gene Symbol` == "SMARCD2" )
+
+
+
+plot_I315RvI315X <- ggplot(data = I315_ms3, aes(x = `N: Student's T-test Difference I315R_I315X`, y = `N: -Log Student's T-test p-value I315R_I315X`)) +
+  geom_point(aes(color = Significance), size = 2) +
+  theme_bw() +
+  ylim(0, 4) +
+  xlim(-8,8) +
+  geom_text_repel(data = I315RvI315X_sig_up_clean_BAF, label = I315RvI315X_sig_up_clean_BAF$`Gene Symbol`, hjust = 1 ,vjust = -2, size = 4) +  # Adjust hjust for text positioning
+  labs(title = "SMARCB1 I315* vs I315R", x = "T-test Difference", y = "-log10(pval)") +
+  theme(text = element_text(family = "Arial", size = 15),
+        axis.text = element_text(size = 15),
+        plot.title = element_text(size = 15, hjust = 0.5)) +
+  scale_color_manual(values = c("#F32316", "#CCCDCD", "#6495ED")) +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(colour = "black"),
+    panel.border = element_rect(colour = "black", fill = NA, size = 1)
+  ) +
+  geom_vline(xintercept = 1.5, linetype = "dotted", size = 0.4) +
+  geom_vline(xintercept = -1.5, linetype = "dotted", size = 0.4) + 
+  geom_hline(yintercept = 1.30102999566, linetype = "dotted", size = 0.4) +
+  theme(legend.position = "none")
+
+plot_I315RvI315X
+
+
+ggsave("./plots/mass_spec/I315XvsI315R_ms_volcano.tiff", plot =plot_I315RvI315X, width = 5, height = 5, dpi=600)
+
+
+
+
+
+
+```
+
+
+
+
+
+
+```{r}
+
+W281_ms <- read_tsv("./results/mass_spec/W281_statistical_analysis.tsv")
+
+W281_ms$`N: Student's T-test Difference WT281_W281P` <- W281_ms$`N: Student's T-test Difference WT281_W281P` * -1
+
+W281_ms$`N: Student's T-test Difference WT281_W281X` <- W281_ms$`N: Student's T-test Difference WT281_W281X` * -1
+
+W281_ms$`N: Student's T-test Difference W281P_W281X` <- W281_ms$`N: Student's T-test Difference W281P_W281X` * -1
+
+W281_ms <- W281_ms[,c(44,46,8,7,5,10,2,9,4,6,3,34,35,37,38,40,41)]
+
+W281_ms <- W281_ms %>%
+  rename(Accession = 'T: Majority protein IDs') %>%
+  rename('Gene Symbol' = 'T: Gene names') %>%
+  rename('L2FC_WT_R1_LFQ' = 'Intensity 08') %>%
+  rename('L2FC_WT_R2_LFQ' = 'Intensity 07') %>%
+  rename('L2FC_WT_R3_LFQ' = 'Intensity 05') %>%
+  rename('L2FC_W281P_R1_LFQ' = 'Intensity 10') %>%
+  rename('L2FC_W281P_R2_LFQ' = 'Intensity 02') %>%
+  rename('L2FC_W281P_R3_LFQ' = 'Intensity 09') %>%
+  rename('L2FC_W281X_R1_LFQ' = 'Intensity 04') %>%
+  rename('L2FC_W281X_R2_LFQ' = 'Intensity 06') %>%
+  rename('L2FC_W281X_R3_LFQ' = 'Intensity 03')
+
+write_xlsx(W281_ms, "./results/mass_spec/W281_ms_supp_data.xlsx")
+
+
+#WT v W281*
+
+WTvW281X_sig <- W281_ms %>%
+  filter(W281_ms$`N: -Log Student's T-test p-value WT281_W281X` > 1.30102999566)
+
+WTvW281X_sig_up <- WTvW281X_sig %>%
+  filter(WTvW281X_sig$`N: Student's T-test Difference WT281_W281X` < -1.5)
+
+WTvW281X_sig_up_clean <- WTvW281X_sig_up %>% filter(!is.na(`Gene Symbol`))
+
+WTvW281X_sig_down <- WTvW281X_sig %>%
+  filter(WTvW281X_sig$`N: Student's T-test Difference WT281_W281X` > 1.5)
+
+WTvW281X_sig_down_clean <- WTvW281X_sig_down %>% filter(!is.na(`Gene Symbol`))
+
+WTvW281X_sig_final <- rbind(WTvW281X_sig_down, WTvW281X_sig_up)
+
+WTvW281X_sig_final2 <- WTvW281X_sig_final[, c("N: -Log Student's T-test p-value WT281_W281X", "N: Student's T-test Difference WT281_W281X", "Gene Symbol")]
+
+write_xlsx(WTvW281X_sig_final2, "./results/mass_spec/WTvW281X_sig_proteins.xlsx")
+
+#WT v W281P 
+
+WTvW281P_sig <- W281_ms %>%
+  filter(W281_ms$`N: -Log Student's T-test p-value WT281_W281P` > 1.30102999566)
+
+WTvW281P_sig_up <- WTvW281P_sig %>%
+  filter(WTvW281P_sig$`N: Student's T-test Difference WT281_W281P` < -1.5)
+
+WTvW281P_sig_up_clean <- WTvW281P_sig_up %>% filter(!is.na(`Gene Symbol`))
+
+WTvW281P_sig_down <- WTvW281P_sig %>%
+  filter(WTvW281P_sig$`N: Student's T-test Difference WT281_W281P` > 1.5)
+
+WTvW281P_sig_down_clean <- WTvW281P_sig_down %>% filter(!is.na(`Gene Symbol`))
+
+WTvW281P_sig_final <- rbind(WTvW281P_sig_down, WTvW281P_sig_up)
+
+WTvW281P_sig_final2 <- WTvW281P_sig_final[, c("N: -Log Student's T-test p-value WT281_W281P", "N: Student's T-test Difference WT281_W281P", "Gene Symbol")]
+
+write_xlsx(WTvW281P_sig_final2, "./results/mass_spec/WTvW281P_sig_proteins.xlsx")
+
+
+
+#W281P v W281X
+
+W281PvW281X_sig <- W281_ms %>%
+  filter(W281_ms$`N: -Log Student's T-test p-value W281P_W281X` > 1.30102999566)
+
+W281PvW281X_sig_up <- W281PvW281X_sig %>%
+  filter(W281PvW281X_sig$`N: Student's T-test Difference W281P_W281X` < -1.5)
+
+W281PvW281X_sig_up_clean <- W281PvW281X_sig_up %>% filter(!is.na(`Gene Symbol`))
+
+W281PvW281X_sig_down <- W281PvW281X_sig %>%
+  filter(W281PvW281X_sig$`N: Student's T-test Difference W281P_W281X` > 1.5)
+
+W281PvW281X_sig_down_clean <- W281PvW281X_sig_down %>% filter(!is.na(`Gene Symbol`))
+
+W281PvW281X_sig_final <- rbind(W281PvW281X_sig_down, W281PvW281X_sig_up)
+
+W281PvW281X_sig_final2 <- W281PvW281X_sig_final[, c("N: -Log Student's T-test p-value W281P_W281X", "N: Student's T-test Difference W281P_W281X", "Gene Symbol")]
+
+write_xlsx(W281PvW281X_sig_final2, "./results/mass_spec/W281PvW281X_sig_proteins.xlsx")
+
+
+
+
+
+WT281vW281P_sig_up_clean_BAF <- WTvW281P_sig_up_clean %>%
+  filter(WTvW281P_sig_up_clean$`Gene Symbol` == "ARID1A" |
+         WTvW281P_sig_up_clean$`Gene Symbol` == "PBRM1" |
+         WTvW281P_sig_up_clean$`Gene Symbol` == "SMARCD2" |
+         WTvW281P_sig_up_clean$`Gene Symbol` == "SS18" |
+         WTvW281P_sig_up_clean$`Gene Symbol` == "SMARCD3" |
+         WTvW281P_sig_up_clean$`Gene Symbol` == "ARID1B" |
+         WTvW281P_sig_up_clean$`Gene Symbol` == "SMARCB1" |
+         WTvW281P_sig_up_clean$`Gene Symbol` == "DPF2" |
+         WTvW281P_sig_up_clean$`Gene Symbol` == "SMARCC1" |
+         WTvW281P_sig_up_clean$`Gene Symbol` == "SMARCE1" |
+         WTvW281P_sig_up_clean$`Gene Symbol` == "BCL7C" |
+         WTvW281P_sig_up_clean$`Gene Symbol` == "HIST1H1A")
+
+
+
+
+overlap_W281 <- intersect(WTvW281P_sig_up$`Gene Symbol`, WTvW281X_sig_up$`Gene Symbol`)
+
+
+W281_ms <- W281_ms %>%
+  mutate(Significance = case_when(
+    `N: -Log Student's T-test p-value WT281_W281P` >= 1.30102999566 & 
+    `N: Student's T-test Difference WT281_W281P` > 1.5 ~ "up",
+    `N: -Log Student's T-test p-value WT281_W281P` >= 1.30102999566 & 
+    `N: Student's T-test Difference WT281_W281P` < -1.5 ~ "down",
+    TRUE ~ "nonsig"
+  ))
+
+
+
+
+plot_W281P <- ggplot(data = W281_ms, aes(x = `N: Student's T-test Difference WT281_W281P`, y = `N: -Log Student's T-test p-value WT281_W281P`)) +
+  geom_point(aes(color = Significance), size = 2) +
+  theme_bw() +
+  ylim(0, 4) +
+  xlim(-8,8) +
+  geom_text_repel(data = WT281vW281P_sig_up_clean_BAF, label = WT281vW281P_sig_up_clean_BAF$`Gene Symbol`, hjust = 1 ,vjust = -2, size = 4) +  # Adjust hjust for text positioning
+  labs(title = "SMARCB1 W281P vs WT", x = "T-test Difference", y = "-log10(pval)") +
+  theme(text = element_text(family = "Arial", size = 15),
+        axis.text = element_text(size = 15),
+        plot.title = element_text(size = 15, hjust = 0.5)) +
+  scale_color_manual(values = c("#F32316", "#CCCDCD", "#6495ED")) +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(colour = "black"),
+    panel.border = element_rect(colour = "black", fill = NA, size = 1)
+  ) +
+  geom_vline(xintercept = 1.5, linetype = "dotted", size = 0.4) +
+  geom_vline(xintercept = -1.5, linetype = "dotted", size = 0.4) + 
+  geom_hline(yintercept = 1.30102999566, linetype = "dotted", size = 0.4) +
+  theme(legend.position = "none")
+
+plot_W281P
+
+
+ggsave("./plots/mass_spec/W281PvWT_ms_volcano.tiff", plot = plot_W281P, width = 5, height = 5, dpi=600)
+
+
+
+W281_ms2 <- W281_ms %>%
+  mutate(Significance = case_when(
+    `N: -Log Student's T-test p-value WT281_W281X` >= 1.30102999566 & 
+    `N: Student's T-test Difference WT281_W281X` > 1.5 ~ "up",
+    `N: -Log Student's T-test p-value WT281_W281X` >= 1.30102999566 & 
+    `N: Student's T-test Difference WT281_W281X` < -1.5 ~ "down",
+    TRUE ~ "nonsig"
+  ))
+
+
+WT281vW281X_sig_up_clean_BAF <- WTvW281X_sig_up_clean %>%
+  filter(WTvW281X_sig_up_clean$`Gene Symbol` == "ARID1A" |
+         WTvW281X_sig_up_clean$`Gene Symbol` == "ARID1B" |
+         WTvW281X_sig_up_clean$`Gene Symbol` == "SMARCB1" |
+         WTvW281X_sig_up_clean$`Gene Symbol` == "DPF2" |
+         WTvW281X_sig_up_clean$`Gene Symbol` == "SMARCD3")
+
+
+plot_W281X <- ggplot(data = W281_ms2, aes(x = `N: Student's T-test Difference WT281_W281X`, y = `N: -Log Student's T-test p-value WT281_W281X`)) +
+  geom_point(aes(color = Significance), size = 2) +
+  theme_bw() +
+  ylim(0, 5) +
+  xlim(-8,8) +
+  geom_text_repel(data = WT281vW281X_sig_up_clean_BAF, label = WT281vW281X_sig_up_clean_BAF$`Gene Symbol`, hjust = 1 ,vjust = -2, size = 4) +  # Adjust hjust for text positioning
+  labs(title = "SMARCB1 W281X vs WT", x = "T-test Difference", y = "-log10(pval)") +
+  theme(text = element_text(family = "Arial", size = 15),
+        axis.text = element_text(size = 15),
+        plot.title = element_text(size = 15, hjust = 0.5)) +
+  scale_color_manual(values = c("#F32316", "#CCCDCD", "#6495ED")) +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(colour = "black"),
+    panel.border = element_rect(colour = "black", fill = NA, size = 1)
+  ) +
+  geom_vline(xintercept = 1.5, linetype = "dotted", size = 0.4) +
+  geom_vline(xintercept = -1.5, linetype = "dotted", size = 0.4) + 
+  geom_hline(yintercept = 1.30102999566, linetype = "dotted", size = 0.4) +
+  theme(legend.position = "none")
+
+plot_W281X
+
+ggsave("./plots/mass_spec/W281XvWT_ms_volcano.tiff", plot = plot_W281X, width = 5, height = 5, dpi=600)
+
+
+
+W281_ms3 <- W281_ms %>%
+  mutate(Significance = case_when(
+    `N: -Log Student's T-test p-value W281P_W281X` >= 1.30102999566 & 
+    `N: Student's T-test Difference W281P_W281X` > 1.5 ~ "up",
+    `N: -Log Student's T-test p-value W281P_W281X` >= 1.30102999566 & 
+    `N: Student's T-test Difference W281P_W281X` < -1.5 ~ "down",
+    TRUE ~ "nonsig"
+  ))
+
+
+
+W281PvW281X_sig_both <- rbind(W281PvW281X_sig_up_clean, W281PvW281X_sig_down_clean)
+
+W281PvW281X_sig_up_clean_BAF <- W281PvW281X_sig_both %>%
+  filter(W281PvW281X_sig_both$`Gene Symbol` == "SMARCB1" |
+         W281PvW281X_sig_both$`Gene Symbol` == "HIST1H1A" |
+         W281PvW281X_sig_both$`Gene Symbol` == "SMARCD3" )
+
+
+
+plot_W281PvW281X <- ggplot(data = W281_ms3, aes(x = `N: Student's T-test Difference W281P_W281X`, y = `N: -Log Student's T-test p-value W281P_W281X`)) +
+  geom_point(aes(color = Significance), size = 2) +
+  theme_bw() +
+  ylim(0, 5) +
+  xlim(-8,8) +
+  geom_text_repel(data = W281PvW281X_sig_up_clean_BAF, label = W281PvW281X_sig_up_clean_BAF$`Gene Symbol`, hjust = 1 ,vjust = -2, size = 4) +  # Adjust hjust for text positioning
+  labs(title = "SMARCB1 W281X vs W281P", x = "T-test Difference", y = "-log10(pval)") +
+  theme(text = element_text(family = "Arial", size = 15),
+        axis.text = element_text(size = 15),
+        plot.title = element_text(size = 15, hjust = 0.5)) +
+  scale_color_manual(values = c("#F32316", "#CCCDCD", "#6495ED")) +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(colour = "black"),
+    panel.border = element_rect(colour = "black", fill = NA, size = 1)
+  ) +
+  geom_vline(xintercept = 1.5, linetype = "dotted", size = 0.4) +
+  geom_vline(xintercept = -1.5, linetype = "dotted", size = 0.4) + 
+  geom_hline(yintercept = 1.30102999566, linetype = "dotted", size = 0.4) +
+  theme(legend.position = "none")
+
+plot_W281PvW281X
+
+ggsave("./plots/mass_spec/W281XvW281P_ms_volcano.tiff", plot = plot_W281PvW281X, width = 5, height = 5, dpi=600)
+
+```
+
+
