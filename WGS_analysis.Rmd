@@ -1,0 +1,272 @@
+
+
+To generate only bam files
+```{bash}
+
+dragen \
+    -r GRCh38p13v9 \
+    --fastq-file1 DNA/G401_P9_STT21_MRT00_SEQ01_1.fq.gz \
+    --fastq-file2 DNA/G401_P9_STT21_MRT00_SEQ01_2.fq.gz \
+    --trim-adapter-read1 /opt/edico/config/adapter_sequences.fasta \
+    --trim-adapter-read2 /opt/edico/config/adapter_sequences.fasta \
+    --read-trimmers adapter \
+    --soft-read-trimmers none \
+    --remove-duplicates true \
+    --output-directory alignments \
+    --output-file-prefix G401_P9_STT21_MRT00_SEQ01 \
+    --RGID G401_P9_STT21_MRT00_SEQ01_01 \
+    --RGSM G401_P9_STT21_MRT00_SEQ01_01_S1 \
+    --enable-map-align true
+
+
+```
+
+To generate VCF files and CNV files
+```{bash}
+
+dragen \
+    -r GRCh38p13v9 \
+    --fastq-file1 DNA/G401_P9_STT21_MRT00_SEQ01_1.fq.gz \
+    --fastq-file2 DNA/G401_P9_STT21_MRT00_SEQ01_2.fq.gz \
+    --trim-adapter-read1 /opt/edico/config/adapter_sequences.fasta \
+    --trim-adapter-read2 /opt/edico/config/adapter_sequences.fasta \
+    --read-trimmers adapter \
+    --soft-read-trimmers none \
+    --remove-duplicates true \
+    --output-directory alignments \
+    --output-file-prefix G401_P9_STT21_MRT00_SEQ01 \
+    --RGID G401_P9_STT21_MRT00_SEQ01_01 \
+    --RGSM G401_P9_STT21_MRT00_SEQ01_01_S1 \
+    --enable-variant-caller true \
+    --enable-cnv true \
+    --cnv-enable-self-normalization true \
+    --enable-map-align true
+
+
+
+```
+
+To generate coverage bins across the genome
+
+```{bash}
+
+bedtools genomecov -ibam G401_P9_STT21_MRT00_SEQ01.bam -bga > coverage_G401.bed
+
+```
+
+```{bash}
+
+bedtools makewindows -g GRCh38.p13.genome.fa.fai -w 1000 > GRCh38.p13_1kb_windows.bed
+
+```
+
+```{bash}
+
+bedtools map -a GRCh38.p13_1kb_windows.bed -b coverage_G401.bedgraph -c 4 -o mean > average_coverage_1kb_G401.bed
+
+```
+
+
+```{r}
+library(readr)
+library(dplyr)
+library(ggplot2)
+
+G401_coverage <- read_tsv("./data/WGS_analysis/average_coverage_10kb_G401.bed")
+
+G401_coverage_filt <- G401_coverage %>%
+  filter(Chr %in% c(paste0("chr", 1:22)))
+
+
+G401_coverage_filt$Chr <- factor(G401_coverage_filt$Chr, levels = paste0("chr", 1:22))
+G401_coverage_filt$color <- ifelse(as.numeric(factor(G401_coverage_filt$Chr)) %% 2 == 0, "black", "gray")
+
+G401_coverage_filt <- G401_coverage_filt %>%
+  mutate(RegionLength = End - Start)
+
+# Create a cumulative sum column
+G401_coverage_filt <- G401_coverage_filt %>%
+  mutate(CumulativeSum = cumsum(RegionLength))
+
+start_positions <- G401_coverage_filt %>%
+  group_by(Chr) %>%
+  filter(row_number() == 1) %>%
+  select(Chr, CumulativeSum)
+
+G401_coverage_filt <- G401_coverage_filt %>%
+  filter(!is.na(CumulativeSum) & !is.na(Coverage))
+
+chromosome_midpoints <- G401_coverage_filt %>%
+  group_by(Chr) %>%
+  summarise(Midpoint = median(CumulativeSum))
+
+
+G401_coverage_plot <- ggplot(G401_coverage_filt, aes(x = CumulativeSum, y = Coverage)) +
+  geom_line(color = G401_coverage_filt$color) +  # Line plot for coverage
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +  # Rotate x labels if needed
+  labs(y = "Coverage", x = NULL) +
+  theme_minimal() +
+  theme(
+    panel.background = element_blank(),  # Remove panel background
+    plot.background = element_blank(),   # Remove plot background
+    panel.grid = element_blank(),        # Remove grid lines
+    axis.text.x = element_blank(),  # **Remove x-axis labels**
+    axis.ticks.x = element_blank(),  # **Remove x-axis ticks**
+    legend.position = "none"  # Remove legend if unnecessary
+  ) +
+  # Add vertical lines at the chromosome start positions
+  geom_vline(data = start_positions, aes(xintercept = CumulativeSum), 
+             linetype = "dotted", color = "red", size = 0.5) +
+  geom_text(data = chromosome_midpoints, aes(x = Midpoint, y = -3, label = Chr), 
+            color = "black", size = 3, vjust = 1, angle = 90) +
+  ylim(-5,100)
+
+G401_coverage_plot
+
+ggsave(filename = "./plots/WGS_analysis/G401_coverage_uniformity.tiff", plot = G401_coverage_plot, 
+       width = 10, height = 6, dpi = 300)
+
+
+```
+
+```{r}
+
+G401_coverage_filt_chr22 <- G401_coverage_filt %>%
+  filter(G401_coverage_filt$Chr == "chr22")
+
+
+
+G401_coverage_filt_chr22_SMARCB1 <- G401_coverage_filt_chr22 %>%
+  filter(G401_coverage_filt_chr22$Start >22500000 & G401_coverage_filt_chr22$Start <25000000)
+
+SMARCB1_G401 <- ggplot(G401_coverage_filt_chr22_SMARCB1, aes(x = Start, y = Coverage)) +
+  geom_line() +
+  labs(x = "Position", y = "Coverage") +
+  theme_minimal() +
+  theme(
+    panel.background = element_blank(),  # Remove panel background
+    plot.background = element_blank(),   # Remove plot background
+    panel.grid = element_blank(),        # Remove grid lines
+    legend.position = "none"  # Remove legend if unnecessary
+  ) +
+  ylim(0, 60) +
+  geom_hline(yintercept = 0, color = "black", size = 0.5) + 
+  geom_vline(xintercept = min(G401_coverage_filt_chr22_SMARCB1$Start), color = "black", size = 0.5) +
+  geom_rect(aes(xmin = 24129153, xmax = 24180196, ymin = 17.5, ymax = 20), 
+            fill = "red", alpha = 0.5) +
+  geom_text(aes(x = (24100000 + 24180196) / 2, y = 21, label = "SMARCB1"), 
+            color = "black", size = 3, fontface = "plain")
+
+SMARCB1_G401
+
+ggsave(filename = "./plots/WGS_analysis/G401_SMARCB1_coverage.tiff", plot = SMARCB1_G401, 
+       width = 10, height = 6, dpi = 300)
+
+```
+
+RCRF analysis
+
+```{r}
+library(readr)
+library(dplyr)
+library(ggplot2)
+
+RCRF_coverage <- read_tsv("./data/WGS_analysis/average_coverage_10kb_RCRF.bed")
+
+RCRF_coverage_filt <- RCRF_coverage %>%
+  filter(Chr %in% c(paste0("chr", 1:22)))
+
+
+RCRF_coverage_filt$Chr <- factor(RCRF_coverage_filt$Chr, levels = paste0("chr", 1:22))
+RCRF_coverage_filt$color <- ifelse(as.numeric(factor(RCRF_coverage_filt$Chr)) %% 2 == 0, "black", "gray")
+
+RCRF_coverage_filt <- RCRF_coverage_filt %>%
+  mutate(RegionLength = End - Start)
+
+# Create a cumulative sum column
+RCRF_coverage_filt <- RCRF_coverage_filt %>%
+  mutate(CumulativeSum = cumsum(RegionLength))
+
+start_positions <- RCRF_coverage_filt %>%
+  group_by(Chr) %>%
+  filter(row_number() == 1) %>%
+  select(Chr, CumulativeSum)
+
+RCRF_coverage_filt <- RCRF_coverage_filt %>%
+  filter(!is.na(CumulativeSum) & !is.na(Coverage))
+
+chromosome_midpoints <- RCRF_coverage_filt %>%
+  group_by(Chr) %>%
+  summarise(Midpoint = median(CumulativeSum))
+
+
+RCRF_coverage_plot <- ggplot(RCRF_coverage_filt, aes(x = CumulativeSum, y = Coverage)) +
+  geom_line(color = RCRF_coverage_filt$color) +  # Line plot for coverage
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +  # Rotate x labels if needed
+  labs(y = "Coverage", x = NULL) +
+  theme_minimal() +
+  theme(
+    panel.background = element_blank(),  # Remove panel background
+    plot.background = element_blank(),   # Remove plot background
+    panel.grid = element_blank(),        # Remove grid lines
+    axis.text.x = element_blank(),  # **Remove x-axis labels**
+    axis.ticks.x = element_blank(),  # **Remove x-axis ticks**
+    legend.position = "none"  # Remove legend if unnecessary
+  ) +
+  # Add vertical lines at the chromosome start positions
+  geom_vline(data = start_positions, aes(xintercept = CumulativeSum), 
+             linetype = "dotted", color = "red", size = 0.5) +
+  geom_text(data = chromosome_midpoints, aes(x = Midpoint, y = -3, label = Chr), 
+            color = "black", size = 3, vjust = 1, angle = 90) +
+  ylim(-5,100)
+
+RCRF_coverage_plot
+
+ggsave(filename = "./plots/WGS_analysis/RCRF_coverage_uniformity.tiff", plot = RCRF_coverage_plot, 
+       width = 10, height = 6, dpi = 300)
+
+
+```
+
+
+```{r}
+
+
+
+RCRF_coverage_filt_chr22 <- RCRF_coverage_filt %>%
+  filter(RCRF_coverage_filt$Chr == "chr22")
+
+
+
+RCRF_coverage_filt_chr22_SMARCB1 <- RCRF_coverage_filt_chr22 %>%
+  filter(RCRF_coverage_filt_chr22$Start >19000000 & RCRF_coverage_filt_chr22$Start <35000000)
+
+SMARCB1_RCRF <- ggplot(RCRF_coverage_filt_chr22_SMARCB1, aes(x = Start, y = Coverage)) +
+  geom_line() +
+  labs(x = "Position", y = "Coverage") +
+  theme_minimal() +
+  theme(
+    panel.background = element_blank(),  # Remove panel background
+    plot.background = element_blank(),   # Remove plot background
+    panel.grid = element_blank(),        # Remove grid lines
+    legend.position = "none"  # Remove legend if unnecessary
+  ) +
+  ylim(0, 60) +
+  geom_hline(yintercept = 0, color = "black", size = 0.5) + 
+  geom_vline(xintercept = 19000000, color = "black", size = 0.5) +
+  geom_rect(aes(xmin = 24129153, xmax = 24180196, ymin = 1, ymax = 4), 
+            fill = "red", alpha = 0.5) +
+  geom_text(aes(x = (24100000 + 24180196) / 2, y = 5, label = "SMARCB1"), 
+            color = "black", size = 3, fontface = "plain")
+
+SMARCB1_RCRF
+
+ggsave(filename = "./plots/WGS_analysis/RCRF_SMARCB1_coverage.tiff", plot = SMARCB1_RCRF, 
+       width = 10, height = 6, dpi = 300)
+
+```
+
+
+
+
+
