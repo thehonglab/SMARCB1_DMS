@@ -1,9 +1,11 @@
-# DMS Mutants ATACSeq Secondary Analysis January 9th, 2024
+# DMS Mutants ATACSeq Secondary Analysis August 27th, 2025
 
 We first looked at each replicate individually, and results looks consistent. Therefore we combined each biological replicate for final representation using the DeepTools tool called bigwigCompare. Bigwigs are not available on Github Repo due to size constraints.
 
 
 ## Part 1: Signal Intensity Heatmaps
+
+### Step 1: Merge each pair of replicate bigWigs by averaging their signal to create final combined bigWig files for each sample.
 
 ```{bash}
 
@@ -16,27 +18,23 @@ bigwigCompare -b1 W281X-R1_final.bw -b2 W281X-R2_final.bw -o W281X_final_merged.
 ```
 
 
-Generate signal intensity heatmap for significant lost and gained peaks when performing WTv across all conditions (Figure presented in Fig 4A)
+### Step 2: Generate signal intensity heatmap for significant lost and gained peaks when performing WTv across all conditions (Figure presented in Fig 4A)
 
 ```{bash}
 
 computeMatrix reference-point \
- -S WT281_final_merged.bw \
-    W281P_final_merged.bw \
-    W281X_final_merged.bw \
-    I315I_final_merged.bw \
-    I315R_final_merged.bw \
-    I315X_final_merged.bw \
- -R ./data/atacseq_data_processing/bed_files/unified_WTvX_regions_loss.bed ./data/atacseq_data_processing/bed_files/unified_WTvX_regions_gain.bed  \
- --referencePoint center --verbose \
- -a 2500 -b 2500 --outFileName matrix_compute_unified_merged.tab.gz
+  -S ../bigwigs/I315I_final_merged.bw ../bigwigs/I315R_final_merged.bw ../bigwigs/I315X_final_merged.bw ../bigwigs/WT281_final_merged.bw ../bigwigs/W281P_final_merged.bw ../bigwigs/W281X_final_merged.bw \
+  -R ../bed_files/nonsignificant_peaks_in_consensus.bed ../bed_files/significant_gain_in_consensus.bed \
+  --referencePoint center \
+  -a 2500 -b 2500 \
+  -p 64 \
+  -o accessibility_matrix_WT_peaks.gz
+  
 
-plotHeatmap \
- -m matrix_compute_unified_merged.tab.gz \
- -out unified_heatmap.png \
- --heatmapHeight 15  \
- --zMax 20 \
- --missingDataColor "#B22222" \
+plotHeatmap -m accessibility_matrix_WT_peaks.gz \
+  --outFileName all_WT_peaks.png \
+  --heatmapHeight 15  \
+  --legendLocation none \
 
 ```
 
@@ -67,13 +65,45 @@ plotHeatmap \
 
 ## Part 2: Motif Enrichment
 
+
+### Step 1: Installing HOMER v5.1
+
+Dowload configureHomer.pl here: http://homer.ucsd.edu/homer/configureHomer.pl
+
+Upload onto S3 and move onto your EC2 instance where you want to install (e.g. homer_install_dir)
+
+```{bash}
+# Install all necessary packages for HOMER to run properly
+conda install wget samtools r-essentials bioconductor-deseq2 bioconductor-edger   # Hit y when prompted
+
+#Install HOMER
+perl ~/homer_install_dir/configureHomer_v5.1.pl -install
+
+# Add this to the bottom of your .bashrc:  PATH=$PATH:/home/ec2-user/homer_install_dir/.//bin/ (or wherever you installed it)
+
+nano ~/.bashrc #scroll to the bottom and paste
+
+source ./bashrc
+
+#Now you should be able to type findMotif.pl and hit tab and it will come as autocomplete.
+
+#Download the reference file
+
+perl /home/ec2-user/homer_install_dir/.//configureHomer.pl -install hg38
+
+```
+
+
+
 We used HOMER to perform motif enrichment on the same regions presented in Fig 4A. HTML of the regions can be found in 
 
 ```{bash}
 
-findMotifsGenome.pl unified_WTvX_regions_loss.bed hg38 output_directory/ -p 8
+findMotifsGenome.pl ../bed_files/nonsignificant_peaks_in_consensus.bed hg38 ./motifs_nonsignificant -p 32
 
-findMotifsGenome.pl unified_WTvX_regions_gain.bed hg38 output_directory/ -p 8
+findMotifsGenome.pl ../bed_files/significant_gain_in_consensus.bed hg38 ./motifs_significant_gain -p 32
+
+findMotifsGenome.pl ../bed_files/significant_loss_in_consensus.bed hg38 ./motifs_significant_loss -p 32
 
 findMotifsGenome.pl gain_W281PvW281X.bed hg38 output_directory/ -p 8
 

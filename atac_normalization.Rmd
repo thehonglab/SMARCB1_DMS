@@ -1,0 +1,300 @@
+
+```{bash}
+
+#Do this for all the peak files
+
+more I315I-R1_peaks.narrowPeak | cut -f 1,2,3 | more
+
+#Create a unified peakset for all the samples
+bedtools merge -i <(cat I315I-R1_peaks.bed I315I-R2_peaks.bed I315X-R1_peaks.bed I315X-R2_peaks.bed) > I315IvI315X_unified_peaks.bed
+
+# Create counts matrix for each sample under each peak
+bedtools multicov -bams 
+../../atac_analysis_gorkin/final_alignments/I315I-R1_final.bam ../../atac_analysis_gorkin/final_alignments/I315I-R2_final.bam ../../atac_analysis_gorkin/final_alignments/I315X-R1_final.bam ../../atac_analysis_gorkin/final_alignments/I315X-R2_final.bam -bed I315IvI315X_unified_peaks.bed > I315IvI315X_countmat_nonTSS
+
+#Move this file into R "I315IvI315X_countmat_nonTSS"
+
+more I315IvI315X_countmat_nonTSS | cut -f 1,2,3 > I315IvI315X_countmat_nonTSS.bed
+
+annotatePeaks.pl I315IvI315X_countmat_nonTSS.bed  hg38 > I315IvI315X_countmat_nonTSS_annotated
+
+#Move this file into R "I315IvI315X_countmat_nonTSS_annotated"
+
+```
+
+
+
+```{r}
+
+library(readr)
+library(dplyr)
+library(readxl)
+
+I315IvI315X_counts_matrix <- read_tsv("./data/atacseq_data_processing/normalization/I315IvI315X_countmat_nonTSS")
+
+
+I315IvI315X_annotated_peaks <- read_tsv("./data/atacseq_data_processing/normalization/I315IvI315X_countmat_nonTSS_annotated")
+
+
+I315IvI315X_counts_matrix_annotated <- merge(I315IvI315X_annotated_peaks, I315IvI315X_counts_matrix, by = c("Chr", "End"), all.x = TRUE)
+
+
+I315IvI315X_TSS_peaks_annotated <- I315IvI315X_counts_matrix_annotated %>%
+  filter(I315IvI315X_counts_matrix_annotated$`Distance to TSS` > -1000 & I315IvI315X_counts_matrix_annotated$`Distance to TSS` < 1000)
+
+
+#Load in the RNA data
+I315IvI315X_rna <- read_xlsx("./results/rna_analysis/I315IvI315X_all_genes.xlsx")
+
+I315IvI315X_rna_nonsig <- I315IvI315X_rna %>%
+  filter(I315IvI315X_rna$padj > 0.05)
+
+I315I_I315X_rna_nonsig_noLFC <- I315IvI315X_rna_nonsig %>%
+  filter(I315IvI315X_rna_nonsig$log2FoldChange > -0.26 & I315IvI315X_rna_nonsig$log2FoldChange < 0.26)
+
+
+I315IvI315X_TSS_peaks_nonsig_noLFC <- subset(I315IvI315X_TSS_peaks_annotated, `Gene Name` %in% I315I_I315X_rna_nonsig_noLFC$ENSEMBL)
+
+TSS_peaks <- I315IvI315X_TSS_peaks_nonsig_noLFC[ ,c(21,22,23,24)]
+
+I315IvI315X_col_sums <- colSums(TSS_peaks)
+
+I315IvI315X_colsum_array <- as.array(I315IvI315X_col_sums)
+
+```
+
+
+```{r}
+library(edgeR)
+
+I315IvI315X_counts_matrix$PeakID <- paste0("Peak_", seq_len(nrow(I315IvI315X_counts_matrix)))
+
+I315IvI315X_counts_matrix <- I315IvI315X_counts_matrix[, c("PeakID", setdiff(names(I315IvI315X_counts_matrix), "PeakID"))]
+
+I315IvI315X_counts_matrix2 <- I315IvI315X_counts_matrix[,c(1,5,6,7,8)]
+
+annotations <- I315IvI315X_counts_matrix2[, 1, drop = FALSE]  # PeakID or other annotations (e.g., Gene IDs)
+counts <- I315IvI315X_counts_matrix2[, -1]
+
+coldata <- data.frame(
+    "condition"=c(rep('I315I', 2), rep('I315X', 2)),
+    "rep"=c(rep(c(1,2),2)))
+
+
+
+
+
+dge <- DGEList(counts=counts, genes=annotations, group=coldata$condition)
+
+design <- model.matrix(~0+group, data=dge$samples)
+
+dge <- estimateDisp(dge, design)
+
+dge$samples$norm.factors <- 1/calcNormFactors(as.matrix(dge), lib.size=I315IvI315X_colsum_array)
+
+dge_fit <- glmQLFit(dge)
+diff <- glmQLFTest(dge_fit, contrast=c(1,-1))
+
+diff$table$FDR <- p.adjust(diff$table$PValue, method = "BH")
+
+
+stat_table <- diff$table
+
+peak_ids <- diff$genes
+
+stat_table$PeakID <- peak_ids
+
+stat_table_full <- cbind(stat_table, I315IvI315X_counts_matrix[, c("Chr", "Start", "End")])
+
+
+stat_table_significant_I315 <- stat_table_full %>%
+  filter(stat_table_full$FDR < 0.05 & (stat_table_full$logFC > 1 | stat_table_full$logFC < -1))
+
+stat_table_significant_I315$PeakID <- stat_table_significant_I315$PeakID$PeakID
+
+loss_I315IvI315X_edger <- stat_table_significant_I315 %>%
+  filter(stat_table_significant_I315$logFC < -1)
+
+loss_I315IvI315X_edger_bed <- loss_I315IvI315X_edger[,c(7,8,9)]
+
+gain_I315IvI315X_edger <- stat_table_significant_I315 %>%
+  filter(stat_table_significant_I315$logFC > 1)
+
+gain_I315IvI315X_edger_bed <- gain_I315IvI315X_edger[,c(7,8,9)]
+
+write_tsv(gain_I315IvI315X_edger_bed, "./data/atacseq_data_processing/normalization/gain_I315IvI315X_edger.bed")
+
+write_tsv(loss_I315IvI315X_edger_bed, "./data/atacseq_data_processing/normalization/loss_I315IvI315X_edger.bed")
+
+
+write_tsv(stat_table_significant_I315, "./data/atacseq_data_processing/normalization/I315IvI315X_edger_analysis.tsv")
+
+
+```
+
+
+
+```{r}
+
+
+I315IvI315X_counts_matrix_annotated2 <- merge(I315IvI315X_annotated_peaks, I315IvI315X_counts_matrix, by = c("Chr", "End"), all.x = TRUE)
+
+
+names(I315IvI315X_counts_matrix_annotated2)[names(I315IvI315X_counts_matrix_annotated2) == "Start.y"] <- "Start"
+
+
+stat_table_full$PeakID <- stat_table_full$PeakID$PeakID
+
+
+I315IvI315X_counts_matrix_annotated2_selected <- I315IvI315X_counts_matrix_annotated2 %>% select(PeakID, Annotation, 'Distance to TSS', 'Gene Name')
+
+
+stat_table_full_annotated_df_I315 <- stat_table_full %>% left_join(I315IvI315X_counts_matrix_annotated2_selected, by = "PeakID")
+
+stat_table_full_annotated_df_I315_significant <- stat_table_full_annotated_df_I315 %>%
+  filter(stat_table_full_annotated_df_I315$FDR < 0.05 & (stat_table_full_annotated_df_I315$logFC > 1 | stat_table_full_annotated_df_I315$logFC < -1))
+
+write_tsv(stat_table_full_annotated_df_I315_significant, "./data/atacseq_data_processing/normalization/I315IvI315X_edger_analysis_annotated.tsv")
+
+
+```
+
+
+
+
+________________W281 Analysis
+
+
+```{r}
+
+library(readr)
+library(dplyr)
+library(readxl)
+
+WTvW281X_counts_matrix <- read_tsv("./data/atacseq_data_processing/normalization/WTvW281X_countmat_nonTSS")
+
+
+WTvW281X_annotated_peaks <- read_tsv("./data/atacseq_data_processing/normalization/WTvW281X_countmat_nonTSS_annotated")
+
+
+WTvW281X_counts_matrix_annotated <- merge(WTvW281X_annotated_peaks, WTvW281X_counts_matrix, by = c("Chr", "End"), all.x = TRUE)
+
+
+WTvW281X_TSS_peaks_annotated <- WTvW281X_counts_matrix_annotated %>%
+  filter(WTvW281X_counts_matrix_annotated$`Distance to TSS` > -1000 & WTvW281X_counts_matrix_annotated$`Distance to TSS` < 1000)
+
+
+#Load in the RNA data
+WTvW281X_rna <- read_xlsx("./results/rna_analysis/WTvW281X_all_genes.xlsx")
+
+WTvW281X_rna_nonsig <- WTvW281X_rna %>%
+  filter(WTvW281X_rna$padj > 0.05)
+
+WTvW281X_rna_nonsig_noLFC <- WTvW281X_rna_nonsig %>%
+  filter(WTvW281X_rna_nonsig$log2FoldChange > -0.26 & WTvW281X_rna_nonsig$log2FoldChange < 0.26)
+
+
+WTvW281X_TSS_peaks_nonsig_noLFC <- subset(WTvW281X_TSS_peaks_annotated, `Gene Name` %in% WTvW281X_rna_nonsig_noLFC$ENSEMBL)
+
+TSS_peaks <- WTvW281X_TSS_peaks_nonsig_noLFC[ ,c(21,22,23,24)]
+
+WTvW281X_col_sums <- colSums(TSS_peaks)
+
+WTvW281X_colsum_array <- as.array(WTvW281X_col_sums)
+
+```
+
+```{r}
+library(edgeR)
+
+WTvW281X_counts_matrix$PeakID <- paste0("Peak_", seq_len(nrow(WTvW281X_counts_matrix)))
+
+WTvW281X_counts_matrix <- WTvW281X_counts_matrix[, c("PeakID", setdiff(names(WTvW281X_counts_matrix), "PeakID"))]
+
+WTvW281X_counts_matrix2 <- WTvW281X_counts_matrix[,c(1,5,6,7,8)]
+
+annotations <- WTvW281X_counts_matrix2[, 1, drop = FALSE]  # PeakID or other annotations (e.g., Gene IDs)
+counts <- WTvW281X_counts_matrix2[, -1]
+
+coldata <- data.frame(
+    "condition"=c(rep('I315I', 2), rep('I315X', 2)),
+    "rep"=c(rep(c(1,2),2)))
+
+
+
+
+
+dge <- DGEList(counts=counts, genes=annotations, group=coldata$condition)
+
+design <- model.matrix(~0+group, data=dge$samples)
+
+dge <- estimateDisp(dge, design)
+
+dge$samples$norm.factors <- 1/calcNormFactors(as.matrix(dge), lib.size=WTvW281X_colsum_array)
+
+dge_fit <- glmQLFit(dge)
+diff <- glmQLFTest(dge_fit, contrast=c(1,-1))
+
+diff$table$FDR <- p.adjust(diff$table$PValue, method = "BH")
+
+
+stat_table <- diff$table
+
+peak_ids <- diff$genes
+
+stat_table$PeakID <- peak_ids
+
+stat_table_full <- cbind(stat_table, WTvW281X_counts_matrix[, c("Chr", "Start", "End")])
+
+
+stat_table_significant_W281 <- stat_table_full %>%
+  filter(stat_table_full$FDR < 0.05 & (stat_table_full$logFC > 1 | stat_table_full$logFC < -1))
+
+stat_table_significant_W281$PeakID <- stat_table_significant_W281$PeakID$PeakID
+
+loss_WTvW281X_edger <- stat_table_significant_W281 %>%
+  filter(stat_table_significant_W281$logFC < -1)
+
+loss_WTvW281X_edger_bed <- loss_WTvW281X_edger[,c(7,8,9)]
+
+gain_WTvW281X_edger <- stat_table_significant_W281 %>%
+  filter(stat_table_significant_W281$logFC > 1)
+
+gain_WTvW281X_edger_bed <- gain_WTvW281X_edger[,c(7,8,9)]
+
+write_tsv(gain_WTvW281X_edger_bed, "./data/atacseq_data_processing/normalization/gain_WTvW281X_edger.bed")
+
+write_tsv(loss_WTvW281X_edger_bed, "./data/atacseq_data_processing/normalization/loss_WTvW281X_edger.bed")
+
+write_tsv(stat_table_significant_W281, "./data/atacseq_data_processing/normalization/WTvW281X_edger_analysis.tsv")
+
+
+```
+
+
+```{r}
+
+
+WTvW281X_counts_matrix_annotated2 <- merge(WTvW281X_annotated_peaks, WTvW281X_counts_matrix, by = c("Chr", "End"), all.x = TRUE)
+
+
+names(WTvW281X_counts_matrix_annotated2)[names(WTvW281X_counts_matrix_annotated2) == "Start.y"] <- "Start"
+
+
+stat_table_full$PeakID <- stat_table_full$PeakID$PeakID
+
+
+WTvW281X_counts_matrix_annotated2_selected <- WTvW281X_counts_matrix_annotated2 %>% select(PeakID, Annotation, 'Distance to TSS', 'Gene Name')
+
+
+stat_table_full_annotated_df_W281 <- stat_table_full %>% left_join(WTvW281X_counts_matrix_annotated2_selected, by = "PeakID")
+
+stat_table_full_annotated_df_W281_significant <- stat_table_full_annotated_df_W281 %>%
+  filter(stat_table_full_annotated_df_W281$FDR < 0.05 & (stat_table_full_annotated_df_W281$logFC > 1 | stat_table_full_annotated_df_W281$logFC < -1))
+
+write_tsv(stat_table_full_annotated_df_W281_significant, "./data/atacseq_data_processing/normalization/WTvW281X_edger_analysis_annotated.tsv")
+
+
+```
+
+

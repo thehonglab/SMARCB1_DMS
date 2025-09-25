@@ -36,13 +36,10 @@ library(dplyr)
 library(rmarkdown)
 library(zoo)
 library(RColorBrewer)
-library(viridis)
-library(VennDiagram)
 library(tidyverse)
 library(colorspace)  
 library(writexl)
 library(tidyr)
-library(bookdown)
 library(yaml)
 library(data.table)
 
@@ -273,6 +270,9 @@ export_data = export_data %>%
          bt16_rep2_log2 = log2(bt16_rep2_ref),
          rcrf1009t_rep1_log2 = log2(rcrf1009t_rep1_ref),
          rcrf1009t_rep2_log2 = log2(rcrf1009t_rep2_ref))
+
+
+write_tsv(export_data, "./data/counts/filtered_counts_data.tsv")
 
 ```
 
@@ -1044,6 +1044,819 @@ write_csv(single_mutants_data,
 ```
 
 
+################################################################################
+```{r}
+# Recreate the silent data filtering (same as original)
+single_mutants_data = single_mutants_data[order(single_mutants_data$mut_1_final), ]
+
+silent_data = filter(single_mutants_data,
+                     mut_1_type_final == "S")
+
+codons_w_23nt = unique(filter(silent_data,
+                              num.whole.mol.nt.changes_Ted == 2 |
+                                num.whole.mol.nt.changes_Ted == 3)$mut_1_final)
+
+silent_data = filter(silent_data,
+                     !(num.whole.mol.nt.changes_Ted == 1 &
+                       is.element(mut_1_final, codons_w_23nt)))
+
+rm(codons_w_23nt)
+
+# Initialize dataframe to store all rolling stats
+all_silent_rolling_stats = data.frame(
+  position = integer(),
+  cell_line = character(),
+  replicate = character(),
+  rolling_mean = numeric(),
+  rolling_sd = numeric(),
+  n_silent_muts = integer()
+)
+
+## G401 Rep 1 ####
+g401_silent_data = filter(silent_data,
+                          !is.na(g401_rep1_log2),
+                          !is.na(g401_rep2_log2))
+
+G401_roll_stats_1 = data.frame("codon" = c(), "rolling_average" = c(), "rolling_sd" = c(), "n_muts" = c())
+
+for (j in 1:386) {
+  rows_needed = g401_silent_data$mut_1_type_final == "S" &
+    g401_silent_data$mut_1_final >= j - 2 &
+    g401_silent_data$mut_1_final <= j + 2
+  
+  codon_mean = mean(g401_silent_data$g401_rep1_log2[rows_needed], na.rm = TRUE)
+  codon_sd = sd(g401_silent_data$g401_rep1_log2[rows_needed], na.rm = TRUE)
+  n_muts = sum(rows_needed, na.rm = TRUE)
+  
+  G401_roll_stats_1 = rbind(G401_roll_stats_1, c(j, codon_mean, codon_sd, n_muts))
+  
+  # Add to master dataframe
+  all_silent_rolling_stats = rbind(all_silent_rolling_stats, 
+                                   data.frame(position = j,
+                                             cell_line = "G401",
+                                             replicate = "Rep1",
+                                             rolling_mean = codon_mean,
+                                             rolling_sd = codon_sd,
+                                             n_silent_muts = n_muts))
+}
+
+## G401 Rep 2 ####
+for (j in 1:386) {
+  rows_needed = g401_silent_data$mut_1_type_final == "S" &
+    g401_silent_data$mut_1_final >= j - 2 &
+    g401_silent_data$mut_1_final <= j + 2
+  
+  codon_mean = mean(g401_silent_data$g401_rep2_log2[rows_needed], na.rm = TRUE)
+  codon_sd = sd(g401_silent_data$g401_rep2_log2[rows_needed], na.rm = TRUE)
+  n_muts = sum(rows_needed, na.rm = TRUE)
+  
+  all_silent_rolling_stats = rbind(all_silent_rolling_stats, 
+                                   data.frame(position = j,
+                                             cell_line = "G401",
+                                             replicate = "Rep2",
+                                             rolling_mean = codon_mean,
+                                             rolling_sd = codon_sd,
+                                             n_silent_muts = n_muts))
+}
+
+## BT16 Rep 1 ####
+bt16_silent_data = filter(silent_data,
+                          !is.na(bt16_rep1_log2),
+                          !is.na(bt16_rep2_log2))
+
+for (j in 1:386) {
+  rows_needed = bt16_silent_data$mut_1_type_final == "S" &
+    bt16_silent_data$mut_1_final >= j - 2 &
+    bt16_silent_data$mut_1_final <= j + 2
+  
+  codon_mean = mean(bt16_silent_data$bt16_rep1_log2[rows_needed], na.rm = TRUE)
+  codon_sd = sd(bt16_silent_data$bt16_rep1_log2[rows_needed], na.rm = TRUE)
+  n_muts = sum(rows_needed, na.rm = TRUE)
+  
+  all_silent_rolling_stats = rbind(all_silent_rolling_stats, 
+                                   data.frame(position = j,
+                                             cell_line = "BT16",
+                                             replicate = "Rep1",
+                                             rolling_mean = codon_mean,
+                                             rolling_sd = codon_sd,
+                                             n_silent_muts = n_muts))
+}
+
+## BT16 Rep 2 ####
+for (j in 1:386) {
+  rows_needed = bt16_silent_data$mut_1_type_final == "S" &
+    bt16_silent_data$mut_1_final >= j - 2 &
+    bt16_silent_data$mut_1_final <= j + 2
+  
+  codon_mean = mean(bt16_silent_data$bt16_rep2_log2[rows_needed], na.rm = TRUE)
+  codon_sd = sd(bt16_silent_data$bt16_rep2_log2[rows_needed], na.rm = TRUE)
+  n_muts = sum(rows_needed, na.rm = TRUE)
+  
+  all_silent_rolling_stats = rbind(all_silent_rolling_stats, 
+                                   data.frame(position = j,
+                                             cell_line = "BT16",
+                                             replicate = "Rep2",
+                                             rolling_mean = codon_mean,
+                                             rolling_sd = codon_sd,
+                                             n_silent_muts = n_muts))
+}
+
+## RCRF1009T Rep 1 ####
+rcrf1009t_silent_data = filter(silent_data,
+                               !is.na(rcrf1009t_rep1_log2),
+                               !is.na(rcrf1009t_rep2_log2))
+
+for (j in 1:386) {
+  rows_needed = rcrf1009t_silent_data$mut_1_type_final == "S" &
+    rcrf1009t_silent_data$mut_1_final >= j - 2 &
+    rcrf1009t_silent_data$mut_1_final <= j + 2
+  
+  codon_mean = mean(rcrf1009t_silent_data$rcrf1009t_rep1_log2[rows_needed], na.rm = TRUE)
+  codon_sd = sd(rcrf1009t_silent_data$rcrf1009t_rep1_log2[rows_needed], na.rm = TRUE)
+  n_muts = sum(rows_needed, na.rm = TRUE)
+  
+  all_silent_rolling_stats = rbind(all_silent_rolling_stats, 
+                                   data.frame(position = j,
+                                             cell_line = "RCRF1009T",
+                                             replicate = "Rep1",
+                                             rolling_mean = codon_mean,
+                                             rolling_sd = codon_sd,
+                                             n_silent_muts = n_muts))
+}
+
+## RCRF1009T Rep 2 ####
+for (j in 1:386) {
+  rows_needed = rcrf1009t_silent_data$mut_1_type_final == "S" &
+    rcrf1009t_silent_data$mut_1_final >= j - 2 &
+    rcrf1009t_silent_data$mut_1_final <= j + 2
+  
+  codon_mean = mean(rcrf1009t_silent_data$rcrf1009t_rep2_log2[rows_needed], na.rm = TRUE)
+  codon_sd = sd(rcrf1009t_silent_data$rcrf1009t_rep2_log2[rows_needed], na.rm = TRUE)
+  n_muts = sum(rows_needed, na.rm = TRUE)
+  
+  all_silent_rolling_stats = rbind(all_silent_rolling_stats, 
+                                   data.frame(position = j,
+                                             cell_line = "RCRF1009T",
+                                             replicate = "Rep2",
+                                             rolling_mean = codon_mean,
+                                             rolling_sd = codon_sd,
+                                             n_silent_muts = n_muts))
+}
+
+# Clean up
+rm(g401_silent_data, bt16_silent_data, rcrf1009t_silent_data)
+rm(G401_roll_stats_1, codon_mean, codon_sd, n_muts, rows_needed, j)
+
+# Summary statistics
+print("Summary of rolling means for silent mutations:")
+summary(all_silent_rolling_stats$rolling_mean)
+
+print("Summary of rolling SDs for silent mutations:")
+summary(all_silent_rolling_stats$rolling_sd)
+
+print("Range of detection thresholds (1.96 * rolling_sd):")
+all_silent_rolling_stats$detection_threshold = 2 * all_silent_rolling_stats$rolling_sd
+summary(all_silent_rolling_stats$detection_threshold)
+
+# Calculate position-averaged values across all replicates
+silent_position_summary = all_silent_rolling_stats %>%
+  group_by(position) %>%
+  summarise(
+    mean_rolling_mean_silent = mean(rolling_mean, na.rm = TRUE),
+    mean_rolling_sd_silent = mean(rolling_sd, na.rm = TRUE),
+    mean_detection_threshold_silent = mean(detection_threshold, na.rm = TRUE),
+    avg_n_silent_muts_silent = mean(n_silent_muts, na.rm = TRUE)
+  )
+
+print("Detection thresholds by position (averaged across all reps):")
+print(paste("Range:", round(min(silent_position_summary$mean_detection_threshold, na.rm = TRUE), 2), 
+            "to", round(max(silent_position_summary$mean_detection_threshold, na.rm = TRUE), 2)))
+print(paste("Median:", round(median(silent_position_summary$mean_detection_threshold_silent, na.rm = TRUE), 2)))
+```
+
+
+
+```{r}
+
+# Recreate the missense data filtering (adapted from silent mutation code)
+single_mutants_data = single_mutants_data[order(single_mutants_data$mut_1_final), ]
+
+missense_data = filter(single_mutants_data,
+                      mut_1_type_final == "M")
+
+# Initialize dataframe to store all rolling stats for missense mutations
+all_missense_rolling_stats = data.frame(
+  position = integer(),
+  cell_line = character(),
+  replicate = character(),
+  rolling_mean = numeric(),
+  rolling_sd = numeric(),
+  n_missense_muts = integer()
+)
+
+## G401 Rep 1 ####
+g401_missense_data = filter(missense_data,
+                           !is.na(g401_rep1_log2),
+                           !is.na(g401_rep2_log2))
+
+for (j in 1:386) {
+  rows_needed = g401_missense_data$mut_1_type_final == "M" &
+    g401_missense_data$mut_1_final >= j - 2 &
+    g401_missense_data$mut_1_final <= j + 2
+  
+  codon_mean = mean(g401_missense_data$g401_rep1_log2[rows_needed], na.rm = TRUE)
+  codon_sd = sd(g401_missense_data$g401_rep1_log2[rows_needed], na.rm = TRUE)
+  n_muts = sum(rows_needed, na.rm = TRUE)
+  
+  # Add to master dataframe
+  all_missense_rolling_stats = rbind(all_missense_rolling_stats, 
+                                    data.frame(position = j,
+                                              cell_line = "G401",
+                                              replicate = "Rep1",
+                                              rolling_mean = codon_mean,
+                                              rolling_sd = codon_sd,
+                                              n_missense_muts = n_muts))
+}
+
+## G401 Rep 2 ####
+for (j in 1:386) {
+  rows_needed = g401_missense_data$mut_1_type_final == "M" &
+    g401_missense_data$mut_1_final >= j - 2 &
+    g401_missense_data$mut_1_final <= j + 2
+  
+  codon_mean = mean(g401_missense_data$g401_rep2_log2[rows_needed], na.rm = TRUE)
+  codon_sd = sd(g401_missense_data$g401_rep2_log2[rows_needed], na.rm = TRUE)
+  n_muts = sum(rows_needed, na.rm = TRUE)
+  
+  all_missense_rolling_stats = rbind(all_missense_rolling_stats, 
+                                    data.frame(position = j,
+                                              cell_line = "G401",
+                                              replicate = "Rep2",
+                                              rolling_mean = codon_mean,
+                                              rolling_sd = codon_sd,
+                                              n_missense_muts = n_muts))
+}
+
+## BT16 Rep 1 ####
+bt16_missense_data = filter(missense_data,
+                           !is.na(bt16_rep1_log2),
+                           !is.na(bt16_rep2_log2))
+
+for (j in 1:386) {
+  rows_needed = bt16_missense_data$mut_1_type_final == "M" &
+    bt16_missense_data$mut_1_final >= j - 2 &
+    bt16_missense_data$mut_1_final <= j + 2
+  
+  codon_mean = mean(bt16_missense_data$bt16_rep1_log2[rows_needed], na.rm = TRUE)
+  codon_sd = sd(bt16_missense_data$bt16_rep1_log2[rows_needed], na.rm = TRUE)
+  n_muts = sum(rows_needed, na.rm = TRUE)
+  
+  all_missense_rolling_stats = rbind(all_missense_rolling_stats, 
+                                    data.frame(position = j,
+                                              cell_line = "BT16",
+                                              replicate = "Rep1",
+                                              rolling_mean = codon_mean,
+                                              rolling_sd = codon_sd,
+                                              n_missense_muts = n_muts))
+}
+
+## BT16 Rep 2 ####
+for (j in 1:386) {
+  rows_needed = bt16_missense_data$mut_1_type_final == "M" &
+    bt16_missense_data$mut_1_final >= j - 2 &
+    bt16_missense_data$mut_1_final <= j + 2
+  
+  codon_mean = mean(bt16_missense_data$bt16_rep2_log2[rows_needed], na.rm = TRUE)
+  codon_sd = sd(bt16_missense_data$bt16_rep2_log2[rows_needed], na.rm = TRUE)
+  n_muts = sum(rows_needed, na.rm = TRUE)
+  
+  all_missense_rolling_stats = rbind(all_missense_rolling_stats, 
+                                    data.frame(position = j,
+                                              cell_line = "BT16",
+                                              replicate = "Rep2",
+                                              rolling_mean = codon_mean,
+                                              rolling_sd = codon_sd,
+                                              n_missense_muts = n_muts))
+}
+
+## RCRF1009T Rep 1 ####
+rcrf1009t_missense_data = filter(missense_data,
+                                !is.na(rcrf1009t_rep1_log2),
+                                !is.na(rcrf1009t_rep2_log2))
+
+for (j in 1:386) {
+  rows_needed = rcrf1009t_missense_data$mut_1_type_final == "M" &
+    rcrf1009t_missense_data$mut_1_final >= j - 2 &
+    rcrf1009t_missense_data$mut_1_final <= j + 2
+  
+  codon_mean = mean(rcrf1009t_missense_data$rcrf1009t_rep1_log2[rows_needed], na.rm = TRUE)
+  codon_sd = sd(rcrf1009t_missense_data$rcrf1009t_rep1_log2[rows_needed], na.rm = TRUE)
+  n_muts = sum(rows_needed, na.rm = TRUE)
+  
+  all_missense_rolling_stats = rbind(all_missense_rolling_stats, 
+                                    data.frame(position = j,
+                                              cell_line = "RCRF1009T",
+                                              replicate = "Rep1",
+                                              rolling_mean = codon_mean,
+                                              rolling_sd = codon_sd,
+                                              n_missense_muts = n_muts))
+}
+
+## RCRF1009T Rep 2 ####
+for (j in 1:386) {
+  rows_needed = rcrf1009t_missense_data$mut_1_type_final == "M" &
+    rcrf1009t_missense_data$mut_1_final >= j - 2 &
+    rcrf1009t_missense_data$mut_1_final <= j + 2
+  
+  codon_mean = mean(rcrf1009t_missense_data$rcrf1009t_rep2_log2[rows_needed], na.rm = TRUE)
+  codon_sd = sd(rcrf1009t_missense_data$rcrf1009t_rep2_log2[rows_needed], na.rm = TRUE)
+  n_muts = sum(rows_needed, na.rm = TRUE)
+  
+  all_missense_rolling_stats = rbind(all_missense_rolling_stats, 
+                                    data.frame(position = j,
+                                              cell_line = "RCRF1009T",
+                                              replicate = "Rep2",
+                                              rolling_mean = codon_mean,
+                                              rolling_sd = codon_sd,
+                                              n_missense_muts = n_muts))
+}
+
+# Clean up
+rm(g401_missense_data, bt16_missense_data, rcrf1009t_missense_data)
+rm(codon_mean, codon_sd, n_muts, rows_needed, j)
+
+# Summary statistics
+print("Summary of rolling means for missense mutations:")
+summary(all_missense_rolling_stats$rolling_mean)
+
+print("Summary of rolling SDs for missense mutations:")
+summary(all_missense_rolling_stats$rolling_sd)
+
+print("Range of detection thresholds (2 * rolling_sd):")
+all_missense_rolling_stats$detection_threshold = 2 * all_missense_rolling_stats$rolling_sd
+summary(all_missense_rolling_stats$detection_threshold)
+
+# Calculate position-averaged values across all replicates
+missense_position_summary = all_missense_rolling_stats %>%
+  group_by(position) %>%
+  summarise(
+    mean_rolling_mean_missense = mean(rolling_mean, na.rm = TRUE),
+    mean_rolling_sd_missense = mean(rolling_sd, na.rm = TRUE),
+    avg_n_missense_muts = mean(n_missense_muts, na.rm = TRUE)
+  )
+
+print("Detection thresholds by position for missense mutations (averaged across all reps):")
+print(paste("Range:", round(min(missense_position_summary$mean_detection_threshold, na.rm = TRUE), 2), 
+            "to", round(max(missense_position_summary$mean_detection_threshold, na.rm = TRUE), 2)))
+
+# Compare to silent mutation thresholds if available
+if(exists("position_summary")) {
+  print("\nComparison of detection thresholds:")
+  print(paste("Silent mutations - Range:", 
+              round(min(position_summary$mean_detection_threshold, na.rm = TRUE), 2), 
+              "to", round(max(position_summary$mean_detection_threshold, na.rm = TRUE), 2)))
+}
+
+```
+
+
+
+
+```{r}
+
+# Recreate the nonsense data filtering (adapted from missense mutation code)
+single_mutants_data = single_mutants_data[order(single_mutants_data$mut_1_final), ]
+
+nonsense_data = filter(single_mutants_data,
+                      mut_1_type_final == "N")
+
+# Initialize dataframe to store all rolling stats for nonsense mutations
+all_nonsense_rolling_stats = data.frame(
+  position = integer(),
+  cell_line = character(),
+  replicate = character(),
+  rolling_mean = numeric(),
+  rolling_sd = numeric(),
+  n_nonsense_muts = integer()
+)
+
+## G401 Rep 1 ####
+g401_nonsense_data = filter(nonsense_data,
+                           !is.na(g401_rep1_log2),
+                           !is.na(g401_rep2_log2))
+
+for (j in 1:386) {
+  rows_needed = g401_nonsense_data$mut_1_type_final == "N" &
+    g401_nonsense_data$mut_1_final >= j - 2 &
+    g401_nonsense_data$mut_1_final <= j + 2
+  
+  codon_mean = mean(g401_nonsense_data$g401_rep1_log2[rows_needed], na.rm = TRUE)
+  codon_sd = sd(g401_nonsense_data$g401_rep1_log2[rows_needed], na.rm = TRUE)
+  n_muts = sum(rows_needed, na.rm = TRUE)
+  
+  # Add to master dataframe
+  all_nonsense_rolling_stats = rbind(all_nonsense_rolling_stats, 
+                                    data.frame(position = j,
+                                              cell_line = "G401",
+                                              replicate = "Rep1",
+                                              rolling_mean = codon_mean,
+                                              rolling_sd = codon_sd,
+                                              n_nonsense_muts = n_muts))
+}
+
+## G401 Rep 2 ####
+for (j in 1:386) {
+  rows_needed = g401_nonsense_data$mut_1_type_final == "N" &
+    g401_nonsense_data$mut_1_final >= j - 2 &
+    g401_nonsense_data$mut_1_final <= j + 2
+  
+  codon_mean = mean(g401_nonsense_data$g401_rep2_log2[rows_needed], na.rm = TRUE)
+  codon_sd = sd(g401_nonsense_data$g401_rep2_log2[rows_needed], na.rm = TRUE)
+  n_muts = sum(rows_needed, na.rm = TRUE)
+  
+  all_nonsense_rolling_stats = rbind(all_nonsense_rolling_stats, 
+                                    data.frame(position = j,
+                                              cell_line = "G401",
+                                              replicate = "Rep2",
+                                              rolling_mean = codon_mean,
+                                              rolling_sd = codon_sd,
+                                              n_nonsense_muts = n_muts))
+}
+
+## BT16 Rep 1 ####
+bt16_nonsense_data = filter(nonsense_data,
+                           !is.na(bt16_rep1_log2),
+                           !is.na(bt16_rep2_log2))
+
+for (j in 1:386) {
+  rows_needed = bt16_nonsense_data$mut_1_type_final == "N" &
+    bt16_nonsense_data$mut_1_final >= j - 2 &
+    bt16_nonsense_data$mut_1_final <= j + 2
+  
+  codon_mean = mean(bt16_nonsense_data$bt16_rep1_log2[rows_needed], na.rm = TRUE)
+  codon_sd = sd(bt16_nonsense_data$bt16_rep1_log2[rows_needed], na.rm = TRUE)
+  n_muts = sum(rows_needed, na.rm = TRUE)
+  
+  all_nonsense_rolling_stats = rbind(all_nonsense_rolling_stats, 
+                                    data.frame(position = j,
+                                              cell_line = "BT16",
+                                              replicate = "Rep1",
+                                              rolling_mean = codon_mean,
+                                              rolling_sd = codon_sd,
+                                              n_nonsense_muts = n_muts))
+}
+
+## BT16 Rep 2 ####
+for (j in 1:386) {
+  rows_needed = bt16_nonsense_data$mut_1_type_final == "N" &
+    bt16_nonsense_data$mut_1_final >= j - 2 &
+    bt16_nonsense_data$mut_1_final <= j + 2
+  
+  codon_mean = mean(bt16_nonsense_data$bt16_rep2_log2[rows_needed], na.rm = TRUE)
+  codon_sd = sd(bt16_nonsense_data$bt16_rep2_log2[rows_needed], na.rm = TRUE)
+  n_muts = sum(rows_needed, na.rm = TRUE)
+  
+  all_nonsense_rolling_stats = rbind(all_nonsense_rolling_stats, 
+                                    data.frame(position = j,
+                                              cell_line = "BT16",
+                                              replicate = "Rep2",
+                                              rolling_mean = codon_mean,
+                                              rolling_sd = codon_sd,
+                                              n_nonsense_muts = n_muts))
+}
+
+## RCRF1009T Rep 1 ####
+rcrf1009t_nonsense_data = filter(nonsense_data,
+                                !is.na(rcrf1009t_rep1_log2),
+                                !is.na(rcrf1009t_rep2_log2))
+
+for (j in 1:386) {
+  rows_needed = rcrf1009t_nonsense_data$mut_1_type_final == "N" &
+    rcrf1009t_nonsense_data$mut_1_final >= j - 2 &
+    rcrf1009t_nonsense_data$mut_1_final <= j + 2
+  
+  codon_mean = mean(rcrf1009t_nonsense_data$rcrf1009t_rep1_log2[rows_needed], na.rm = TRUE)
+  codon_sd = sd(rcrf1009t_nonsense_data$rcrf1009t_rep1_log2[rows_needed], na.rm = TRUE)
+  n_muts = sum(rows_needed, na.rm = TRUE)
+  
+  all_nonsense_rolling_stats = rbind(all_nonsense_rolling_stats, 
+                                    data.frame(position = j,
+                                              cell_line = "RCRF1009T",
+                                              replicate = "Rep1",
+                                              rolling_mean = codon_mean,
+                                              rolling_sd = codon_sd,
+                                              n_nonsense_muts = n_muts))
+}
+
+## RCRF1009T Rep 2 ####
+for (j in 1:386) {
+  rows_needed = rcrf1009t_nonsense_data$mut_1_type_final == "N" &
+    rcrf1009t_nonsense_data$mut_1_final >= j - 2 &
+    rcrf1009t_nonsense_data$mut_1_final <= j + 2
+  
+  codon_mean = mean(rcrf1009t_nonsense_data$rcrf1009t_rep2_log2[rows_needed], na.rm = TRUE)
+  codon_sd = sd(rcrf1009t_nonsense_data$rcrf1009t_rep2_log2[rows_needed], na.rm = TRUE)
+  n_muts = sum(rows_needed, na.rm = TRUE)
+  
+  all_nonsense_rolling_stats = rbind(all_nonsense_rolling_stats, 
+                                    data.frame(position = j,
+                                              cell_line = "RCRF1009T",
+                                              replicate = "Rep2",
+                                              rolling_mean = codon_mean,
+                                              rolling_sd = codon_sd,
+                                              n_nonsense_muts = n_muts))
+}
+
+# Clean up
+rm(g401_nonsense_data, bt16_nonsense_data, rcrf1009t_nonsense_data)
+rm(codon_mean, codon_sd, n_muts, rows_needed, j)
+
+# Summary statistics
+print("Summary of rolling means for nonsense mutations:")
+summary(all_nonsense_rolling_stats$rolling_mean)
+
+print("Summary of rolling SDs for nonsense mutations:")
+summary(all_nonsense_rolling_stats$rolling_sd)
+
+print("Range of detection thresholds (2 * rolling_sd):")
+all_nonsense_rolling_stats$detection_threshold = 2 * all_nonsense_rolling_stats$rolling_sd
+summary(all_nonsense_rolling_stats$detection_threshold)
+
+# Calculate position-averaged values across all replicates
+nonsense_position_summary = all_nonsense_rolling_stats %>%
+  group_by(position) %>%
+  summarise(
+    mean_rolling_mean_nonsense = mean(rolling_mean, na.rm = TRUE),
+    mean_rolling_sd_nonsense = mean(rolling_sd, na.rm = TRUE),
+    avg_n_nonsense_muts = mean(n_nonsense_muts, na.rm = TRUE)
+  )
+
+```
+
+```{r}
+
+# Recreate the frameshift data filtering (adapted from nonsense mutation code)
+single_mutants_data = single_mutants_data[order(single_mutants_data$mut_1_final), ]
+
+frameshift_data = filter(single_mutants_data,
+                        mut_1_type_final == "F")
+
+# Initialize dataframe to store all rolling stats for frameshift mutations
+all_frameshift_rolling_stats = data.frame(
+  position = integer(),
+  cell_line = character(),
+  replicate = character(),
+  rolling_mean = numeric(),
+  rolling_sd = numeric(),
+  n_frameshift_muts = integer()
+)
+
+## G401 Rep 1 ####
+g401_frameshift_data = filter(frameshift_data,
+                             !is.na(g401_rep1_log2),
+                             !is.na(g401_rep2_log2))
+
+for (j in 1:386) {
+  rows_needed = g401_frameshift_data$mut_1_type_final == "F" &
+    g401_frameshift_data$mut_1_final >= j - 2 &
+    g401_frameshift_data$mut_1_final <= j + 2
+  
+  codon_mean = mean(g401_frameshift_data$g401_rep1_log2[rows_needed], na.rm = TRUE)
+  codon_sd = sd(g401_frameshift_data$g401_rep1_log2[rows_needed], na.rm = TRUE)
+  n_muts = sum(rows_needed, na.rm = TRUE)
+  
+  # Add to master dataframe
+  all_frameshift_rolling_stats = rbind(all_frameshift_rolling_stats, 
+                                      data.frame(position = j,
+                                                cell_line = "G401",
+                                                replicate = "Rep1",
+                                                rolling_mean = codon_mean,
+                                                rolling_sd = codon_sd,
+                                                n_frameshift_muts = n_muts))
+}
+
+## G401 Rep 2 ####
+for (j in 1:386) {
+  rows_needed = g401_frameshift_data$mut_1_type_final == "F" &
+    g401_frameshift_data$mut_1_final >= j - 2 &
+    g401_frameshift_data$mut_1_final <= j + 2
+  
+  codon_mean = mean(g401_frameshift_data$g401_rep2_log2[rows_needed], na.rm = TRUE)
+  codon_sd = sd(g401_frameshift_data$g401_rep2_log2[rows_needed], na.rm = TRUE)
+  n_muts = sum(rows_needed, na.rm = TRUE)
+  
+  all_frameshift_rolling_stats = rbind(all_frameshift_rolling_stats, 
+                                      data.frame(position = j,
+                                                cell_line = "G401",
+                                                replicate = "Rep2",
+                                                rolling_mean = codon_mean,
+                                                rolling_sd = codon_sd,
+                                                n_frameshift_muts = n_muts))
+}
+
+## BT16 Rep 1 ####
+bt16_frameshift_data = filter(frameshift_data,
+                             !is.na(bt16_rep1_log2),
+                             !is.na(bt16_rep2_log2))
+
+for (j in 1:386) {
+  rows_needed = bt16_frameshift_data$mut_1_type_final == "F" &
+    bt16_frameshift_data$mut_1_final >= j - 2 &
+    bt16_frameshift_data$mut_1_final <= j + 2
+  
+  codon_mean = mean(bt16_frameshift_data$bt16_rep1_log2[rows_needed], na.rm = TRUE)
+  codon_sd = sd(bt16_frameshift_data$bt16_rep1_log2[rows_needed], na.rm = TRUE)
+  n_muts = sum(rows_needed, na.rm = TRUE)
+  
+  all_frameshift_rolling_stats = rbind(all_frameshift_rolling_stats, 
+                                      data.frame(position = j,
+                                                cell_line = "BT16",
+                                                replicate = "Rep1",
+                                                rolling_mean = codon_mean,
+                                                rolling_sd = codon_sd,
+                                                n_frameshift_muts = n_muts))
+}
+
+## BT16 Rep 2 ####
+for (j in 1:386) {
+  rows_needed = bt16_frameshift_data$mut_1_type_final == "F" &
+    bt16_frameshift_data$mut_1_final >= j - 2 &
+    bt16_frameshift_data$mut_1_final <= j + 2
+  
+  codon_mean = mean(bt16_frameshift_data$bt16_rep2_log2[rows_needed], na.rm = TRUE)
+  codon_sd = sd(bt16_frameshift_data$bt16_rep2_log2[rows_needed], na.rm = TRUE)
+  n_muts = sum(rows_needed, na.rm = TRUE)
+  
+  all_frameshift_rolling_stats = rbind(all_frameshift_rolling_stats, 
+                                      data.frame(position = j,
+                                                cell_line = "BT16",
+                                                replicate = "Rep2",
+                                                rolling_mean = codon_mean,
+                                                rolling_sd = codon_sd,
+                                                n_frameshift_muts = n_muts))
+}
+
+## RCRF1009T Rep 1 ####
+rcrf1009t_frameshift_data = filter(frameshift_data,
+                                  !is.na(rcrf1009t_rep1_log2),
+                                  !is.na(rcrf1009t_rep2_log2))
+
+for (j in 1:386) {
+  rows_needed = rcrf1009t_frameshift_data$mut_1_type_final == "F" &
+    rcrf1009t_frameshift_data$mut_1_final >= j - 2 &
+    rcrf1009t_frameshift_data$mut_1_final <= j + 2
+  
+  codon_mean = mean(rcrf1009t_frameshift_data$rcrf1009t_rep1_log2[rows_needed], na.rm = TRUE)
+  codon_sd = sd(rcrf1009t_frameshift_data$rcrf1009t_rep1_log2[rows_needed], na.rm = TRUE)
+  n_muts = sum(rows_needed, na.rm = TRUE)
+  
+  all_frameshift_rolling_stats = rbind(all_frameshift_rolling_stats, 
+                                      data.frame(position = j,
+                                                cell_line = "RCRF1009T",
+                                                replicate = "Rep1",
+                                                rolling_mean = codon_mean,
+                                                rolling_sd = codon_sd,
+                                                n_frameshift_muts = n_muts))
+}
+
+## RCRF1009T Rep 2 ####
+for (j in 1:386) {
+  rows_needed = rcrf1009t_frameshift_data$mut_1_type_final == "F" &
+    rcrf1009t_frameshift_data$mut_1_final >= j - 2 &
+    rcrf1009t_frameshift_data$mut_1_final <= j + 2
+  
+  codon_mean = mean(rcrf1009t_frameshift_data$rcrf1009t_rep2_log2[rows_needed], na.rm = TRUE)
+  codon_sd = sd(rcrf1009t_frameshift_data$rcrf1009t_rep2_log2[rows_needed], na.rm = TRUE)
+  n_muts = sum(rows_needed, na.rm = TRUE)
+  
+  all_frameshift_rolling_stats = rbind(all_frameshift_rolling_stats, 
+                                      data.frame(position = j,
+                                                cell_line = "RCRF1009T",
+                                                replicate = "Rep2",
+                                                rolling_mean = codon_mean,
+                                                rolling_sd = codon_sd,
+                                                n_frameshift_muts = n_muts))
+}
+
+# Clean up
+rm(g401_frameshift_data, bt16_frameshift_data, rcrf1009t_frameshift_data)
+rm(codon_mean, codon_sd, n_muts, rows_needed, j)
+
+# Summary statistics
+print("Summary of rolling means for frameshift mutations:")
+summary(all_frameshift_rolling_stats$rolling_mean)
+
+print("Summary of rolling SDs for frameshift mutations:")
+summary(all_frameshift_rolling_stats$rolling_sd)
+
+print("Range of detection thresholds (2 * rolling_sd):")
+all_frameshift_rolling_stats$detection_threshold = 2 * all_frameshift_rolling_stats$rolling_sd
+summary(all_frameshift_rolling_stats$detection_threshold)
+
+# Calculate position-averaged values across all replicates
+frameshift_position_summary = all_frameshift_rolling_stats %>%
+  group_by(position) %>%
+  summarise(
+    mean_rolling_mean_frameshift = mean(rolling_mean, na.rm = TRUE),
+    mean_rolling_sd_frameshift = mean(rolling_sd, na.rm = TRUE),
+    avg_n_frameshift_muts = mean(n_frameshift_muts, na.rm = TRUE)
+  )
+
+
+```
+
+```{r}
+
+all_mutations_position_summary <- cbind(silent_position_summary, missense_position_summary, nonsense_position_summary, frameshift_position_summary)
+
+
+all_mutations_position_summary <- all_mutations_position_summary[, -c(6, 10, 14)]
+
+
+
+
+# Create the plot using your combined_wide dataframe
+p <- ggplot(all_mutations_position_summary, aes(x = position)) +
+  # Plot all mutation types as lines
+  geom_line(aes(y = mean_rolling_mean_silent, color = "Silent"), size = 0.8, alpha = 1) +
+  geom_line(aes(y = mean_rolling_mean_missense, color = "Missense"), size = 0.8, alpha = 1) +
+  geom_line(aes(y = mean_rolling_mean_nonsense, color = "Nonsense"), size = 0.8, alpha = 1) +
+  geom_line(aes(y = mean_rolling_mean_frameshift, color = "Frameshift"), size = 0.8, alpha = 1) +
+  
+  # Add detection threshold bands based on silent mutations
+  geom_ribbon(aes(ymin = mean_rolling_mean_silent - mean_detection_threshold_silent, 
+                  ymax = mean_rolling_mean_silent + mean_detection_threshold_silent), 
+              alpha = 0.3, fill = "gray") +
+  
+  # Add a horizontal line at y = 0 for reference
+  geom_hline(yintercept = 0, linetype = "dashed", color = "black", alpha = 0.5) +
+  
+  # Customize colors
+  scale_color_manual(values = c(
+    "Silent" = "black",
+    "Missense" = "darkgray", 
+    "Nonsense" = "red",
+    "Frameshift" = "blue"
+  )) +
+  
+  # Customize the plot
+  labs(
+    subtitle = "Mean fitness effects by mutation type, Gray band = ±silent detection threshold",
+    x = "Amino Acid Position",
+    y = "Log2 Fold Change (End / Start)",
+    caption = "Negative values indicate growth inhibition",
+    color = "Mutation Type"
+  ) +
+  
+  # Set axis limits and breaks
+  scale_x_continuous(breaks = seq(0, 400, 50), limits = c(1, 386)) +
+  scale_y_continuous(breaks = seq(-2, 2, 0.5)) +
+  
+  # Apply a clean theme
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 14, face = "bold"),
+    plot.subtitle = element_text(size = 12),
+    axis.title = element_text(size = 12),
+    axis.text = element_text(size = 10),
+    panel.grid.minor = element_blank(),
+    legend.position = "right"
+  )
+
+# Display the plot
+print(p)
+
+
+ggsave("./plots/DMS_plots/log2FC_by_mutation_plot.png", plot = p, width = 10, height = 6, dpi = 300)
+
+
+```
+
+
+```{r}
+
+total_average <- mean(all_mutations_position_summary$mean_rolling_mean_silent, na.rm = TRUE)
+
+hump_average <- mean(all_mutations_position_summary$mean_rolling_mean_silent[63:93], na.rm = TRUE)
+
+non_hump_average <- mean(all_mutations_position_summary$mean_rolling_mean_silent[-(63:93)], na.rm = TRUE)
+
+total_average_effect_size <- mean(all_mutations_position_summary$mean_rolling_mean_silent + 
+                                 all_mutations_position_summary$mean_detection_threshold_silent, 
+                                 na.rm = TRUE)
+
+hump_average_effect_size <- mean(all_mutations_position_summary$mean_detection_threshold_silent[63:93], na.rm = TRUE)
+
+non_hump_average_effect_size <- mean(all_mutations_position_summary$mean_detection_threshold_silent[-(63:93)], na.rm = TRUE)
+
+
+
+```
+
+
+################################################################################
+
+
 ## Collapsing Molecules by Amino Acid Substitution
 
 Frameshift data filtered because each of these does not have the same identifier, here only missense, nonsense, and silent mutations are being collapsed
@@ -1293,6 +2106,8 @@ write_csv(all_mutants_averaged, "./results/functional_scores/DMS_collapsed_data.
 ## Plotting Z-scores Across 385 Amino Acids
 ```{r}
 
+all_mutants_averaged <- read.csv("./results/functional_scores/DMS_collapsed_data.csv")
+
 all_mutants_averaged <- all_mutants_averaged[order(all_mutants_averaged$Mutation_Type, decreasing = FALSE),]
 
 tiff("./plots/DMS_plots/allreps_by_amino_acid.tiff", units="in", width=6, height=6, res=300)
@@ -1426,13 +2241,55 @@ nonsense_mite_data <- all_mutants_averaged %>%
   filter(all_mutants_averaged$Mutation_Type == "N")
 
 
+residues_of_interest <- c(
+  300, 125, 122, 281, 123, 63, 315, 277, 90, 91, 77, 55, 52, 297, 377, 294,
+  53, 50, 209, 124, 82, 78, 88, 379, 66, 42, 80, 47, 142, 373, 87, 136, 54, 2,
+  79, 376, 370, 151, 85, 86, 62, 241, 41, 45, 46, 32, 67, 112, 83, 140, 81,
+  147, 43, 211, 94, 113, 316, 380, 44, 139, 141, 95, 76, 146, 84, 301, 282,
+  226, 111, 126, 48, 5, 374, 318, 319, 299, 74, 372, 39, 302, 127, 150, 64,
+  279, 73, 227, 321, 72, 378, 34, 132, 144, 137, 368, 320, 230, 56, 222, 121
+)
+
+
+wildtype_df <- missense_mite_data %>%
+  filter(Residue %in% residues_of_interest) %>%
+  select(Residue, Wildtype_Amino_Acid) %>%
+  mutate(Residue = factor(Residue, levels = residues_of_interest)) %>%
+  distinct() %>%
+  arrange(Residue)
+
+write_
+
+mutation_matrix <- missense_mite_data %>%
+  filter(Residue %in% residues_of_interest) %>%
+  select(Residue, Mutant_Amino_Acid, all_reps_zscore) %>%
+  mutate(Residue = factor(Residue, levels = residues_of_interest)) %>%  # Set factor with your custom order
+  arrange(Residue) %>%  # Arrange by this factor order
+  pivot_wider(
+    names_from = Mutant_Amino_Acid,
+    values_from = all_reps_zscore
+  )
+
+write.table(mutation_matrix, "./results/functional_scores/amino_acid_substit_specific_z-score.tsv", sep = "\t", row.names = FALSE, col.names = TRUE, quote = FALSE)
+
+
 average_residue_result <- missense_mite_data %>%
   group_by(Residue) %>%
-  summarise(avg_zscore = mean(all_reps_zscore, na.rm = TRUE))
-
-write.table(average_residue_result, "./results/structural_analysis/residue_average_zscore_missense_only.tsv", sep = "\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
+  summarise(
+    avg_zscore = mean(all_reps_zscore, na.rm = TRUE),
+    G401_R1_avg = mean(G401_R1_zscore, na.rm = TRUE),
+    G401_R2_avg = mean(G401_R2_zscore, na.rm = TRUE),
+    BT16_R1_avg = mean(BT16_R1_zscore, na.rm = TRUE),
+    BT16_R2_avg = mean(BT16_R2_zscore, na.rm = TRUE),
+    RCRF1009T_R1_avg = mean(RCRF1009T_R1_zscore, na.rm = TRUE),
+    RCRF1009T_R2_avg = mean(RCRF1009T_R2_zscore, na.rm = TRUE),
+    replicate_sd = sd(c_across(c(G401_R1_avg, G401_R2_avg, BT16_R1_avg, BT16_R2_avg,
+                                 RCRF1009T_R1_avg, RCRF1009T_R2_avg)), na.rm = TRUE)
+  )
 
 average_residue_result <- head(average_residue_result, -1)
+
+write.table(average_residue_result, "./results/structural_analysis/residue_average_zscore_missense_only.tsv", sep = "\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
 
 
 average_residue_result_sorted <- average_residue_result[order(-average_residue_result$avg_zscore), ]
@@ -1568,6 +2425,114 @@ sum(zscore_lof$Single_Nucleotide_Substitution)
 
 write_tsv(zscore_lof, "./results/functional_scores/LOF_mutants.tsv")
 ```
+
+Now we are going to rank by amino acid type to see if there are some trends.
+
+
+```{r}
+
+# Load required libraries
+library(dplyr)
+library(ggplot2)
+
+# Calculate average all_reps_zscore for each Mutant_Amino_Acid
+# Filter out Stop and Fs mutations
+amino_acid_averages <- all_mutants_averaged %>%
+  filter(!Mutant_Amino_Acid %in% c("Stop", "Fs")) %>%
+  group_by(Mutant_Amino_Acid) %>%
+  summarise(
+    avg_zscore = mean(all_reps_zscore, na.rm = TRUE),
+    sd_zscore = sd(all_reps_zscore, na.rm = TRUE),
+    n_mutations = n(),
+    sem_zscore = sd_zscore / sqrt(n_mutations),
+    .groups = 'drop'
+  )
+
+# View the results
+print(amino_acid_averages)
+
+
+point_plot <- ggplot(amino_acid_averages, aes(x = reorder(Mutant_Amino_Acid, -avg_zscore), 
+                                              y = avg_zscore)) +
+  geom_errorbar(aes(ymin = avg_zscore - sd_zscore, 
+                    ymax = avg_zscore + sd_zscore), 
+                width = 0.2, alpha = 0.7, color = "gray50") +
+  geom_point(size = 3, color = "steelblue") +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(
+    title = "Average Z-score by Mutant Amino Acid (Ranked)",
+    x = "Mutant Amino Acid (Ranked by Average Z-score)",
+    y = "Average Z-score ± SD"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 14),
+    axis.text.x = element_text(size = 12),
+    axis.text.y = element_text(size = 12),
+    axis.title.x = element_text(size = 20),
+    axis.title.y = element_text(size = 20),
+    panel.grid = element_blank(),
+    axis.line = element_line(color = "black", size = 0.5),
+    axis.ticks = element_line(color = "black", size = 0.5)
+  )
+print(point_plot)
+
+ggsave("./plots/DMS_plots/amino_acid_rank_plot.png", point_plot)
+
+
+individual_plot_data <- all_mutants_averaged %>%
+  filter(!Mutant_Amino_Acid %in% c("Stop", "Fs"))
+
+total_counts <- individual_plot_data %>%
+  group_by(Mutant_Amino_Acid) %>%
+  summarise(
+    total_mutations = n(),
+    high_impact = sum(all_reps_zscore > 2),
+    proportion_high_impact = high_impact / total_mutations
+  ) %>%
+  arrange(desc(high_impact))
+
+print(total_counts)
+
+proline_high_impact <- individual_plot_data %>%
+  filter(Mutant_Amino_Acid == "P" & all_reps_zscore > 2) %>%
+  pull(Residue) %>%
+  sort()
+
+print("Proline residues with z-score > 2:")
+print(proline_high_impact)
+
+
+individual_point_plot <- ggplot(individual_plot_data, aes(x = reorder(Mutant_Amino_Acid, -all_reps_zscore, FUN = mean),
+                                                          y = all_reps_zscore)) +
+  geom_jitter(aes(color = all_reps_zscore > 2), size = 1, alpha = 0.6, width = 0.1) +
+  scale_color_manual(values = c("TRUE" = "green", "FALSE" = "gray"), guide = "none") +
+  stat_summary(fun = mean, geom = "crossbar", color = "black", width = 0.5, size = 0.3) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "gray") +
+  geom_hline(yintercept = 2, linetype = "dashed", color = "black") +
+  labs(
+    x = "Mutant Amino Acid",
+    y = "Z-score"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 14),
+    axis.text.x = element_text(size = 12),
+    axis.text.y = element_text(size = 12),
+    axis.title.x = element_text(size = 20),
+    axis.title.y = element_text(size = 20),
+    panel.grid = element_blank(),
+    axis.line = element_line(color = "black", size = 0.5),
+    axis.ticks = element_line(color = "black", size = 0.5)
+  ) +
+  scale_y_continuous(position = "left", limits = c(-6, 6))
+
+print(individual_point_plot)
+
+ggsave("./plots/DMS_plots/amino_acid_rank_plot_individual_values.tif", individual_point_plot, width=5, height=6)
+
+```
+
 
 
 

@@ -1,0 +1,293 @@
+```{r}
+
+library(readr)
+library(dplyr)
+library(ggplot2)
+
+DMS_data <- read_csv("./results/functional_scores/DMS_collapsed_data.csv")
+
+DMS_data$Highlight <- with(DMS_data, ifelse(
+  (G401_R1_zscore > 2 & G401_R2_zscore > 2) |
+  (G401_R1_zscore < -2 & G401_R2_zscore < -2),
+  as.character(Mutation_Type),  # use original color if in quadrant
+  "Other"                       # else set as "Other"
+))
+
+color_map_highlight <- c(
+  "M" = "darkgray",
+  "F" = "blue",
+  "N" = "red",
+  "S" = "black",
+  "Other" = "white"
+)
+
+```
+
+
+G401
+```{r}
+
+library(ggplot2)
+
+subset_data <- subset(
+  DMS_data,
+  (G401_R1_zscore > 2 & G401_R2_zscore > 2) |
+  (G401_R1_zscore < -2 & G401_R2_zscore < -2)
+)
+
+# Calculate R² on this subset
+r2_subset <- summary(lm(G401_R2_zscore ~ G401_R1_zscore, data = subset_data))$r.squared
+
+DMS_data$Mutation_Type <- factor(DMS_data$Mutation_Type, levels = c("M", "N", "F", "S"))
+
+plot_order <- c("N", "F", "S", "M")
+
+# Reorder rows so points are plotted in the desired layer order
+DMS_data <- DMS_data[order(match(DMS_data$Mutation_Type, plot_order)), ]
+
+color_map <- c(
+  "M" = "gray",
+  "F" = "blue",
+  "N" = "red",
+  "S" = "black"
+)
+
+G401 <- ggplot(DMS_data, aes(x = G401_R1_zscore, y = G401_R2_zscore)) +
+  # 1. Background: all points in light gray
+  geom_point(color = "gray80", alpha = 0.2) +
+
+  # 2. Overlay: colored points in strong quadrants
+  geom_point(
+    data = subset(DMS_data, 
+      (G401_R1_zscore > 2 & G401_R2_zscore > 2) |
+      (G401_R1_zscore < -2 & G401_R2_zscore < -2)),
+    aes(color = Mutation_Type),
+    alpha = 0.8
+  ) +
+
+  # Threshold lines
+  geom_vline(xintercept = c(-2, 2), color = "darkgray", linetype = "dashed", size = 0.6) +
+  geom_hline(yintercept = c(-2, 2), color = "darkgray", linetype = "dashed", size = 0.6) +
+
+  # Manual color scale for Mutation_Type
+  scale_color_manual(values = color_map) +
+
+  labs(
+    x = "G401 zscore R1",
+    y = "G401 zscore R2",
+    title = paste("Subset R² (|z| > 2 in both):", round(r2_subset, 4))
+  ) +
+
+  theme_minimal() +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(color = "black", size = 0.5),
+    axis.title = element_text(size = 24),           # Axis labels
+    axis.text = element_text(size = 20),            # Axis tick labels
+    plot.title = element_text(size = 24)
+  ) +
+  ylim(-20, 20) +
+  xlim(-20, 20)
+
+G401
+
+
+ggsave("./plots/DMS_plots/correlation_plots/g401_rep_correlation.png", plot = G401, width = 6.2, height = 5, dpi = 300)
+
+
+
+G401_consistent_signal <- DMS_data %>%
+      filter(DMS_data$G401_R1_zscore > 2 & DMS_data$G401_R2_zscore > 2 | DMS_data$G401_R1_zscore < -2 & DMS_data$G401_R2_zscore < -2)
+
+G401_consistent_signal_missense <- G401_consistent_signal %>%
+  filter(G401_consistent_signal$Mutation_Type == "M")
+
+
+```
+
+
+BT16
+```{r}
+
+library(ggplot2)
+
+subset_data <- subset(
+  DMS_data,
+  (BT16_R1_zscore > 2 & BT16_R2_zscore > 2) |
+  (BT16_R1_zscore < -2 & BT16_R2_zscore < -2)
+)
+
+# Calculate R² on this subset
+r2_subset <- summary(lm(BT16_R2_zscore ~ BT16_R1_zscore, data = subset_data))$r.squared
+
+DMS_data$Mutation_Type <- factor(DMS_data$Mutation_Type, levels = c("M", "N", "F", "S"))
+
+plot_order <- c("N", "F", "S", "M")
+
+# Reorder rows so points are plotted in the desired layer order
+DMS_data <- DMS_data[order(match(DMS_data$Mutation_Type, plot_order)), ]
+
+color_map <- c(
+  "M" = "gray",
+  "F" = "blue",
+  "N" = "red",
+  "S" = "black"
+)
+
+BT16 <- ggplot(DMS_data, aes(x = BT16_R1_zscore, y = BT16_R2_zscore)) +
+  # 1. Background: all points in light gray
+  geom_point(color = "gray80", alpha = 0.2) +
+
+  # 2. Overlay: colored points in strong quadrants
+  geom_point(
+    data = subset(DMS_data, 
+      (BT16_R1_zscore > 2 & BT16_R2_zscore > 2) |
+      (BT16_R1_zscore < -2 & BT16_R2_zscore < -2)),
+    aes(color = Mutation_Type),
+    alpha = 0.8
+  ) +
+
+  # Threshold lines
+  geom_vline(xintercept = c(-2, 2), color = "darkgray", linetype = "dashed", size = 0.6) +
+  geom_hline(yintercept = c(-2, 2), color = "darkgray", linetype = "dashed", size = 0.6) +
+
+  # Manual color scale for Mutation_Type
+  scale_color_manual(values = color_map) +
+
+  labs(
+    x = "BT16 zscore R1",
+    y = "BT16 zscore R2",
+    title = paste("BT16 R² (|z| > 2 in both):", round(r2_subset, 4))
+  ) +
+
+  theme_minimal() +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(color = "black", size = 0.5),
+    axis.title = element_text(size = 24),           # Axis labels
+    axis.text = element_text(size = 20),            # Axis tick labels
+    plot.title = element_text(size = 24)
+  ) + 
+  ylim(-20, 20) +
+  xlim(-20, 20)
+
+ggsave("./plots/DMS_plots/correlation_plots/bt16_rep_correlation.png", plot = BT16, width = 6.2, height = 5, dpi = 300)
+
+BT16
+
+
+BT16_consistent_signal <- DMS_data %>%
+      filter(DMS_data$BT16_R1_zscore > 2 & DMS_data$BT16_R2_zscore > 2 | DMS_data$BT16_R1_zscore < -2 & DMS_data$BT16_R2_zscore < -2)
+
+BT16_consistent_signal_missense <- BT16_consistent_signal %>%
+  filter(BT16_consistent_signal$Mutation_Type == "M")
+
+```
+
+RCRF
+```{r}
+
+library(ggplot2)
+
+subset_data <- subset(
+  DMS_data,
+  (RCRF1009T_R1_zscore > 2 & RCRF1009T_R2_zscore > 2) |
+  (RCRF1009T_R1_zscore < -2 & RCRF1009T_R2_zscore < -2)
+)
+
+# Calculate R² on this subset
+r2_subset <- summary(lm(RCRF1009T_R2_zscore ~ RCRF1009T_R1_zscore, data = subset_data))$r.squared
+
+DMS_data$Mutation_Type <- factor(DMS_data$Mutation_Type, levels = c("M", "N", "F", "S"))
+
+plot_order <- c("N", "F", "S", "M")
+
+# Reorder rows so points are plotted in the desired layer order
+DMS_data <- DMS_data[order(match(DMS_data$Mutation_Type, plot_order)), ]
+
+color_map <- c(
+  "M" = "gray",
+  "F" = "blue",
+  "N" = "red",
+  "S" = "black"
+)
+
+RCRF <- ggplot(DMS_data, aes(x = RCRF1009T_R1_zscore, y = RCRF1009T_R2_zscore)) +
+  # 1. Background: all points in light gray
+  geom_point(color = "gray80", alpha = 0.2) +
+
+  # 2. Overlay: colored points in strong quadrants
+  geom_point(
+    data = subset(DMS_data, 
+      (RCRF1009T_R1_zscore > 2 & RCRF1009T_R2_zscore > 2) |
+      (RCRF1009T_R1_zscore < -2 & RCRF1009T_R2_zscore < -2)),
+    aes(color = Mutation_Type),
+    alpha = 0.8
+  ) +
+
+  # Threshold lines
+  geom_vline(xintercept = c(-2, 2), color = "darkgray", linetype = "dashed", size = 0.6) +
+  geom_hline(yintercept = c(-2, 2), color = "darkgray", linetype = "dashed", size = 0.6) +
+
+  # Manual color scale for Mutation_Type
+  scale_color_manual(values = color_map) +
+
+  labs(
+    x = "RCRF1009T zscore R1",
+    y = "RCRF1009T zscore R2",
+    title = paste("Subset R² (|z| > 2 in both):", round(r2_subset, 4))
+  ) +
+
+  theme_minimal() +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(color = "black", size = 0.5),
+    axis.title = element_text(size = 24),           # Axis labels
+    axis.text = element_text(size = 20),            # Axis tick labels
+    plot.title = element_text(size = 24)
+  ) +
+  ylim(-20,20) +
+  xlim(-20,20)
+
+ggsave("./plots/DMS_plots/correlation_plots/rcrf1009t_rep_correlation.png", plot = RCRF, width = 6.2, height = 5, dpi = 300)
+
+RCRF
+
+RCRF1009T_consistent_signal <- DMS_data %>%
+      filter(DMS_data$RCRF1009T_R1_zscore > 2 & DMS_data$RCRF1009T_R2_zscore > 2 | DMS_data$RCRF1009T_R1_zscore < -2 & DMS_data$RCRF1009T_R2_zscore < -2)
+
+RCRF1009T_consistent_signal_missense <- RCRF1009T_consistent_signal %>%
+  filter(RCRF1009T_consistent_signal$Mutation_Type == "M")
+
+```
+
+
+
+```{r}
+
+common_subs <- Reduce(intersect, list(RCRF1009T_consistent_signal_missense$Substitution, BT16_consistent_signal_missense$Substitution, G401_consistent_signal_missense$Substitution))
+
+print(common_subs)
+
+
+```
+
+
+
+```{r}
+
+library(dplyr)
+
+mean_scores <- DMS_data %>%
+  group_by(Mutant_Amino_Acid) %>%
+  summarize(mean_zscore = mean(all_reps_zscore, na.rm = TRUE)) %>%
+  arrange(desc(mean_zscore))
+
+```
+
+
+
+

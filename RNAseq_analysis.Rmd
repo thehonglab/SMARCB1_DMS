@@ -101,6 +101,12 @@ plot3 <- ggplot(pca_samples,
   )
 ) +
   geom_point(size=4) +
+  scale_color_manual(values = c("WT" = "#000000",      # Black
+                               "I315I" = "#E69F00",     # Orange
+                               "W281P" = "#56B4E9",     # Sky blue
+                               "I315R" = "#009E73",     # Bluish green
+                               "W281*" = "#F0E442",     # Yellow
+                               "I315*" = "#CC79A7")) +  # Reddish purple
   theme(
   # Hide panel borders and remove grid lines
   panel.background = element_blank(),
@@ -323,7 +329,7 @@ tx_data_WTvW281P = tximport(file_names_WTvW281P,
 
 residue_WTvW281P$Mutant <- factor(residue_WTvW281P$Mutant)
 
-residue_WTvW281P$Mutant <- relevel(residue_WTvW281P$Mutant, ref = "zWT")
+residue_WTvW281P$Mutant <- relevel(residue_WTvW281P$Mutant, ref = "zW281P")
 
 levels(residue_WTvW281P$Mutant)
 
@@ -344,6 +350,10 @@ res_WTvW281P <- results(dds_diff_WTvW281P)
 res_WTvW281P_df <- as.data.frame(res_WTvW281P)
 
 res_WTvW281P_df$ENSEMBL <- rownames(res_WTvW281P_df)
+
+res_WTvW281P_df$ENSEMBL <- sub('\\.[0-9]*$', '', res_WTvW281P_df$ENSEMBL)
+
+write_xlsx(res_WTvW281P_df, "./results/rna_analysis/WTvW281P_all_genes.xlsx")
 
 ```
 
@@ -611,6 +621,52 @@ I315RvI315X_signif <- rbind(I315RvI315X_down, I315RvI315X_up)
 
 write_xlsx(I315RvI315X_signif, "./results/rna_analysis/I315RvI315X_significant_genes.xlsx")
 
+
+#==================
+
+file_names_315Iv315R = residue_315Iv315R$Filename
+
+file_names_315Iv315R = file.path("./data/rnaseq_analysis/quants", file_names_315Iv315R)
+
+names(file_names_315Iv315R) = residue_315Iv315R$Filename
+
+tx_data_315Iv315R = tximport(file_names_315Iv315R,
+                   type = c("salmon"),
+                   tx2gene = t2g,
+                   abundanceCol = "TPM",
+                   countsCol = "NumReads",
+                   lengthCol = "EffectiveLength",
+                   ignoreTxVersion = T,
+                   ignoreAfterBar = T)
+
+residue_315Iv315R$Mutant <- factor(residue_315Iv315R$Mutant)
+
+residue_315Iv315R$Mutant <- relevel(residue_315Iv315R$Mutant, ref = "zI315R")
+
+levels(residue_315Iv315R$Mutant)
+
+dds_315Iv315R = DESeqDataSetFromTximport(tx_data_315Iv315R,
+                               colData = residue_315Iv315R,
+                               design = ~ Mutant)
+
+dds_315Iv315R <- estimateSizeFactors(dds_315Iv315R)
+
+
+keep = rowSums(counts(dds_315Iv315R)) >= 10
+dds_315Iv315R = dds_315Iv315R[keep,]
+
+dds_diff_315Iv315R <- DESeq(dds_315Iv315R)
+
+res_315Iv315R <- results(dds_diff_315Iv315R)
+
+res_315Iv315R_df <- as.data.frame(res_315Iv315R)
+
+res_315Iv315R_df$ENSEMBL <- rownames(res_315Iv315R_df)
+
+res_315Iv315R_df$ENSEMBL <- sub('\\.[0-9]*$', '', res_315Iv315R_df$ENSEMBL)
+
+
+write_xlsx(res_315Iv315R_df, "./results/rna_analysis/I315IvI315R_all_genes.xlsx")
 
 ```
 

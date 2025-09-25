@@ -125,11 +125,14 @@ cadd_data_exons <- cadd_data_exons %>%
 
 write.table(cadd_data_exons, file = "./data/computational_predictors/SMARCB1_CADD_v1.7_annotated.tsv", sep = "\t", row.names = FALSE, quote = FALSE)
 
+colnames(cadd_data_exons)[colnames(cadd_data_exons) == "#Chrom"] <- "Chrom"
+
+
 #CADD has duplicate rows where multiple nucleotide substitution lead to the same amino acid change. Here we will average the PHRED score across all duplicates and keep as one row.
 cadd_data_no_duplicates <- cadd_data_exons %>%
   group_by(AA_Substitution) %>%
   summarise(
-    across(-PHRED, ~ first(.), .names = "{.col}"), # Keep the first instance for all columns except PHRED
+    across(-PHRED, ~ dplyr::first(.), .names = "{.col}"), # Keep the first instance for all columns except PHRED
     PHRED = mean(PHRED, na.rm = TRUE) # Calculate the average for PHRED
   ) %>%
   ungroup()
@@ -174,8 +177,47 @@ write_tsv(cadd_average_residue_sorted, "./data/computational_predictors/residue_
 
 
 
+```
+
+```{r}
+
+cadd_r377h_score <- 33
+
+cadd_percentile_inclusive <- mean(cadd_data_exons_missense$PHRED <= cadd_r377h_score, na.rm = TRUE)
 
 ```
+
+
+```{r}
+
+cadd_amino_acid_rank <- ggplot(cadd_data_exons_missense, aes(y = reorder(Amino_Acid_Alt, PHRED, FUN = median),
+                                                          x = PHRED)) +
+  geom_jitter(size = 1.5, color = "steelblue", alpha = 0.6, height = 0.2) +
+  stat_summary(fun = median, geom = "crossbar", color = "red", height = 0.5, size = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(
+    y = "Mutant Amino Acid",
+    x = "PHRED"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 14),
+    axis.text.x = element_text(size = 12),
+    axis.text.y = element_text(size = 12),
+    axis.title.x = element_text(size = 20),
+    axis.title.y = element_text(size = 20),
+    panel.grid = element_blank(),
+    axis.line = element_line(color = "black", size = 0.5),
+    axis.ticks = element_line(color = "black", size = 0.5)
+  ) +
+  xlim(0,40)
+
+print(cadd_amino_acid_rank)
+
+
+```
+
+
 
 
 
@@ -226,7 +268,7 @@ cadd_data_exons_unique <- cadd_data_exons %>%
   distinct(Pos, .keep_all = TRUE)
 
 revel_data_exons <- revel_data_exons %>%
-  left_join(cadd_data_exons_unique %>% select(Pos, Codon, Site), by = "Pos")
+  left_join(cadd_data_exons_unique %>% dplyr::select(Pos, Codon, Site), by = "Pos")
 
 
 
@@ -236,7 +278,7 @@ cadd_data_exons_unique_codon <- cadd_data_exons %>%
 cadd_data_exons_unique_codon$Codon <- as.numeric(cadd_data_exons_unique_codon$Codon)
 
 revel_data_exons <- revel_data_exons %>%
-  left_join(cadd_data_exons_unique_codon %>% select(Codon, Ref_Codon), by = "Codon")
+  left_join(cadd_data_exons_unique_codon %>% dplyr::select(Codon, Ref_Codon), by = "Codon")
 
 
 
@@ -302,7 +344,7 @@ write.table(revel_data_exons, file = "./data/computational_predictors/SMARCB1_re
 revel_data_no_duplicates <- revel_data_exons %>%
   group_by(AA_Substitution) %>%
   summarise(
-    across(-REVEL, ~ first(.), .names = "{.col}"), # Keep the first instance of all columns
+    across(-REVEL, ~ dplyr::first(.), .names = "{.col}"), # Keep the first instance of all columns
     REVEL = mean(REVEL, na.rm = TRUE) # Replace REVEL with the average of duplicates
   ) %>%
   ungroup()
@@ -340,6 +382,16 @@ write_tsv(revel_average_residue_sorted, "./data/computational_predictors/residue
 ```
 
 
+```{r}
+
+revel_r377h_score <- 0.868
+
+revel_percentile <- mean(revel_data_no_duplicates$REVEL < revel_r377h_score, na.rm = TRUE)
+
+```
+
+
+
 Data obtained from this: https://console.cloud.google.com/storage/browser/dm_alphamissense;tab=objects?pli=1&inv=1&invt=AbinwQ&prefix=&forceOnObjectsSortingFiltering=false
 Downloaded this file: AlphaMissense_aa_substitutions.tsv.gz
 
@@ -351,7 +403,8 @@ alpha_missense <- read_tsv(file=config$alphamissense_raw)
 alpha_missense <- alpha_missense %>%
   mutate(
     Residue = as.numeric(str_extract(protein_variant, "\\d+")),  # Extract the number
-    Amino_Acid_Alt = str_sub(protein_variant, start = -1)  # Extract the last letter
+    Amino_Acid_Alt = str_sub(protein_variant, start = -1),
+    Amino_Acid_Ref = str_sub(protein_variant, start = 1, end = 1)# Extract the last letter
   )
 
 alpha_missense <- alpha_missense %>%
@@ -381,7 +434,24 @@ alpha_missense_average_residue_sorted$rank <- 1:nrow(alpha_missense_average_resi
 
 write_tsv(alpha_missense_average_residue_sorted, "./data/computational_predictors/residue_averaged_zscores/AlphaMissense_SMARCB1_res_avg.tsv")
 
+
 ```
+
+
+```{r}
+
+
+
+am_r377h_score <- 0.9996
+
+
+am_percentile <- mean(alpha_missense$am_pathogenicity < am_r377h_score, na.rm = TRUE)
+
+```
+
+
+
+
 
 ```{r}
 
@@ -488,5 +558,41 @@ M_concordant <-  M_only %>%
 
 ```
 
+
+
+
+```{r}
+
+SMARCB1_sift <- read_tsv("./data/computational_predictors/SMARCB1_SIFT4g_GRCh38.83.tsv")
+
+
+SMARCB1_v1_sift <- SMARCB1_sift %>%
+  filter(SMARCB1_sift$Transcript_id == "ENST00000263121")
+
+SMARCB1_v1_cds_sift <- SMARCB1_v1_sift %>%
+  filter(SMARCB1_v1_sift$Region == "CDS")
+
+SMARCB1_v1_cds_sift_nostop <- SMARCB1_v1_cds_sift %>%
+  filter(SMARCB1_v1_cds_sift$New_amino_acid != "*")
+
+SMARCB1_v1_cds_sift_nostop <- SMARCB1_v1_cds_sift_nostop %>%
+  filter(SMARCB1_v1_cds_sift_nostop$Ref_amino_acid != "*")
+
+SMARCB1_v1_cds_sift_nostop_nosilent <- SMARCB1_v1_cds_sift_nostop %>%
+  filter(SMARCB1_v1_cds_sift_nostop$Ref_amino_acid != SMARCB1_v1_cds_sift_nostop$New_amino_acid)
+
+
+
+
+write_tsv(SMARCB1_v1_cds_sift_nostop_nosilent, "./data/computational_predictors/SIFT_SMARCB1.tsv")
+
+```
+
+
+```{r}
+
+
+
+```
 
 
