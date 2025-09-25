@@ -120,5 +120,67 @@ dev.off()
 
 ```
 
+```{r}
+
+mite_data <- read.csv(file=config$mitedata)
+
+
+colnames(mite_data)[colnames(mite_data) == "Substitution"] <- "Protein_Change"
+
+colnames(missense_count_by_mutation_genie)[colnames(missense_count_by_mutation_genie) == "AA_Substitution"] <- "Protein_Change"
+
+merged_dataframe <- left_join(missense_count_by_mutation_genie, mite_data, by = c("Protein_Change" = "Protein_Change"))
+
+
+library(ggplot2)
+library(ggrepel)
+
+# Ensure x and y are defined in your environment if you're referencing them in the title
+x <- merged_dataframe$all_reps_zscore
+y <- merged_dataframe$total_count
+
+# Labeling condition
+merged_dataframe$label <- ifelse(
+  merged_dataframe$total_count > 15 | merged_dataframe$all_reps_zscore > 2,
+  merged_dataframe$Protein_Change,
+  NA
+)
+
+r_squared <- round(cor(merged_dataframe$all_reps_zscore, merged_dataframe$total_count, use = "complete.obs")^2, 2)
+
+ggplot(merged_dataframe, aes(x = all_reps_zscore, y = total_count)) +
+  geom_point(size = 1) +
+  geom_text_repel(
+    aes(label = label),
+    size = 4,
+    max.overlaps = Inf,
+    segment.color = "gray30",
+    segment.size = 0.3,
+    box.padding = 0.4,
+    point.padding = 0.3,
+    min.segment.length = 0,
+    direction = "y",
+    nudge_y = 2,
+    nudge_x = 0.2
+  ) +
+  annotate("text", x = Inf, y = Inf, 
+           label = paste("R² =", r_squared), 
+           hjust = 4, vjust = 2, size = 8, color = "black") +  # Increased from 5 to 8
+  labs(
+    x = "DMS z-score", 
+    y = "Mutation Count (Genie)"
+  ) +
+  theme_classic() +
+  theme(
+    panel.grid = element_blank(),
+    legend.text = element_text(size = 20),
+    axis.title = element_text(size = 20),        # Axis label size
+    axis.text = element_text(size = 16)          # Axis tick label size
+  )
+
+ggsave("./plots/patient_data/Genie_v_DMS.tiff", device = "tiff", width = 8, height = 6, dpi = 300)
+
+
+```
 
 

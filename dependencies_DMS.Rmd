@@ -1,0 +1,20 @@
+```{r}
+
+library(readr)
+
+all_reps_data <- read.csv("./results/functional_scores/DMS_collapsed_data.csv")
+
+
+```
+
+
+
+
+```{r}
+
+
+
+
+```
+
+

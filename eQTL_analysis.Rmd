@@ -1,0 +1,63 @@
+
+
+```{r}
+library(biomaRt)
+library(VariantAnnotation)
+```
+
+
+
+```{r}
+
+eqtl_raw <- read.csv("./data/eQTL_analysis/GTEx_Portal_SMARCB1.csv")
+
+snp <- unique(eqtl_raw$SNP.Id)
+
+eqtl_raw$genomic_regions_biomart <- sapply(eqtl_raw$Variant.Id, function(x) {
+   parts <- strsplit(x, "_")[[1]]
+   chr <- gsub("chr", "", parts[1])  # remove "chr" prefix
+   pos <- parts[2]
+   # biomaRt format: chr:start:end (for single position, start=end)
+   paste0(chr, ":", pos, ":", pos)
+ })
+
+# Extract just the position number for the site column
+eqtl_raw$site <- sapply(eqtl_raw$Variant.Id, function(x) {
+   parts <- strsplit(x, "_")[[1]]
+   pos <- parts[2]
+   as.numeric(pos)  # convert to numeric
+})
+
+
+eqtl_raw_unique <- eqtl_raw[!duplicated(eqtl_raw$SNP.Id), ]
+
+
+variant_parts <- strsplit(eqtl_raw_unique$Variant.Id, "_")
+
+eqtl_raw_unique$ref_allele <- sapply(variant_parts, function(x) x[3])
+eqtl_raw_unique$alt_allele <- sapply(variant_parts, function(x) x[4])
+
+# Check the results
+head(eqtl_raw_unique[, c("Variant.Id", "ref_allele", "alt_allele")])
+
+
+
+eqtl_raw_unique_snvs <- eqtl_raw_unique[nchar(eqtl_raw_unique$ref_allele) == 1 & 
+                                 nchar(eqtl_raw_unique$alt_allele) == 1, ]
+```
+
+```{r}
+
+eqtl_unique_exonic_snvs <- eqtl_raw_unique_snvs %>%
+  filter(site >= 23787170 & site <= 23787262 | #exon 1
+         site >= 23791756 & site <= 23791894 | #exon 2
+         site >= 23793559 & site <= 23793688 | #exon 3
+         site >= 23800944 & site <= 23801081 | #exon 4
+         site >= 23803295 & site <= 23803422 | #exon 5
+         site >= 23816770 & site <= 23816936 | #exon 6
+         site >= 23825225 & site <= 23825415 | #exon 7
+         site >= 23833572 & site <= 23833703 | #exon 8
+         site >= 23834141 & site <= 23834180)  #exon 9
+
+```
+

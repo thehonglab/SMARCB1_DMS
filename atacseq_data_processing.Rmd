@@ -145,7 +145,7 @@ I315IvI315X_induction.counted_contrast <- dba.contrast(I315IvI315X_induction.cou
                                            name1="WT",                        # Naming group1
                                            name2="MUTANT")  
 
-dba.show(induction.counted_contrast, bContrasts=TRUE)
+dba.show(I315IvI315X_induction.counted_contrast, bContrasts=TRUE)
 
 I315IvI315X_induction.analyzed <- dba.analyze(I315IvI315X_induction.counted_contrast, method=DBA_ALL_METHODS, bParallel=FALSE)
 
@@ -414,7 +414,7 @@ write_tsv(gain_W281PvW281X_bed, "./data/atacseq_data_processing/bed_files/gain_W
 ```
 
 
-## Step 3: Unifying bed files from WT v nonsense comparison for plotting in Figure 4A
+### Step 3: Merge gain or loss peaks from both WT vs W281X and I315I vs I315X comparisons to create unified significant peak sets identified through DiffBind.
 
 
 ```{bash}
@@ -424,6 +424,141 @@ cat ./data/atacseq_data_processing/bed_files/loss_WTvW281X.bed ./data/atacseq_da
 cat ./data/atacseq_data_processing/bed_files/gain_WTvW281X.bed ./data/atacseq_data_processing/bed_files/gain_I315IvI315X.bed | sort -k1,1 -k2,2n | bedtools merge > ./data/atacseq_data_processing/bed_files/unified_WTvX_regions_gain.bed
 
 ```
+
+
+## Part 3: Creating a consensus set of regions that are accessible upon re-expression of "WT" SMARCB1
+
+
+The input is the raw narrowPeak files from MACS3 that we also used in DiffBind
+
+### Step 1: Generate merged consensus peaks for each sample by finding overlapping regions between R1 and R2 replicates.
+
+```{bash}
+
+mkdir -p replicate_overlaps
+
+for r1_file in *-R1_peaks.narrowPeak; do
+    prefix=${r1_file%%-R1_peaks.narrowPeak}
+    r2_file="${prefix}-R2_peaks.narrowPeak"
+
+    if [[ -f "$r2_file" ]]; then
+        out="replicate_overlaps/${prefix}_R1_vs_R2_overlap.bed"
+
+        # Find overlapping regions between R1 and R2, keep unique A regions, sort, and merge
+        bedtools intersect -a "$r1_file" -b "$r2_file" -u \
+            | cut -f1-3 \
+            | bedtools sort -i - \
+            | bedtools merge -i - > "$out"
+
+        echo "✅ Compared $r1_file with $r2_file → $out (merged consensus peaks)"
+    else
+        echo "⚠️ No R2 file found for $prefix"
+    fi
+done
+
+```
+
+### Step 2: Create a consensus WT SMARCB1 peak set by keeping only regions shared between I315I and WT replicates and merging overlaps (so we are only keeping peaks found across 4 replicates: I315I-R1, I315I-R2, WT-R1, WT-R2).
+
+```{bash}
+
+bedtools intersect -a I315I_R1_vs_R2_overlap.bed -b WT281_R1_vs_R2_overlap.bed -u | sort -k1,1 -k2,2n | bedtools merge > consensus_WT_SMARCB1_atac_peaks.bed
+
+```
+
+### Step 3: Classify consensus peaks into significant gain, significant loss, and non-significant sets by intersecting with unified DiffBind peak regions.
+
+```{bash}
+
+bedtools intersect -a consensus_WT_SMARCB1_atac_peaks.bed \
+                   -b unified_WTvX_regions_gain.bed -u > significant_gain_in_consensus.bed
+
+bedtools intersect -a consensus_WT_SMARCB1_atac_peaks.bed \
+                   -b unified_WTvX_regions_loss.bed -u > significant_loss_in_consensus.bed
+
+bedtools intersect -a consensus_WT_SMARCB1_atac_peaks.bed \
+                   -b unified_WTvX_regions_gain.bed unified_WTvX_regions_loss.bed -v > nonsignificant_peaks_in_consensus.bed
+
+```
+
+
+Annotate the regions
+
+```{r}
+
+annotatePeaks.pl consensus_WT_SMARCB1_atac_peaks.bed hg38 > consensus_WT_SMARCB1_atac_peaks_annotated.bed
+
+annotatePeaks.pl consensus_atac_gained.bed hg38 > consensus_atac_gained_annotated.bed
+
+annotatePeaks.pl consensus_atac_loss.bed hg38 > consensus_atac_loss_anotated.bed
+
+annotatePeaks.pl consensus_atac_persistent.bed hg38 > consensus_atac_persistent_annotated.bed
+
+```
+
+
+```{r}
+
+library(readr)
+library(dplyr)
+
+all_accessible_sites <- read_tsv("./results/atacseq/consensus_WT_SMARCB1_atac_peaks_annotated.bed")
+
+all_accessible_annotation_counts <- all_accessible_sites %>%
+  mutate(cleaned_annotation = gsub("\\s*\\([^)]*\\)", "", Annotation)) %>%
+  mutate(cleaned_annotation = trimws(cleaned_annotation)) %>%
+  mutate(cleaned_annotation = gsub("\\.[0-9]+$", "", cleaned_annotation)) %>%  
+  count(cleaned_annotation, sort = TRUE)
+
+gained_atac_sites <- read_tsv("./results/atacseq/consensus_atac_gained_annotated.bed")
+
+gained_atac_annotation_counts <- gained_atac_sites %>%
+  mutate(cleaned_annotation = gsub("\\s*\\([^)]*\\)", "", Annotation)) %>%
+  mutate(cleaned_annotation = trimws(cleaned_annotation)) %>%
+  mutate(cleaned_annotation = gsub("\\.[0-9]+$", "", cleaned_annotation)) %>% 
+  count(cleaned_annotation, sort = TRUE)
+
+lost_atac_sites <- read_tsv("./results/atacseq/consensus_atac_loss_anotated.bed")
+
+lost_atac_annotation_counts <- lost_atac_sites %>%
+  mutate(cleaned_annotation = gsub("\\s*\\([^)]*\\)", "", Annotation)) %>%
+  mutate(cleaned_annotation = trimws(cleaned_annotation)) %>%
+  mutate(cleaned_annotation = gsub("\\.[0-9]+$", "", cleaned_annotation)) %>%  
+  count(cleaned_annotation, sort = TRUE)
+
+persistent_atac_sites <- read_tsv("./results/atacseq/consensus_atac_persistent_annotated.bed")
+
+persistent_atac_annotation_counts <- persistent_atac_sites %>%
+  mutate(cleaned_annotation = gsub("\\s*\\([^)]*\\)", "", Annotation)) %>%
+  mutate(cleaned_annotation = trimws(cleaned_annotation)) %>%
+  mutate(cleaned_annotation = gsub("\\.[0-9]+$", "", cleaned_annotation)) %>%  
+  count(cleaned_annotation, sort = TRUE)
+
+
+
+```
+
+
+```{r}
+# Filter for promoter-TSS peaks
+persistent_promoter_peaks <- persistent_atac_sites[grepl("promoter-TSS", persistent_atac_sites$Annotation), ]
+
+persisent_promoter_peaks_regions <- persistent_promoter_peaks[,c(2,3,4)]
+
+write_tsv(persisent_promoter_peaks_regions, "./results/atacseq/persistent_promoter_regions.bed")
+
+# Optional: check how many
+nrow(promoter_peaks)
+
+# Optional: look at motif counts/frequencies in these promoter peaks
+table(promoter_peaks$Motif)  # replace "Motif" with your motif column name
+
+
+
+```
+
+
+
 
 
 

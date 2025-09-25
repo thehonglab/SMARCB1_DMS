@@ -1,314 +1,813 @@
-**Molecular Dynamics Simulation Guide**
 
-**System Setup**
-- **Platform:** Linux-based system running Amber v24
-- **Hardware:** NVIDIA RTX A6000 with 49,140 MiB of memory
-- **CUDA Version:** 12.6
-**Input Structure**
-**SMARCB1 PDB:** Obtained from AlphaFold Q12824
-**Mutations:** WT structure mutated to W281P and I315R using PyMOL.
-**Processing:** All structures (WT, W281P, and I315R) processed using Amber v24 in the same way as described below.
+Molecular Dynamic Simulations
+
+September 19, 2025
+Author: Garrett Cooper
 
 
+The following files were present in one directory:
+build_system.leap
+min1_restrained.in
+min2_unrestrained.in
+nvt_heat.in
+npt_equil.in
+production.in
+run_amber.sh
 
-1. Prepare the PDB File
-```{bash}
-pdb4amber WT.pdb > WT.amber.pdb
-```
+*Also WT.pdb or W281P.pdb, I315R.pdb or S299L.pdb
+
+the contents of all these text input files is as follows:
+
+** Note: you can simply just use nano to create these files.
 
 
-
-2.	Set up the topology
-
-Create a file called leap.in containing the following:
+build_system.leap
 ```{bash}
 source leaprc.protein.ff19SB
 source leaprc.water.tip3p
 mol = loadPDB WT.amber.pdb
-solvateBox mol TIP3PBOX 10.0
+solvateBox mol TIP3PBOX 15.0
 addIons mol Na+ 0
 saveAmberParm mol system.prmtop system.inpcrd
 quit
 ```
 
-Run the following command to generate the topology:
+min1_restrained.in
 ```{bash}
-tleap -f leap.in
-```
-
-
-
-3.	Energy Minimization (This takes a while to run)
-
-Create a file called min.in for energy minimization:
-```{bash}
-Energy minimization
+Minimize Solvent with Protein Restrained
 &cntrl
-  imin=1,        ! Perform minimization
-  maxcyc=5000,  ! Maximum number of cycles
-  ncyc=2500,    ! Number of cycles for steepest descent
-  cut=10.0,
+  imin   = 1,
+  maxcyc = 10000,
+  ncyc   = 500,
+  ntb    = 1,        ! Constant volume PBC
+  cut    = 10.0,
+  ntr    = 1,        ! Positional restraints ON
+  restraint_wt = 10.0,  ! Restraint force constant (kcal/mol/Å²)
+  restraintmask = ':1-385 & !@H='  ! Restrain all protein heavy atoms 
 &end
 ```
 
-Run the minimization:
+min2_unrestrained.in
 ```{bash}
-nohup pmemd.cuda -O -i min.in -o min.out -p system.prmtop -c system.inpcrd -r min.crd -ref system.inpcrd &
-```
-
-
-
-4.	Equilibration
-
-a) NVT Equilibriation
-
-Create a file called nvt.in for NVT equilibration:
-```{bash}
-NVT equilibration
+Minimize Whole System Without Restraints
 &cntrl
-  imin=0,        ! No minimization
-  ntt=3,         ! Temperature coupling
-  temp0=300.0,   ! Target temperature
-  ntpr=100,      ! Print every 100 steps
-  ntwx=100,      ! Write coordinates every 100 steps
-  ntf=2,
-  ntb=1,
-  cut=10.0,
+  imin   = 1,
+  maxcyc = 10000,
+  ncyc   = 500,
+  ntb    = 1,
+  cut    = 10.0,
+  ntr    = 0,        ! No restraints
 &end
 ```
 
-Run the equilibration:
+nvt_heat.in
 ```{bash}
-nohup pmemd.cuda -O -i nvt.in -o nvt.out -p system.prmtop -c min.crd -r nvt.crd -x nvt.mdcrd &
-```
-
-b) NPT Equilibriation
-
-Create a file called npt.in for NPT equilibration:
-```{bash}
-NPT equilibration
+NVT Heating Equilibration - constant volume
 &cntrl
-  imin=0,          ! No minimization
-  ntt=3,           ! Temperature coupling
-  ntp=1,           ! Pressure coupling
-  ntpr=100,
-  ntwx=100,
-  cut=10.0,
-  taup=2.0,        ! Pressure relaxation time
-  temp0=300.0,     ! Target temperature
-  gamma_ln=1.0,    ! Friction coefficient for Langevin dynamics
+  imin     = 0,          ! Run molecular dynamics (0 = MD, not minimization)
+  irest    = 0,          ! Start simulation fresh, no restart (0 = no restart)
+  ntx      = 1,          ! Input coordinate format (1 = coordinates only, no velocities)
+  ntb      = 1,          ! Constant volume periodic boundary conditions (1 = NVT ensemble)
+  cut      = 10.0,       ! Nonbonded cutoff distance (Å)
+  ntr      = 0,          ! No positional restraints applied
+  ntc      = 2,          ! SHAKE algorithm on bonds involving hydrogen (2 = SHAKE on hydrogen bonds)
+  ntf      = 2,          ! Force evaluation corresponding to SHAKE (2 = omit force on bonds constrained by SHAKE)
+  tempi    = 0.0,        ! Initial temperature (K), system starts cold (0 K)
+  temp0    = 310.0,      ! Target temperature (K), heat system up to 300 K
+  ntt      = 3,          ! Temperature coupling algorithm (3 = Langevin thermostat)
+  ig       = -1,         ! Random seed for Langevin thermostat (-1 = time-based seed)
+  ioutfm   = 1,          ! NetCDF output format for trajectory (1 = NetCDF)
+  iwrap    = 1,          ! Wrap coordinates into primary box (1 = yes)
+  gamma_ln = 1.0,        ! Collision frequency for Langevin thermostat (ps⁻¹)
+  nstlim   = 5000000,  ! Number of MD steps (5 million steps = 10 ns at 2 fs timestep)
+  dt       = 0.002,      ! MD timestep in ps (2 fs)
+  ntpr     = 5000,       ! Print energies every 5000 steps (10 ps)
+  ntwx     = 50000,       ! Write coordinates every 50000 steps (100 ps)
+  ntwr     = 1000,       ! Write restart file every 1000 steps
 &end
 ```
 
-Run the equilibration:
+
+npt_equil.in
 ```{bash}
-nohup pmemd.cuda -O -i npt.in -o npt.out -p system.prmtop -c nvt.crd -r npt.crd -x npt.mdcrd &
-```
-
-
-
-5.	Run Molecular Dynamics Simulation
-
-Create a file called md.in for the MD simulation:
-```{bash}
-Production MD simulation
+NPT Equilibration - constant pressure
 &cntrl
-  imin=0,
-  ntt=3,
-  ntp=1,
-  ntpr=100,
-  ntwx=100,
-  cut=10.0,
-  nstlim=200000000,  ! Number of steps to run
-  dt=0.001,       ! Reduced time step
-  temp0=300.0,
-  gamma_ln=5.0,   ! Higher friction coefficient
-  restraint_wt=2.0,  ! Restraint weight on solute atoms
-  restraintmask=":1-385@CA"  ! Apply restraints to only alpha carbons
+  imin     = 0,          ! Run molecular dynamics (0 = MD, not minimization)
+  irest    = 1,          ! Restart simulation from a previous run (1 = yes, continue velocities)
+  ntx      = 5,          ! Input coordinate and velocity format (5 = coordinates & velocities read from binary restart file)
+  ntb      = 2,          ! Periodic boundary conditions and constant pressure (2 = NPT ensemble)
+  pres0    = 1.0,        ! Target pressure in atm (1 atm)
+  ntp      = 1,          ! Pressure coupling on (1 = isotropic pressure scaling)
+  taup     = 2.0,        ! Pressure relaxation time constant (in ps)
+  cut      = 10.0,       ! Nonbonded cutoff distance (Å)
+  ntr      = 0,          ! No positional restraints applied (0 = no restraints)
+  ntc      = 2,          ! SHAKE algorithm on bonds involving hydrogen (2 = SHAKE on hydrogen bonds)
+  ntf      = 2,          ! Force evaluation corresponding to SHAKE (2 = omit force on bonds constrained by SHAKE)
+  tempi    = 310.0,      ! Initial temperature (K)
+  temp0    = 310.0,      ! Target temperature (K)
+  ntt      = 3,          ! Temperature coupling algorithm (3 = Langevin thermostat)
+  gamma_ln = 5.0,        ! Collision frequency for Langevin thermostat (ps⁻¹), higher than production run for faster equilibration
+  ig       = -1,         ! Random seed for Langevin thermostat (-1 = time-based seed)
+  ioutfm   = 1,          ! NetCDF output format for trajectory (1 = NetCDF)
+  iwrap    = 1,          ! Coordinates wrapped into primary box for output (1 = yes)
+  nstlim   = 2500000,  ! Number of MD steps (2.5 million steps, corresponds to 5 ns at 2 fs timestep)
+  dt       = 0.002,      ! MD timestep in ps (2 fs)
+  ntpr     = 5000,       ! Print energies every 5000 steps (10 ps)
+  ntwx     = 50000,       ! Write coordinates to trajectory file every 50000 steps (100 ps)
+  ntwr     = 1000,       ! Write restart file every 1000 steps
 &end
 ```
 
-Run the MD simulation:
+production.in
 ```{bash}
-nohup pmemd.cuda -O -i md.in -o md.out -p system.prmtop -c npt.crd -r md.crd -x md.mdcrd &
+Production MD - constant pressure
+&cntrl
+  imin     = 0,          ! Run molecular dynamics (0 = MD, 1 = minimization)
+  irest    = 1,          ! Restart simulation from a previous run (1 = yes, continue velocities)
+  ntx      = 5,          ! Input coordinate and velocity format (5 = coordinates & velocities read from binary restart file)
+  ntb      = 2,          ! Periodic boundary conditions and constant pressure (2 = NPT ensemble)
+  ntp      = 1,          ! Pressure coupling on (1 = isotropic pressure scaling)
+  pres0    = 1.0,        ! Target pressure in atm (1 atm)
+  taup     = 2.0,        ! Pressure relaxation time constant (in ps)
+  cut      = 10.0,       ! Nonbonded cutoff distance (Å)
+  ntr      = 0,          ! No positional restraints applied (0 = no restraints)
+  ntc      = 2,          ! SHAKE algorithm on bonds involving hydrogen (2 = SHAKE on hydrogen bonds)
+  ntf      = 2,          ! Force evaluation method corresponding to ntc (2 = omit force calculation on bonds with SHAKE)
+  tempi    = 310.0,      ! Initial temperature (K)
+  temp0    = 310.0,      ! Target temperature (K)
+  ntt      = 3,          ! Temperature coupling algorithm (3 = Langevin thermostat)
+  gamma_ln = 1.0,        ! Collision frequency for Langevin thermostat (ps⁻¹)
+  ig       = -1,         ! Random seed for Langevin thermostat (-1 = time-based seed)
+  iwrap    = 1,          ! Coordinates wrapped into primary box for output (1 = yes)
+  ioutfm   = 1,          ! NetCDF output format for trajectory (1 = NetCDF)
+  nstlim   = 100000000,  ! Number of MD steps to run (100 million steps, corresponds to 200 ns at dt=0.002 ps)
+  dt       = 0.002,      ! MD timestep in ps (2 fs)
+  ntpr     = 5000,        ! Print energies to output every 5000 steps (10 ps)
+  ntwx     = 50000,        ! Write coordinates to trajectory file every 50000 steps (100 ps)
+  ntwr     = 25000,       ! Write restart file every 25000 steps
+&end
 ```
 
 
+The following code was used to run all steps and write out log files
 
-6.	Analyze Results
-
-RMSD Analysis:
+run_amber.sh
 ```{bash}
-cpptraj -p system.prmtop -y md.mdcrd
-rmsd :1-385@CA out rmsd.dat
-run
+#!/bin/bash
+
+# AMBER Molecular Dynamics Simulation Workflow
+# Complete protocol from PDB preparation to production MD
+echo "Starting AMBER MD simulation workflow..."
+
+# Step 1: Prepare PDB file
+echo "Step 1: Preparing PDB file..."
+pdb4amber WT.pdb > WT.amber.pdb
+
+# Step 2: Create system with tleap
+echo "Step 2: Creating solvated system..."
+tleap -f build_system.leap
+
+# Step 3: Minimization - Restrained
+echo "Step 3: Minimization with protein restraints..."
+pmemd.cuda -O -i min1_restrained.in -o min1.out -p system.prmtop -c system.inpcrd -r min1.rst -ref system.inpcrd
+
+# Step 4: Minimization - Unrestrained
+echo "Step 4: Minimization without restraints..."
+pmemd.cuda -O -i min2_unrestrained.in -o min2.out -p system.prmtop -c min1.rst -r min2.rst
+
+# Step 5: NVT Heating Equilibration
+echo "Step 5: NVT heating equilibration..."
+
+pmemd.cuda -O -i nvt_heat.in -o nvt_heat.out -p system.prmtop -c min2.rst -r nvt_heat.rst -x nvt_heat.nc
+
+# Step 6: NPT Equilibration
+echo "Step 6: NPT pressure equilibration..."
+pmemd.cuda -O -i npt_equil.in -o npt_equil.out -p system.prmtop -c nvt_heat.rst -r npt_equil.rst -x npt_equil.nc
+
+# Step 7: Production MD
+echo "Step 7: Production MD simulation..."
+pmemd.cuda -O -i production.in -o production.out -p system.prmtop -c npt_equil.rst -r production.rst -x production.nc
+echo "Simulation workflow complete!"
+echo "Check output files for any errors before proceeding with analysis."
 ```
 
-RMSF Analysis:
+
+
+Calculating contact frequency TCL script
+
+To run this, open up the TkConsole in VMD and just paste this in there and hit enter.
+
+
 ```{bash}
-cpptraj -p system.prmtop -y md.mdcrd
-trajin md.mdcrd
-atomicfluct out rmsf.dat byres :1-385
-run
+
+# VMD TCL Script for Contact Difference Maps
+# Contact analysis between two cleft regions
+
+# Define your selections
+set sel1_text "protein and resid 260 to 283"
+set sel2_text "protein and resid 290 to 324"
+set cutoff 4.0  ;# Contact distance cutoff in Angstroms
+
+# Function to calculate contact map for a trajectory
+proc calculate_contact_map {sel1_text sel2_text cutoff} {
+    set sel1 [atomselect top $sel1_text]
+    set sel2 [atomselect top $sel2_text]
+    
+    # Get residue lists
+    set reslist1 [lsort -unique [$sel1 get resid]]
+    set reslist2 [lsort -unique [$sel2 get resid]]
+    
+    set nframes [molinfo top get numframes]
+    
+    # Initialize contact matrix
+    array unset contact_sum
+    
+    # Loop through frames
+    for {set frame 0} {$frame < $nframes} {incr frame} {
+        $sel1 frame $frame
+        $sel2 frame $frame
+        
+        # Loop through residue pairs
+        foreach res1 $reslist1 {
+            foreach res2 $reslist2 {
+                set sel_res1 [atomselect top "$sel1_text and resid $res1"]
+                set sel_res2 [atomselect top "$sel2_text and resid $res2"]
+                
+                $sel_res1 frame $frame
+                $sel_res2 frame $frame
+                
+                # Calculate minimum distance between residues
+                set coords1 [$sel_res1 get {x y z}]
+                set coords2 [$sel_res2 get {x y z}]
+                
+                set min_dist 999.0
+                foreach coord1 $coords1 {
+                    foreach coord2 $coords2 {
+                        set dist [vecdist $coord1 $coord2]
+                        if {$dist < $min_dist} {
+                            set min_dist $dist
+                        }
+                    }
+                }
+                
+                # Check if contact exists
+                if {$min_dist <= $cutoff} {
+                    if {![info exists contact_sum($res1,$res2)]} {
+                        set contact_sum($res1,$res2) 0
+                    }
+                    incr contact_sum($res1,$res2)
+                }
+                
+                $sel_res1 delete
+                $sel_res2 delete
+            }
+        }
+        
+        if {[expr $frame % 100] == 0} {
+            puts "Processed frame $frame of $nframes"
+        }
+    }
+    
+    # Convert to contact frequency
+    array unset contact_freq
+    foreach key [array names contact_sum] {
+        set contact_freq($key) [expr double($contact_sum($key)) / $nframes]
+    }
+    
+    $sel1 delete
+    $sel2 delete
+    
+    return [array get contact_freq]
+}
+
+# Function to write contact map to file
+proc write_contact_map {contact_array filename reslist1 reslist2} {
+    array set contacts $contact_array
+    
+    set outfile [open $filename w]
+    
+    # Write header
+    puts $outfile "# Contact frequency map"
+    puts $outfile "# Res1\tRes2\tFrequency"
+    
+    foreach res1 $reslist1 {
+        foreach res2 $reslist2 {
+            if {[info exists contacts($res1,$res2)]} {
+                puts $outfile "$res1\t$res2\t$contacts($res1,$res2)"
+            } else {
+                puts $outfile "$res1\t$res2\t0.0"
+            }
+        }
+    }
+    
+    close $outfile
+    puts "Contact map written to $filename"
+}
+
+# Function to create difference map
+proc create_difference_map {wt_file mut_file output_file} {
+    # Read WT contacts
+    array unset wt_contacts
+    set infile [open $wt_file r]
+    while {[gets $infile line] != -1} {
+        if {[string index $line 0] != "#"} {
+            set fields [split $line "\t"]
+            set res1 [lindex $fields 0]
+            set res2 [lindex $fields 1]
+            set freq [lindex $fields 2]
+            set wt_contacts($res1,$res2) $freq
+        }
+    }
+    close $infile
+    
+    # Read mutant contacts and calculate difference
+    array unset diff_contacts
+    set infile [open $mut_file r]
+    set outfile [open $output_file w]
+    puts $outfile "# Contact difference map (WT - Mutant)"
+    puts $outfile "# Positive values = contacts lost in mutant"
+    puts $outfile "# Negative values = contacts gained in mutant"
+    puts $outfile "# Res1\tRes2\tWT_Freq\tMut_Freq\tDifference"
+    
+    while {[gets $infile line] != -1} {
+        if {[string index $line 0] != "#"} {
+            set fields [split $line "\t"]
+            set res1 [lindex $fields 0]
+            set res2 [lindex $fields 1]
+            set mut_freq [lindex $fields 2]
+            
+            if {[info exists wt_contacts($res1,$res2)]} {
+                set wt_freq $wt_contacts($res1,$res2)
+            } else {
+                set wt_freq 0.0
+            }
+            
+            set diff [expr $wt_freq - $mut_freq]
+            puts $outfile "$res1\t$res2\t$wt_freq\t$mut_freq\t$diff"
+        }
+    }
+    
+    close $infile
+    close $outfile
+    puts "Difference map written to $output_file"
+}
+
+# Main execution
+proc analyze_contacts {} {
+    global sel1_text sel2_text cutoff
+    
+    # Get current molecule name for file naming
+    set molname [molinfo top get name]
+    
+    # Calculate contact map
+    puts "Calculating contact map for $molname..."
+    set sel1 [atomselect top $sel1_text]
+    set sel2 [atomselect top $sel2_text]
+    set reslist1 [lsort -unique [$sel1 get resid]]
+    set reslist2 [lsort -unique [$sel2 get resid]]
+    $sel1 delete
+    $sel2 delete
+    
+    set contact_data [calculate_contact_map $sel1_text $sel2_text $cutoff]
+    
+    # Write to file
+    set output_file "${molname}_contacts.dat"
+    write_contact_map $contact_data $output_file $reslist1 $reslist2
+    
+    puts "Analysis complete for $molname"
+}
+
+# Usage instructions
+puts "======================================"
+puts "VMD Contact Analysis Script Loaded"
+puts "======================================"
+puts ""
+puts "To use this script:"
+puts "1. Load your WT trajectory: mol new wt.psf; mol addfile wt.dcd"
+puts "2. Run: analyze_contacts"
+puts "3. Load mutant trajectory: mol new mut.psf; mol addfile mut.dcd"  
+puts "4. Run: analyze_contacts"
+puts "5. Create difference map:"
+puts "   create_difference_map wt_contacts.dat mut_contacts.dat difference.dat"
+puts ""
+puts "Modify sel1_text, sel2_text, and cutoff variables as needed"
+puts "Current settings:"
+puts "  Selection 1: $sel1_text"
+puts "  Selection 2: $sel2_text" 
+puts "  Cutoff: $cutoff Å"
+
+
 ```
 
+To loop over multiple trajectories as this takes a while to run use this for loop (just paste this into the TkConsole after pasting the previous command in:
 
+** modify the $i < 16 to n number of trajectories you have loaded into VMD.
 
-7. Convert trajectory to VMD readable format
+** you can only load 20 trajectories into VMD at once, if you exceed this, it will crash
+
 ```{bash}
-cpptraj
-parm system.prmtop 
-trajin md.mdcrd
-trajout md.dcd
-run
-```
-To load into VMD, first load system.prmtop, then load the md.dcd file.
 
-
-
-8. Plotting Trajectory Results
-
-a)RMSD
-
-```{r}
-library(readr)
-library(ggplot2)
-
-WT_RMSD <- read.table("./results/molecular_dynamics_simulation/rmsd_WT_200ns.dat", header=FALSE)
-colnames(WT_RMSD) <- c("Time", "RMSD")
-
-write_xlsx(WT_RMSD, "./results/molecular_dynamics_simulation/rmsd_WT_200ns.xlsx")
-
-
-I315R_RMSD <- read.table("./results/molecular_dynamics_simulation/rmsd_I315R_200ns.dat", header=FALSE)
-colnames(I315R_RMSD) <- c("Time", "RMSD")
-
-write_xlsx(I315R_RMSD, "./results/molecular_dynamics_simulation/rmsd_I315R_200ns.xlsx")
-
-W281P_RMSD <- read.table("./results/molecular_dynamics_simulation/rmsd_W281P_200ns.dat", header=FALSE)
-colnames(W281P_RMSD) <- c("Time", "RMSD")
-
-write_xlsx(W281P_RMSD, "./results/molecular_dynamics_simulation/rmsd_W281P_200ns.xlsx")
-
-WT_RMSD$Variant <- "WT"
-I315R_RMSD$Variant <- "I315R"
-W281P_RMSD$Variant <- "W281P"
-
-combined_RMSD <- rbind(WT_RMSD, I315R_RMSD, W281P_RMSD)
-
-# Reorder the columns for better readability
-combined_RMSD <- combined_RMSD[, c("Time", "RMSD", "Variant")]
-
-# View the combined dataframe
-head(combined_RMSD)
-
-#Save for later use
-write_xlsx(combined_RMSD, "./results/molecular_dynamics_simulation/combined_rmsd.xlsx")
-
-
-
-
-time_per_frame_ns <- 0.005
-
-combined_RMSD$Time_ns <- combined_RMSD$Time * time_per_frame_ns
-
-# Create the plot
-rmsd <- ggplot(combined_RMSD, aes(x = Time_ns, y = RMSD, color = factor(Variant, levels = c("WT", "W281P", "I315R")))) +
-  geom_line(size= 1.5) +  
-  labs(title = "RMSD vs. Time",
-       x = "Time (ns)",
-       y = "RMSD (Å)",
-       color = "Variant") +     # Legend title
-  theme_minimal() +           # Use a minimal theme
-  theme(legend.position = "top",
-        axis.text = element_text(size = 30),
-        axis.title = element_text(size = 34),
-        legend.text = element_text(size = 26),
-        legend.title = element_text(size = 34),
-        plot.title = element_text(size = 36)) +
-  scale_color_manual(values = c("WT" = "gray", "I315R" = "red", "W281P" = "blue"))  # Customize colors
-
-rmsd
-
-
-
-ggsave("./plots/molecular_dynamics_simulation/rmsd_200ns.tif", plot = rmsd, width = 34, height =20, units = "cm", device = tiff ,res = 600)
+for {set i 0} {$i < 16} {incr i} {
+    puts "Processing trajectory $i..."
+    mol top $i
+    analyze_contacts
+}
 
 ```
 
-b) RMSF
 
-```{r}
+Then to create the difference map just type this into the TkConsole (this runs very quickly)
 
-#Read in RMSF data
-WT_RMSF <- read.table("./results/molecular_dynamics_simulation/rmsf_WT_200ns.dat", header=FALSE)
-colnames(WT_RMSF) <- c("Residue", "RMSF")
-W281P_RMSF <- read.table("./results/molecular_dynamics_simulation/rmsf_W281P_200ns.dat", header=FALSE)
-colnames(W281P_RMSF) <- c("Residue", "RMSF")
-I315R_RMSF <- read.table("./results/molecular_dynamics_simulation/rmsf_I315R_200ns.dat", header=FALSE)
-colnames(I315R_RMSF) <- c("Residue", "RMSF")
-WT_RMSF$Variant <- "WT"
-I315R_RMSF$Variant <- "I315R"
-W281P_RMSF$Variant <- "W281P"
+** You will have to manually edit the names here for each replicate and mutant to do pairwise replicate subtraction... not too bad.
 
-combined_RMSF <- rbind(WT_RMSF, I315R_RMSF, W281P_RMSF)
+```{bash}
 
-# Reorder the columns for better readability
-combined_RMSF <- combined_RMSF[, c("Residue", "RMSF", "Variant")]
-
-# View the combined dataframe
-head(combined_RMSF)
-
-write_xlsx(combined_RMSF, "./results/molecular_dynamics_simulation/rmsf_combined.xlsx")
-
-domain_data <- data.frame(
-  Domain = c( "WHD","RPT1", "RPT2", "CCD"),
-  Start = c( 10,183, 259, 335),
-  End = c(110, 245, 319, 378),
-  Color = c("gray70","green", "orange", "blue")  # Colors for each domain
-)
-
-# Create the plot
-rmsf <- ggplot() +
-  # Add rectangles for domains
-  geom_rect(data = domain_data,
-            aes(xmin = Start, xmax = End, ymin = -Inf, ymax = Inf, fill = Domain),
-            alpha = 0.3) +  # Make rectangles slightly transparent
-  # First add mutant points
-  geom_point(data = subset(combined_RMSF, Variant != "WT"), 
-             aes(x = Residue, y = RMSF, color = Variant), 
-             size = 1) +  # Mutant points
-  # Then add WT points, this ensures they are on top
-  geom_point(data = subset(combined_RMSF, Variant == "WT"), 
-             aes(x = Residue, y = RMSF, color = Variant), 
-             size = 1) +  # WT points on top
-  geom_line(data = combined_RMSF, aes(x = Residue, y = RMSF, color = Variant), 
-            linewidth = 2, alpha = 0.9) + 
-  labs(title = "RMSF by Residue with Domains",
-       x = "Residue Number",
-       y = "RMSF Value",
-       color = "Variant",
-       fill = "Domain") +  # Legend title for fill
-  theme_minimal() +  # Use a minimal theme
-  theme(legend.position = "top",
-  axis.text = element_text(size = 30),
-        axis.title = element_text(size = 34),
-        legend.text = element_text(size = 26),
-        legend.title = element_text(size = 34),
-        plot.title = element_text(size = 36)) +
-  scale_fill_manual(values = domain_data$Color, 
-                    limits = c("WHD","RPT1", "RPT2", "CCD")) + 
-  scale_color_manual(values = c("WT" = "gray", "W281P" = "blue", "I315R" = "red" ),  # Adjust colors if needed
-                     limits = c("WT","W281P", "I315R")) +
-  scale_x_continuous(limits = c(0, 385)) + 
-  scale_y_continuous(limits = c(5, 25))  
-
-rmsf
-
-ggsave("./plots/molecular_dynamics_simulation/rmsf_200ns.tif", plot = rmsf, width = 34, height =20, units = "cm", device = tiff ,res = 600)
-```
+create_difference_map WT-rep4_contacts.dat I315R-rep4_contacts.dat WT_vs_I315R_diff.dat
 
 ```
 
+
+Processing contact frequency output to perform pairwise experimental mutant - S299L mutant subtraction
+
+```{bash}
+
+#!/bin/bash
+
+# Example: subtract S299L from I315R for all replicates
+# List of replicate numbers (adjust as needed)
+reps=$(seq 4 15)
+
+# First, process each replicate and create individual files with only columns 1, 2, and 5
+for rep in $reps; do
+    file1="WT_vs_I315R_rep${rep}_diff.dat"
+    file2="WT_vs_S299L_rep${rep}_diff.dat"
+    outfile="I315R_minus_S299L_rep${rep}.dat"
+    
+    # Use awk to subtract the 5th column row by row and output only columns 1, 2, and 5
+    awk 'NR==FNR{a[NR]=$5; next} { delta = $5 - a[FNR]; print $1, $2, delta }' "$file2" "$file1" > "$outfile"
+done
+
+# Now combine all replicates into one massive TSV file
+combined_file="I315R_minus_S299L_combined.tsv"
+
+# Create header
+header="resid1\tresid2"
+for rep in $reps; do
+    header="${header}\tI315R_delta_value_R${rep}"
+done
+echo -e "$header" > "$combined_file"
+
+# Get the number of rows from the first file (assuming all files have same number of rows)
+first_rep=$(echo $reps | cut -d' ' -f1)
+num_rows=$(wc -l < "I315R_minus_S299L_rep${first_rep}.dat")
+
+# Process each row
+for ((row=1; row<=num_rows; row++)); do
+    # Get resid1 and resid2 from the first file
+    line_data=$(sed -n "${row}p" "I315R_minus_S299L_rep${first_rep}.dat")
+    resid1=$(echo "$line_data" | awk '{print $1}')
+    resid2=$(echo "$line_data" | awk '{print $2}')
+    
+    # Start building the output line
+    output_line="${resid1}\t${resid2}"
+    
+    # Add delta values from each replicate
+    for rep in $reps; do
+        delta_value=$(sed -n "${row}p" "I315R_minus_S299L_rep${rep}.dat" | awk '{print $3}')
+        output_line="${output_line}\t${delta_value}"
+    done
+    
+    echo -e "$output_line" >> "$combined_file"
+done
+
+echo "Individual replicate files created: I315R_minus_S299L_rep[4-15].dat"
+echo "Combined file created: $combined_file"
+
+```
+
+Instead of using the NAMD GUI to calculate energy interactions, which is a pain and takes forever I created this script that loops over multiple trajectories at once.
+
+I called it batch_energy.tcl
+
+** In the TkConsole, navigate to where to have this file saved and where you want all output files written. To run just type: source batch_energy.tcl
+
+** You will need to provide the path to the namd plugin. Just naviate where to the NAMD download folder and click namd
+
+```{bash}
+
+#!/usr/bin/tclsh
+# Batch NAMDEnergy analysis for already-loaded molecules
+
+set mutations {WT W281P I315R S299L}
+set reps {13 14 15}
+
+foreach mut $mutations {
+    foreach rep $reps {
+        set molname "${mut}-rep${rep}"
+        puts "Processing ${molname}..."
+        
+        # Find the molecule by name
+        set molid -1
+        for {set i 0} {$i < [molinfo num]} {incr i} {
+            if {[molinfo $i get name] == $molname} {
+                set molid $i
+                break
+            }
+        }
+        
+        if {$molid == -1} {
+            puts "Warning: Molecule $molname not found, skipping..."
+            continue
+        }
+        
+        # Set selections for this molecule
+        set sel1 [atomselect $molid "protein and resid 264"]
+        set sel2 [atomselect $molid "protein and resid 314"]
+        
+        # Run NAMDEnergy
+        namdenergy -sel $sel1 $sel2 \
+                   -ofile "${molname}_energy.dat" \
+                   -switch 10 \
+                   -cutoff 12 \
+                   -elec \
+                   -vdw \
+                   -dielectric 2.0 \
+        
+        # Clean up selections
+        $sel1 delete
+        $sel2 delete
+        
+        puts "Completed ${molname}"
+    }
+}
+
+
+####After NAMDEnergy you need to divide the Elec value by 2 to mimic the dielectric =2 option... couldnt get it to work using command line
+
+
+set infile "${molname}_energy.dat"
+set outfile "${molname}_energy_corrected.dat"
+
+set in [open $infile r]
+set out [open $outfile w]
+
+while {[gets $in line] >= 0} {
+    if {[string match "Frame*" $line]} {
+        puts $out $line
+        continue
+    }
+
+    set fields [regexp -all -inline {\S+} $line]
+
+    if {[llength $fields] < 5} {
+        puts $out $line
+        continue
+    }
+
+    set elec_str [string trim [lindex $fields 2]]
+
+    if {[string is double -strict $elec_str]} {
+        set elec_energy [expr {$elec_str / 2.0}]
+        set fields [lreplace $fields 2 2 $elec_energy]
+
+        if {[string is double -strict [lindex $fields 4]]} {
+            set old_total [lindex $fields 4]
+            set total [expr {$old_total - $elec_str + $elec_energy}]
+            set fields [lreplace $fields 4 4 $total]
+        }
+    }
+
+    puts $out [join $fields "\t"]
+}
+
+close $in
+close $out
+
+file delete $infile
+file rename -force $outfile $infile
+
+puts "Corrected energies written to $infile"
+
+```
+
+
+Then to quickly perform stats across all mutants and reps using these two bash scripts:
+
+calculate_means.sh
+
+```{bash}
+
+#!/bin/bash
+for input_file in *_energy.dat; do
+    prefix=$(basename "$input_file" .txt)
+    echo "Processing: $input_file -> ${prefix}_means.txt"
+    
+    # Clean whitespace and process in one pipeline
+    sed -E 's/  +/\t/g' "$input_file" | awk -F'\t' -v prefix="$prefix" '
+    NR == 1 { 
+        col3_name = $3; col4_name = $4; col5_name = $5 
+        gsub(/^[ \t]+|[ \t]+$/, "", col3_name)
+        gsub(/^[ \t]+|[ \t]+$/, "", col4_name)
+        gsub(/^[ \t]+|[ \t]+$/, "", col5_name)
+    }
+    NR > 1 { 
+        gsub(/\+/, "", $3); gsub(/\+/, "", $4); gsub(/\+/, "", $5)
+        sum3 += $3; sum4 += $4; sum5 += $5; count++ 
+    } 
+    END { 
+        print "Results for: " prefix
+        print "=========================="
+        printf "%s mean: %.4f\n", col3_name, sum3/count
+        printf "%s mean: %.4f\n", col4_name, sum4/count  
+        printf "%s mean: %.4f\n", col5_name, sum5/count
+    }' > "${prefix}_means.txt"
+done
+
+echo "All files processed!"
+
+```
+
+
+and combine_subtract_stats_final.sh
+
+** this will output all the delta delta values and corresponding stats. The vdw_delta_delta_analysis.txt is what Im actually plotting in Fig 4a and 4c
+
+```{bash}
+
+#!/bin/bash
+
+echo "Starting complete energy analysis pipeline (VdW, Elec, Total)..."
+
+# First, concatenate all mean files
+echo "Concatenating all mean files..."
+cat *_means.txt > all_means_combined.txt
+
+# Array of energy types to analyze
+energy_types=("VdW" "Elec" "Total")
+
+for energy_type in "${energy_types[@]}"; do
+    echo ""
+    echo "=========================================="
+    echo "Processing ${energy_type} analysis..."
+    echo "=========================================="
+    
+    # Create header for differences file
+    echo -e "Rep\tWT_${energy_type}\tI315R_${energy_type}\tS299L_${energy_type}\tW281P_${energy_type}\tI315R_diff\tS299L_diff\tW281P_diff" > ${energy_type,,}_differences.txt
+    
+    # Process each rep (reps 4-15)
+    for rep in {4..15}; do
+        echo "Processing rep $rep for ${energy_type}..."
+
+        wt_val=$(grep -A5 "Results for: WT-rep${rep}_energy.dat" all_means_combined.txt | grep "${energy_type} mean:" | awk '{print $3}')
+        i315r_val=$(grep -A5 "Results for: I315R-rep${rep}_energy.dat" all_means_combined.txt | grep "${energy_type} mean:" | awk '{print $3}')
+        s299l_val=$(grep -A5 "Results for: S299L-rep${rep}_energy.dat" all_means_combined.txt | grep "${energy_type} mean:" | awk '{print $3}')
+        w281p_val=$(grep -A5 "Results for: W281P-rep${rep}_energy.dat" all_means_combined.txt | grep "${energy_type} mean:" | awk '{print $3}')
+
+        # Calculate differences
+        i315r_diff="NA"
+        s299l_diff="NA"
+        w281p_diff="NA"
+
+        if [[ -n "$wt_val" && -n "$i315r_val" ]]; then
+            i315r_diff=$(echo "$i315r_val - $wt_val" | bc -l)
+        fi
+        if [[ -n "$wt_val" && -n "$s299l_val" ]]; then
+            s299l_diff=$(echo "$s299l_val - $wt_val" | bc -l)
+        fi
+        if [[ -n "$wt_val" && -n "$w281p_val" ]]; then
+            w281p_diff=$(echo "$w281p_val - $wt_val" | bc -l)
+        fi
+
+        echo -e "$rep\t$wt_val\t$i315r_val\t$s299l_val\t$w281p_val\t$i315r_diff\t$s299l_diff\t$w281p_diff" >> ${energy_type,,}_differences.txt
+    done
+
+    echo "${energy_type} differences calculated!"
+
+    # Delta-delta G analysis
+    echo "Calculating ${energy_type} delta-delta values and t-statistics..."
+
+    gawk -F'\t' -v energy_type="$energy_type" '
+    NR == 1 {
+        print $0 "\tI315R_ddG\tW281P_ddG"
+        next
+    }
+    {
+        i315r_diff = $6
+        s299l_diff = $7
+        w281p_diff = $8
+
+        i315r_ddg = (i315r_diff != "NA" && s299l_diff != "NA") ? i315r_diff - s299l_diff : "NA"
+        w281p_ddg = (w281p_diff != "NA" && s299l_diff != "NA") ? w281p_diff - s299l_diff : "NA"
+
+        if (i315r_ddg != "NA") {
+            i315r_values[i315r_count++] = i315r_ddg
+            i315r_sum += i315r_ddg
+        }
+        if (w281p_ddg != "NA") {
+            w281p_values[w281p_count++] = w281p_ddg
+            w281p_sum += w281p_ddg
+        }
+
+        print $0 "\t" i315r_ddg "\t" w281p_ddg
+    }
+    END {
+        if (i315r_count > 1) {
+            mean = i315r_sum / i315r_count
+            sumsq = 0
+            for (i = 0; i < i315r_count; i++) sumsq += (i315r_values[i] - mean)^2
+            stdev = sqrt(sumsq / (i315r_count - 1))
+            se = stdev / sqrt(i315r_count)
+            t = mean / se
+            printf "\n# I315R " energy_type ": mean=%.4f, stdev=%.4f, se=%.4f, t=%.4f, n=%d\n", mean, stdev, se, t, i315r_count
+        }
+        if (w281p_count > 1) {
+            mean = w281p_sum / w281p_count
+            sumsq = 0
+            for (i = 0; i < w281p_count; i++) sumsq += (w281p_values[i] - mean)^2
+            stdev = sqrt(sumsq / (w281p_count - 1))
+            se = stdev / sqrt(w281p_count)
+            t = mean / se
+            printf "# W281P " energy_type ": mean=%.4f, stdev=%.4f, se=%.4f, t=%.4f, n=%d\n", mean, stdev, se, t, w281p_count
+        }
+    }' ${energy_type,,}_differences.txt > ${energy_type,,}_delta_delta_analysis.txt
+
+    # Statistics summary
+    echo "Creating ${energy_type} statistics summary table..."
+
+    gawk -F'\t' -v energy_type="$energy_type" '
+    BEGIN { print "Mutation\tEnergy_Type\tMean_ddG\tStdev\tSE\tt_statistic\tn\tSignificance" }
+    NR > 1 {
+        if ($6 != "NA" && $7 != "NA") {
+            ddg = $6 - $7
+            i315r_vals[n1++] = ddg
+            sum1 += ddg
+        }
+        if ($8 != "NA" && $7 != "NA") {
+            ddg = $8 - $7
+            w281p_vals[n2++] = ddg
+            sum2 += ddg
+        }
+    }
+    END {
+        # I315R stats
+        mean1 = sum1 / n1
+        sq1 = 0
+        for (i = 0; i < n1; i++) sq1 += (i315r_vals[i] - mean1)^2
+        stdev1 = sqrt(sq1 / (n1 - 1))
+        se1 = stdev1 / sqrt(n1)
+        t1 = mean1 / se1
+        sig1 = (t1 > 3.71 || t1 < -3.71) ? "p < 0.01" : ((t1 > 2.45 || t1 < -2.45) ? "p < 0.05" : "n.s.")
+        printf "I315R\t%s\t%.4f\t%.4f\t%.4f\t%.4f\t%d\t%s\n", energy_type, mean1, stdev1, se1, t1, n1, sig1
+
+        # W281P stats
+        mean2 = sum2 / n2
+        sq2 = 0
+        for (i = 0; i < n2; i++) sq2 += (w281p_vals[i] - mean2)^2
+        stdev2 = sqrt(sq2 / (n2 - 1))
+        se2 = stdev2 / sqrt(n2)
+        t2 = mean2 / se2
+        sig2 = (t2 > 3.71 || t2 < -3.71) ? "p < 0.01" : ((t2 > 2.45 || t2 < -2.45) ? "p < 0.05" : "n.s.")
+        printf "W281P\t%s\t%.4f\t%.4f\t%.4f\t%.4f\t%d\t%s\n", energy_type, mean2, stdev2, se2, t2, n2, sig2
+    }' ${energy_type,,}_differences.txt > ${energy_type,,}_statistics_summary.txt
+
+    echo "${energy_type} analysis complete!"
+done
+
+# Create a combined statistics summary
+echo ""
+echo "Creating combined statistics summary..."
+echo -e "Mutation\tEnergy_Type\tMean_ddG\tStdev\tSE\tt_statistic\tn\tSignificance" > combined_statistics_summary.txt
+tail -n +2 vdw_statistics_summary.txt >> combined_statistics_summary.txt
+tail -n +2 elec_statistics_summary.txt >> combined_statistics_summary.txt  
+tail -n +2 total_statistics_summary.txt >> combined_statistics_summary.txt
+
+echo ""
+echo "============================================="
+echo "COMPLETE ENERGY ANALYSIS FINISHED!"
+echo "============================================="
+echo "Generated files:"
+echo ""
+echo "Individual Energy Type Files:"
+echo "  VdW Analysis:"
+echo "    - vdw_differences.txt"
+echo "    - vdw_delta_delta_analysis.txt" 
+echo "    - vdw_statistics_summary.txt"
+echo ""
+echo "  Electrostatic Analysis:"
+echo "    - elec_differences.txt"
+echo "    - elec_delta_delta_analysis.txt"
+echo "    - elec_statistics_summary.txt"
+echo ""
+echo "  Total Energy Analysis:"
+echo "    - total_differences.txt"
+echo "    - total_delta_delta_analysis.txt"
+echo "    - total_statistics_summary.txt"
+echo ""
+echo "Combined Files:"
+echo "  - all_means_combined.txt           : All individual mean files"
+echo "  - combined_statistics_summary.txt  : All statistics in one table"
+echo ""
+
+```
 
 

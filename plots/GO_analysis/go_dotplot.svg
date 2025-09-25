@@ -1,0 +1,78 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' class='svglite' width='576.00pt' height='432.00pt' viewBox='0 0 576.00 432.00'>
+<defs>
+  <style type='text/css'><![CDATA[
+    .svglite line, .svglite polyline, .svglite polygon, .svglite path, .svglite rect, .svglite circle {
+      fill: none;
+      stroke: #000000;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-miterlimit: 10.00;
+    }
+    .svglite text {
+      white-space: pre;
+    }
+  ]]></style>
+</defs>
+<rect width='100%' height='100%' style='stroke: none; fill: none;'/>
+<defs>
+  <clipPath id='cpMC4wMHw1NzYuMDB8MC4wMHw0MzIuMDA='>
+    <rect x='0.00' y='0.00' width='576.00' height='432.00' />
+  </clipPath>
+</defs>
+<g clip-path='url(#cpMC4wMHw1NzYuMDB8MC4wMHw0MzIuMDA=)'>
+</g>
+<defs>
+  <clipPath id='cpMjYxLjA0fDQ5Mi45Nnw1LjQ4fDM5OC4xOQ=='>
+    <rect x='261.04' y='5.48' width='231.92' height='392.71' />
+  </clipPath>
+</defs>
+<g clip-path='url(#cpMjYxLjA0fDQ5Mi45Nnw1LjQ4fDM5OC4xOQ==)'>
+<polyline points='271.58,398.19 271.58,5.48 ' style='stroke-width: 1.07; stroke: #EBEBEB; stroke-linecap: butt;' />
+<polyline points='346.80,398.19 346.80,5.48 ' style='stroke-width: 1.07; stroke: #EBEBEB; stroke-linecap: butt;' />
+<polyline points='422.02,398.19 422.02,5.48 ' style='stroke-width: 1.07; stroke: #EBEBEB; stroke-linecap: butt;' />
+<rect x='271.58' y='15.10' width='210.83' height='26.95' style='stroke-width: 0.64; stroke-linecap: butt; stroke-linejoin: miter; fill: #C87160;' />
+<rect x='271.58' y='53.61' width='184.26' height='26.95' style='stroke-width: 0.64; stroke-linecap: butt; stroke-linejoin: miter; fill: #B85450;' />
+<rect x='271.58' y='92.11' width='184.26' height='26.95' style='stroke-width: 0.64; stroke-linecap: butt; stroke-linejoin: miter; fill: #FDD49E;' />
+<rect x='271.58' y='130.61' width='184.26' height='26.95' style='stroke-width: 0.64; stroke-linecap: butt; stroke-linejoin: miter; fill: #B85450;' />
+<rect x='271.58' y='169.11' width='177.57' height='26.95' style='stroke-width: 0.64; stroke-linecap: butt; stroke-linejoin: miter; fill: #FDD49E;' />
+<rect x='271.58' y='207.61' width='155.22' height='26.95' style='stroke-width: 0.64; stroke-linecap: butt; stroke-linejoin: miter; fill: #EFB78C;' />
+<rect x='271.58' y='246.11' width='154.86' height='26.95' style='stroke-width: 0.64; stroke-linecap: butt; stroke-linejoin: miter; fill: #F6C695;' />
+<rect x='271.58' y='323.12' width='145.82' height='26.95' style='stroke-width: 0.64; stroke-linecap: butt; stroke-linejoin: miter; fill: #D88D71;' />
+<rect x='271.58' y='284.61' width='145.82' height='26.95' style='stroke-width: 0.64; stroke-linecap: butt; stroke-linejoin: miter; fill: #D88D71;' />
+<rect x='271.58' y='361.62' width='145.82' height='26.95' style='stroke-width: 0.64; stroke-linecap: butt; stroke-linejoin: miter; fill: #D88D71;' />
+</g>
+<g clip-path='url(#cpMC4wMHw1NzYuMDB8MC4wMHw0MzIuMDA=)'>
+<text x='256.11' y='378.68' text-anchor='end' style='font-size: 10.00px; font-family: "Arial";' textLength='198.96px' lengthAdjust='spacingAndGlyphs'>external encapsulating structure organization</text>
+<text x='256.11' y='340.18' text-anchor='end' style='font-size: 10.00px; font-family: "Arial";' textLength='141.16px' lengthAdjust='spacingAndGlyphs'>extracellular matrix organization</text>
+<text x='256.11' y='301.68' text-anchor='end' style='font-size: 10.00px; font-family: "Arial";' textLength='152.83px' lengthAdjust='spacingAndGlyphs'>extracellular structure organization</text>
+<text x='256.11' y='263.18' text-anchor='end' style='font-size: 10.00px; font-family: "Arial";' textLength='137.83px' lengthAdjust='spacingAndGlyphs'>Rho protein signal transduction</text>
+<text x='256.11' y='224.68' text-anchor='end' style='font-size: 10.00px; font-family: "Arial";' textLength='116.71px' lengthAdjust='spacingAndGlyphs'>keratinocyte differentiation</text>
+<text x='256.11' y='186.17' text-anchor='end' style='font-size: 10.00px; font-family: "Arial";' textLength='151.17px' lengthAdjust='spacingAndGlyphs'>cell adhesion mediated by integrin</text>
+<text x='256.11' y='147.67' text-anchor='end' style='font-size: 10.00px; font-family: "Arial";' textLength='152.84px' lengthAdjust='spacingAndGlyphs'>positive regulation of cell adhesion</text>
+<text x='256.11' y='109.17' text-anchor='end' style='font-size: 10.00px; font-family: "Arial";' textLength='195.64px' lengthAdjust='spacingAndGlyphs'>regulation of Rho protein signal transduction</text>
+<text x='256.11' y='70.67' text-anchor='end' style='font-size: 10.00px; font-family: "Arial";' textLength='193.38px' lengthAdjust='spacingAndGlyphs'>small GTPase-mediated signal transduction</text>
+<text x='256.11' y='32.17' text-anchor='end' style='font-size: 10.00px; font-family: "Arial";' textLength='250.63px' lengthAdjust='spacingAndGlyphs'>regulation of small GTPase mediated signal transduction</text>
+<text x='271.58' y='410.30' text-anchor='middle' style='font-size: 10.00px; font-family: "Arial";' textLength='5.56px' lengthAdjust='spacingAndGlyphs'>0</text>
+<text x='346.80' y='410.30' text-anchor='middle' style='font-size: 10.00px; font-family: "Arial";' textLength='5.56px' lengthAdjust='spacingAndGlyphs'>1</text>
+<text x='422.02' y='410.30' text-anchor='middle' style='font-size: 10.00px; font-family: "Arial";' textLength='5.56px' lengthAdjust='spacingAndGlyphs'>2</text>
+<text x='377.00' y='423.87' text-anchor='middle' style='font-size: 12.00px; font-family: "Arial";' textLength='83.38px' lengthAdjust='spacingAndGlyphs'>-log10(p.adjust)</text>
+<text x='509.40' y='159.84' style='font-size: 11.00px; font-family: "Arial";' textLength='55.64px' lengthAdjust='spacingAndGlyphs'>Gene Ratio</text>
+<image width='17.28' height='86.40' x='509.40' y='166.54' preserveAspectRatio='none' xlink:href='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAEsCAYAAAACUNnVAAAAlklEQVQ4jb1TQQ6AMAyCvdCDj/V3epiZZbZq4/TWkNEAZVjmaS0AUEigAERBnbBP7LD6mPZJj4Xc7/aF3AMbrAVgS00x5YIOFnJVi8ttWqjc3ZFi5rTKVS0h95PYU1bpxG7k6nqvxVTnAxqWDtvhphSkemWldWd8Fph/y8smPlQQNsL7iCeDt1ftsTe9+qsbeftEuMViG8qQBcUmHf96AAAAAElFTkSuQmCC'/>
+<polyline points='523.22,238.44 526.68,238.44 ' style='stroke-width: 0.38; stroke: #FFFFFF; stroke-linecap: butt;' />
+<polyline points='523.22,222.18 526.68,222.18 ' style='stroke-width: 0.38; stroke: #FFFFFF; stroke-linecap: butt;' />
+<polyline points='523.22,205.91 526.68,205.91 ' style='stroke-width: 0.38; stroke: #FFFFFF; stroke-linecap: butt;' />
+<polyline points='523.22,189.65 526.68,189.65 ' style='stroke-width: 0.38; stroke: #FFFFFF; stroke-linecap: butt;' />
+<polyline points='523.22,173.38 526.68,173.38 ' style='stroke-width: 0.38; stroke: #FFFFFF; stroke-linecap: butt;' />
+<polyline points='512.86,238.44 509.40,238.44 ' style='stroke-width: 0.38; stroke: #FFFFFF; stroke-linecap: butt;' />
+<polyline points='512.86,222.18 509.40,222.18 ' style='stroke-width: 0.38; stroke: #FFFFFF; stroke-linecap: butt;' />
+<polyline points='512.86,205.91 509.40,205.91 ' style='stroke-width: 0.38; stroke: #FFFFFF; stroke-linecap: butt;' />
+<polyline points='512.86,189.65 509.40,189.65 ' style='stroke-width: 0.38; stroke: #FFFFFF; stroke-linecap: butt;' />
+<polyline points='512.86,173.38 509.40,173.38 ' style='stroke-width: 0.38; stroke: #FFFFFF; stroke-linecap: butt;' />
+<text x='532.16' y='241.60' style='font-size: 8.80px; font-family: "Arial";' textLength='17.13px' lengthAdjust='spacingAndGlyphs'>0.05</text>
+<text x='532.16' y='225.33' style='font-size: 8.80px; font-family: "Arial";' textLength='17.13px' lengthAdjust='spacingAndGlyphs'>0.06</text>
+<text x='532.16' y='209.06' style='font-size: 8.80px; font-family: "Arial";' textLength='17.13px' lengthAdjust='spacingAndGlyphs'>0.07</text>
+<text x='532.16' y='192.80' style='font-size: 8.80px; font-family: "Arial";' textLength='17.13px' lengthAdjust='spacingAndGlyphs'>0.08</text>
+<text x='532.16' y='176.53' style='font-size: 8.80px; font-family: "Arial";' textLength='17.13px' lengthAdjust='spacingAndGlyphs'>0.09</text>
+</g>
+</svg>

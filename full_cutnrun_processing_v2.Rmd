@@ -1,0 +1,1659 @@
+Manuscript CUT&RUN data processing
+Author: Garrett Cooper
+Date: July 21, 2025
+
+
+Note for the W281X_SMARCB1_R1 we had to resequence. I downsampled the fastq by 15% to reach a total data amount of 5.0085Gb.
+
+Took the AH52_CKDL250018287-1A_22V757LT4_L8_1.fq.gz and AH52_CKDL250018287-1A_22V757LT4_L8_2.fq.gz files and did:
+
+First install bbmap:
+
+conda install -c bioconda bbmap
+
+then run this with the new data
+```{bash}
+
+reformat.sh \
+  in1=AH52_CKDL250018287-1A_22V757LT4_L8_1.fq.gz \
+  in2=AH52_CKDL250018287-1A_22V757LT4_L8_2.fq.gz \
+  out1=W281X_SMARCB1_R1_1.fq.gz \
+  out2=W281X_SMARCB1_R1_2.fq.gz \
+  samplerate=0.15
+  
+```
+
+
+Part 1: Alignment and Bam Processing
+
+Alignment: Aligned to both the GRCh38p13 and Ecoli Reference Genome Using this command using DRAGEN 4.2.4
+```{bash}
+
+#Adaptor file is in /opt/edico/config/adapter_sequences.fasta
+
+#Copy and pasted this into ephemeral directory:
+#>Illumina Universal Adapter          
+#AGATCGGAAGAG
+#>Illumina Small RNA 3' Adapter       
+#TGGAATTCTCGG
+#>Illumina Small RNA 5' Adapter       
+#GATCGTCGGACT
+#>Nextera Transposase Sequence        
+#CTGTCTCTTATA
+
+dragen -r GrCh38p13v9 \
+-1 DNA/WT_IgG_pilot_1.fq.gz \
+-2 DNA/WT_IgG_pilot_2.fq.gz \
+--trim-adapter-read1 /ephemeral/adapters.fasta \
+--trim-adapter-read2 /ephemeral/adapters.fasta \
+--read-trimmers adapter \
+--soft-read-trimmers none \
+--remove-duplicates true \
+--output-directory human_alignments/WT_IgG/ \
+--output-file-prefix WT_IgG \
+--RGID WT_IgG_01 \
+--RGSM WT_IgG_01_S1;
+
+```
+
+First step is launch an instance:
+
+Launch a m7i.16xlarge instance (64 vCPUs, 256 GiB of memory and 25 Gibps of bandwidth) for parallelizing to work properly.
+
+Step 1: Install parallel
+
+
+```{bash}
+sudo yum update
+sudo yum install parallel
+```
+
+
+Step 2: First download reference fasta which was used to align the genome
+```{bash}
+
+aws s3 cp s3://pedi-cancers/GrCh38p13v9/GRCh38.p13.genome.fa .
+
+samtools faidx GRCh38.p13.genome.fa
+
+cut -f1,2 GRCh38.p13.fa.fai > GRCh38.p13.chrom.sizes
+
+```
+
+
+
+
+Step 3: Process bam files
+
+Create a text file with all file prefixes in it so they can be looped over
+```{bash}
+I315I_H3K27me3_R1
+I315I_H3K27me3_R2
+I315I_H3K4me3_R1
+I315I_H3K4me3_R2
+I315I_IgG_R1
+I315I_IgG_R2
+I315I_SMARCA4_R1
+I315I_SMARCA4_R2
+I315I_SMARCB1_R1
+I315I_SMARCB1_R2
+I315I_SMARCE1_R1
+I315I_SMARCE1_R2
+I315R_H3K27me3_R1
+I315R_H3K27me3_R2
+I315R_H3K4me3_R1
+I315R_H3K4me3_R2
+I315R_IgG_R1
+I315R_IgG_R2
+I315R_SMARCA4_R1
+I315R_SMARCA4_R2
+I315R_SMARCB1_R1
+I315R_SMARCB1_R2
+I315R_SMARCE1_R1
+I315R_SMARCE1_R2
+I315X_H3K27me3_R1
+I315X_H3K27me3_R2
+I315X_H3K4me3_R1
+I315X_H3K4me3_R2
+I315X_IgG_R1
+I315X_IgG_R2
+I315X_SMARCA4_R1
+I315X_SMARCA4_R2
+I315X_SMARCB1_R1
+I315X_SMARCB1_R2
+I315X_SMARCE1_R1
+I315X_SMARCE1_R2
+W281P_H3K27me3_R1
+W281P_H3K27me3_R2
+W281P_H3K4me3_R1
+W281P_H3K4me3_R2
+W281P_IgG_R1
+W281P_IgG_R2
+W281P_SMARCA4_R1
+W281P_SMARCA4_R2
+W281P_SMARCB1_R1
+W281P_SMARCB1_R2
+W281P_SMARCE1_R1
+W281P_SMARCE1_R2
+W281X_H3K27me3_R1
+W281X_H3K27me3_R2
+W281X_H3K4me3_R1
+W281X_H3K4me3_R2
+W281X_IgG_R1
+W281X_IgG_R2
+W281X_SMARCA4_R1
+W281X_SMARCA4_R2
+W281X_SMARCB1_R1
+W281X_SMARCB1_R2
+W281X_SMARCE1_R1
+W281X_SMARCE1_R2
+WT_H3K27me3_R1
+WT_H3K27me3_R2
+WT_H3K4me3_R1
+WT_H3K4me3_R2
+WT_IgG_R1
+WT_IgG_R2
+WT_SMARCA4_R1
+WT_SMARCA4_R2
+WT_SMARCB1_R1
+WT_SMARCB1_R2
+WT_SMARCE1_R1
+WT_SMARCE1_R2
+```
+
+This will take ~3 hours to run (or about 2min 30sec per sample)
+```{bash}
+#!/bin/bash
+
+# Usage: ./bam_processing_pe.sh <sample_name_without_extension>
+# To run this command type this into the command line: nohup bash -c "cat filenames.txt | parallel -j 18 ./bam_processing_pe.sh {}" &
+
+i=$1
+
+outdir=processed_bams_pe
+mkdir -p "$outdir"
+exec > "$outdir/${i}_run.log" 2>&1
+set -euo pipefail
+
+# Create output directory if it doesn't exist
+mkdir -p processed_bams_pe
+
+echo "Processing $i..."
+
+# Sort BAM by query name
+samtools sort -n -@ 8 "$i".bam -o processed_bams_pe/"$i"_sort.bam
+
+# Filter for high-quality, paired reads
+samtools view -F 3852 -f 2 -q 30 -h -@ 8 -o processed_bams_pe/"$i"_sort_filt.bam processed_bams_pe/"$i"_sort.bam
+rm processed_bams_pe/"$i"_sort.bam
+
+# Remove blacklisted and non-chromosomal reads
+bedtools intersect -v -a processed_bams_pe/"$i"_sort_filt.bam -b ./ENCFF356LFX.bed.gz \
+  | samtools view -h -@ 8 \
+  | awk -F '\t' '!($3 ~ /chrM|chrUn|random|chrEBV/)' \
+  | samtools view -bh -@ 8 > processed_bams_pe/"$i"_sort_filt2.bam
+rm processed_bams_pe/"$i"_sort_filt.bam
+
+# Name sort BAM file for bedtools bamtobed processing
+samtools sort -n -@ 8 processed_bams_pe/"$i"_sort_filt2.bam -o processed_bams_pe/"$i"_final_namesort.bam
+rm processed_bams_pe/"$i"_sort_filt2.bam
+
+#Coordinate sort the same bam file for downstream processes
+samtools sort -@ 8 processed_bams_pe/"$i"_final_namesort.bam -o processed_bams_pe/"$i"_final.bam
+
+#Index coordinate sorted bam file for downstream processing
+samtools index -@ 8 processed_bams_pe/"$i"_final.bam
+
+# Convert to paired-end BEDPE format
+bedtools bamtobed -bedpe -i processed_bams_pe/"$i"_final_namesort.bam > processed_bams_pe/"$i"_final.bedpe
+
+rm processed_bams_pe/"$i"_final_namesort.bam
+
+# Filter pairs where both reads map to the same chromosome and fragment size < 1000 bp
+awk '$1==$4 && $6-$2 < 1000 {print $0}' processed_bams_pe/"$i"_final.bedpe > processed_bams_pe/"$i"_final.clean.bedpe
+
+rm processed_bams_pe/"$i"_final.bedpe
+
+# Extract fragment coordinates: chrom, start (5' of first read), end (3' of second read), then sort
+cut -f 1,2,6 processed_bams_pe/"$i"_final.clean.bedpe | sort -k1,1 -k2,2n -k3,3n > processed_bams_pe/"$i"_final.fragments.bed
+
+# Generate bedGraph showing fragment coverage/density
+bedtools genomecov -bg -i processed_bams_pe/"$i"_final.fragments.bed -g ./GRCh38.p13.chrom.sizes > processed_bams_pe/"$i"_final.fragments.bedgraph
+
+# Sort bedGraph (optional but good practice)
+sort -k1,1 -k2,2n processed_bams_pe/"$i"_final.fragments.bedgraph > processed_bams_pe/"$i"_final.fragments.sorted.bedgraph
+
+rm processed_bams_pe/"$i"_final.fragments.bedgraph
+
+echo "$i done."
+
+```
+
+
+________________________________________________________________________________
+
+Part 2: Process bedgraph files for downstream peak calling and plotting
+________________________________________________________________________________
+
+
+Step 1: Normalize bedgraph files
+
+Made a tsv file with file prefixes and corresponding normalization factor
+```{bash}
+Prefix	Factor
+WT_IgG_R1	0.520284897
+WT_H3K4me3_R1	2.429385008
+WT_H3K27me3_R1	17.86575146
+WT_SMARCB1_R1	2.00287154
+WT_SMARCA4_R1	2.511713718
+WT_SMARCE1_R1	3.708826094
+WT_IgG_R2	0.337232743
+WT_H3K4me3_R2	2.511298643
+WT_H3K27me3_R2	23.87240869
+WT_SMARCB1_R2	2.019098819
+WT_SMARCA4_R2	3.490809867
+WT_SMARCE1_R2	4.06146745
+W281P_IgG_R1	0.403253642
+W281P_H3K4me3_R1	2.600089876
+W281P_H3K27me3_R1	19.90194135
+W281P_SMARCB1_R1	0.862294853
+W281P_SMARCA4_R1	1.585701862
+W281P_SMARCE1_R1	1.628127476
+W281P_IgG_R2	0.338475351
+W281P_H3K4me3_R2	2.486667177
+W281P_H3K27me3_R2	18.26993016
+W281P_SMARCB1_R2	0.824312345
+W281P_SMARCA4_R2	2.256373507
+W281P_SMARCE1_R2	1.625909028
+W281X_IgG_R1	0.400951626
+W281X_H3K4me3_R1	2.280306546
+W281X_H3K27me3_R1	19.07066977
+W281X_SMARCB1_R1	0.536350372
+W281X_SMARCA4_R1	1.88370139
+W281X_SMARCE1_R1	1.84611721
+W281X_IgG_R2	0.283177452
+W281X_H3K4me3_R2	2.915416588
+W281X_H3K27me3_R2	28.70079119
+W281X_SMARCB1_R2	0.591568232
+W281X_SMARCA4_R2	2.304916336
+W281X_SMARCE1_R2	2.112593424
+I315I_IgG_R1	0.505907558
+I315I_H3K4me3_R1	3.241933082
+I315I_H3K27me3_R1	14.08438615
+I315I_SMARCB1_R1	1.50193382
+I315I_SMARCA4_R1	2.482547882
+I315I_SMARCE1_R1	3.900447195
+I315I_IgG_R2	0.612686656
+I315I_H3K4me3_R2	4.633005735
+I315I_H3K27me3_R2	32.00137575
+I315I_SMARCB1_R2	3.316137059
+I315I_SMARCA4_R2	3.95596601
+I315I_SMARCE1_R2	7.115679044
+I315R_IgG_R1	0.354351655
+I315R_H3K4me3_R1	3.392590593
+I315R_H3K27me3_R1	32.02694495
+I315R_SMARCB1_R1	1.034782615
+I315R_SMARCA4_R1	1.348799507
+I315R_SMARCE1_R1	0.921420274
+I315R_IgG_R2	1.115398409
+I315R_H3K4me3_R2	4.479915813
+I315R_H3K27me3_R2	31.47565569
+I315R_SMARCB1_R2	2.404716861
+I315R_SMARCA4_R2	3.449786274
+I315R_SMARCE1_R2	2.443254216
+I315X_IgG_R1	0.249502708
+I315X_H3K4me3_R1	2.150636011
+I315X_H3K27me3_R1	19.26176229
+I315X_SMARCB1_R1	0.373499107
+I315X_SMARCA4_R1	1.072849794
+I315X_SMARCE1_R1	1.300870803
+I315X_IgG_R2	0.630003921
+I315X_H3K4me3_R2	4.27602886
+I315X_H3K27me3_R2	30.74021654
+I315X_SMARCB1_R2	1.102316424
+I315X_SMARCA4_R2	3.389267131
+I315X_SMARCE1_R2	3.184346469
+```
+
+
+This runs super fast
+```{bash}
+
+#!/bin/bash
+
+normalize_bedgraph() {
+  prefix="$1"
+  factor="$2"
+  infile="${prefix}_final.fragments.sorted.bedgraph"
+  outfile="${prefix}_final_normalized.bedgraph"
+  if [[ -f "$infile" ]]; then
+    awk -v factor="$factor" '{OFS="\t"; $4 = $4 * factor; print}' "$infile" > "$outfile"
+    echo "Normalized $infile"
+  else
+    echo "Missing file $infile"
+  fi
+}
+
+export -f normalize_bedgraph
+
+tail -n +2 normalization_factors.tsv | parallel --colsep '\t' -j 18 normalize_bedgraph {1} {2}
+
+```
+
+Step 2: Subtract out minimum normalized signal to make baseline 0 for plotting purpose (DO NOT USE THIS FOR PEAK CALLING)
+The reason we do this is because when plotting a scatterplot the minimum value ends up being 1* normalization factor making the graphs look skewed. To make everything consistent we just make the minimum 1 for all samples.
+
+This one runs pretty quick
+
+```{bash}
+mkdir -p baseline_normalized_bedgraphs
+
+parallel --jobs 16 '
+  file={}
+  echo "Processing $file ..."
+  min=$(awk "NR==1 {min=\$4} \$4<min {min=\$4} END {print min}" "$file")
+  out="baseline_normalized_bedgraphs/${file%.bedgraph}_baseline.bedgraph"
+  awk -v min=$min "{
+    corrected = \$4 - min;
+    if (corrected < 0) corrected = 0;
+    print \$1, \$2, \$3, corrected
+  }" OFS="\t" "$file" > "$out"
+' ::: *_final_normalized.bedgraph
+```
+
+Step 3: Merge signal between replicates 
+
+```{bash}
+
+#!/bin/bash
+
+mkdir -p average_bedgraphs
+
+# Define the function first
+average_pair() {
+    genotype="$1"
+    antibody="$2"
+    r1="baseline_normalized_bedgraphs/${genotype}_${antibody}_R1_final_normalized_baseline.bedgraph"
+    r2="baseline_normalized_bedgraphs/${genotype}_${antibody}_R2_final_normalized_baseline.bedgraph"
+    averaged="average_bedgraphs/${genotype}_${antibody}_averaged.bedgraph"
+
+    echo "Averaging $genotype $antibody..."
+
+    if [[ -f "$r1" && -f "$r2" ]]; then
+        bedtools unionbedg -i "$r1" "$r2" | \
+        awk 'BEGIN{OFS="\t"} {
+            sum=0; count=0;
+            for(i=4;i<=NF;i++) {
+                if($i!=".") {sum+=$i; count++}
+            }
+            if(count>0) print $1, $2, $3, sum/count;
+            else print $1, $2, $3, "0";
+        }' > "$averaged"
+    else
+        echo "Missing file: $r1 or $r2"
+    fi
+}
+
+# Now export it
+export -f average_pair
+
+# Define arrays
+genotypes=("WT" "W281P" "W281X" "I315I" "I315R" "I315X")
+antibodies=("H3K27me3" "H3K4me3" "SMARCB1" "SMARCA4" "SMARCE1")
+
+# Generate input pairs and parallelize
+for g in "${genotypes[@]}"; do
+    for a in "${antibodies[@]}"; do
+        echo "$g $a"
+    done
+done | parallel -j 12 --colsep ' ' average_pair {1} {2}
+
+```
+
+
+________________________________________________________________________________
+
+Part 3: Generate and process bigwigs for plotting purposes
+________________________________________________________________________________
+
+Step 1: Now run parallelized function to create bigwigs for each sample.
+    -This one takes a while to run (~20 mins)
+```{bash}
+
+#!/bin/bash
+
+# Create output directory if not exists
+mkdir -p bigwigs_scaled
+
+# Define the bamCoverage wrapper function
+bam_to_bw() {
+  prefix="$1"
+  factor="$2"
+  input_bam="${prefix}_final.bam"
+  output_bw="bigwigs_scaled/${prefix}_scaled.bw"
+
+  echo "🔄 Processing $prefix with scale factor $factor"
+
+  if [[ -f "$input_bam" ]]; then
+    bamCoverage -b "$input_bam" \
+                -o "$output_bw" \
+                --scaleFactor "$factor" \
+                --normalizeUsing None \
+                --binSize 10 \
+                --ignoreDuplicates \
+                --extendReads
+    echo "✅ Finished $prefix"
+  else
+    echo "❌ Skipping: $input_bam not found"
+  fi
+}
+
+# Export the function so GNU parallel can use it
+export -f bam_to_bw
+
+# Run in parallel using 6 cores (adjust -j for your system)
+tail -n +2 normalization_factors.tsv | parallel -j 18 --colsep '\t' bam_to_bw {1} {2}
+
+```
+
+
+
+Step 2: Subtract out IgG from target samples for plotting (Also do not use for peak calling). This will be used when plotting tracks or tornado plots.
+  -This one takes about 20 minutes to run
+
+```{bash}
+
+#!/usr/bin/env bash
+
+marks=(H3K27me3 H3K4me3 SMARCB1 SMARCA4 SMARCE1)
+reps=(R1 R2)
+samples=(I315I I315R I315X W281P W281X WT)
+
+tmpfile=$(mktemp)
+
+for sample in "${samples[@]}"; do
+  for mark in "${marks[@]}"; do
+    for rep in "${reps[@]}"; do
+      chip="${sample}_${mark}_${rep}_scaled.bw"
+      igg="${sample}_IgG_${rep}_scaled.bw"
+      out="${sample}_${mark}_${rep}_IgGsubtracted.bw"
+
+      if [[ -f "$chip" && -f "$igg" ]]; then
+        echo "🔄 Processing $chip minus $igg"
+        echo "bigwigCompare -b1 \"$chip\" -b2 \"$igg\" --operation subtract --binSize 50 -v -p 4 --skipNAs -o \"$out\" && echo ✅ Finished $out || echo ❌ Failed $out" >> "$tmpfile"
+      else
+        echo "❌ Skipping $chip or $igg (missing file)"
+      fi
+    done
+  done
+done
+
+parallel -j 12 < "$tmpfile"
+
+```
+
+
+Step 3: Average bigwig signal between replicates 
+
+```{bash}
+
+mutants=(I315X W281P W281X I315I I315R WT)
+targets=(SMARCB1 SMARCA4 SMARCE1 H3K27me3 H3K4me3)
+
+for m in "${mutants[@]}"; do
+  for t in "${targets[@]}"; do
+    bw1=${m}_${t}_R1_IgGsubtracted.bw
+    bw2=${m}_${t}_R2_IgGsubtracted.bw
+    out=${m}_${t}_avg50bp.bw
+
+    # skip if files are missing
+    if [[ -f $bw1 && -f $bw2 ]]; then
+      echo "Processing $bw1 and $bw2 to generate $out..."
+      bigwigCompare -b1 "$bw1" -b2 "$bw2" -o "$out" --operation mean --binSize 50 -p 18
+      echo "✅ Completed: $out"
+    else
+      echo "❌ Skipping: Missing input file(s) for $m - $t"
+    fi
+  done
+done
+
+```
+
+
+Part 4: Peak Calling
+
+Step 1: Use SEACRv1.3 to call peaks with your normalized bedgraph files you generated in Part 2
+
+```{bash}
+
+# List of your filename lists and corresponding controls
+declare -A controls=(
+  ["filenames_WT_R1.txt"]="WT_IgG_R1_final_normalized.bedgraph"
+  ["filenames_WT_R2.txt"]="WT_IgG_R2_final_normalized.bedgraph"
+  ["filenames_W281P_R1.txt"]="W281P_IgG_R1_final_normalized.bedgraph"
+  ["filenames_W281P_R2.txt"]="W281P_IgG_R2_final_normalized.bedgraph"
+  ["filenames_W281X_R1.txt"]="W281X_IgG_R1_final_normalized.bedgraph"
+  ["filenames_W281X_R2.txt"]="W281X_IgG_R2_final_normalized.bedgraph"
+  ["filenames_I315I_R1.txt"]="I315I_IgG_R1_final_normalized.bedgraph"
+  ["filenames_I315I_R2.txt"]="I315I_IgG_R2_final_normalized.bedgraph"
+  ["filenames_I315R_R1.txt"]="I315R_IgG_R1_final_normalized.bedgraph"
+  ["filenames_I315R_R2.txt"]="I315R_IgG_R2_final_normalized.bedgraph"
+  ["filenames_I315X_R1.txt"]="I315X_IgG_R1_final_normalized.bedgraph"
+  ["filenames_I315X_R2.txt"]="I315X_IgG_R2_final_normalized.bedgraph"
+)
+
+for file in "${!controls[@]}"; do
+  control="${controls[$file]}"
+  echo "Running parallel on $file with control $control"
+  parallel -a "/home/ec2-user/cutnrun/full_run/bams/processed_bams/$file" -j 8 --line-buffer \
+    bash SEACR_1.3.sh {}_final_normalized.bedgraph "$control" non stringent ./seacr_output/{}_SEACR_peaks
+done
+
+
+```
+
+Step 2: Get histogram of max peak intensity for all peak files, read all into one file. Use this to determine the threshold by which you filter in the next step
+```{bash}
+for f in *.bed; do   echo "File: $f" >> histogram_summary.txt;   awk '{print int($5/10)*10}' "$f" | sort -n | uniq -c >> histogram_summary.txt;   echo "" >> histogram_summary.txt; done
+```
+
+Step 3: Filter the peak files for only peaks with a max intensity of >5 to ensure these are only confident peaks.
+
+```{bash}
+for f in *.bed; do awk '$5 > 5' "$f" > "${f%.bed}_filtered.bed"; done
+```
+
+Step 4: Count how many peaks are in each condition
+
+```{bash}
+for f in *_filtered.bed; do echo -e "$(wc -l < "$f")\t$f"; done > filtered_counts.txt
+```
+
+Step 5: Find overlaps between replicates
+```{bash}
+
+mkdir -p replicate_overlaps
+
+for r1_file in *_R1_SEACR_peaks.stringent_filtered.bed; do
+    prefix=${r1_file%%_R1_SEACR_peaks.stringent_filtered.bed}
+    r2_file="${prefix}_R2_SEACR_peaks.stringent_filtered.bed"
+
+    if [[ -f "$r2_file" ]]; then
+        out="replicate_overlaps/${prefix}_R1_vs_R2_overlap.bed"
+        bedtools intersect -a "$r1_file" -b "$r2_file" -wa -wb > "$out"
+        echo "✅ Compared $r1_file with $r2_file → $out"
+    else
+        echo "⚠️ No R2 file found for $prefix"
+    fi
+done
+
+```
+
+Step 6: Create a master list of peaks found in both replicates for all WT or I315I conditions.
+```{bash}
+
+#!/bin/bash
+
+# Create the output directory if it doesn't exist
+mkdir -p master_list
+
+# Define genotypes and antibodies
+genotypes=("I315I" "WT")
+marks=("H3K27me3" "H3K4me3" "SMARCA4" "SMARCB1" "SMARCE1")
+
+# Loop over each combination
+for genotype in "${genotypes[@]}"; do
+    for mark in "${marks[@]}"; do
+        input="${genotype}_${mark}_R1_vs_R2_overlap.bed"
+        output="master_list/${genotype}_${mark}_reproducible_peaks.bed"
+
+        echo "Processing $input -> $output"
+
+        awk '{
+            chr = $1;
+            start = ($2 < $7 ? $2 : $7);
+            end   = ($3 > $8 ? $3 : $8);
+            print chr "\t" start "\t" end
+        }' "$input" > "$output"
+    done
+done
+
+```
+
+
+________________________________________________________________________________
+
+Part 4: Plot signal at these reproducible peaks to compare signal between WT and mutant constructs
+________________________________________________________________________________
+
+
+Step 1: Map CUT&RUN signal from multiple genotypes to a shared set of reference peaks (from WT or I315I control), then combine the signals into a single matrix for downstream comparison. 
+
+Input files:
+  1. Bedgraph files showing average signal between both replicates after normalization and baseline subtraction (Generated in Part 2: Step 3).
+  2. Reproducible high confidence peaks which were called in both replicates of your I315I or WT condition (Generated in Part 3: Step 6 )
+
+```{bash}
+#!/bin/bash
+
+mkdir -p combined_signals
+
+declare -A clusters
+clusters[W281]="WT W281P W281X"
+clusters[I315]="I315I I315R I315X"
+
+declare -A ref_peaks
+ref_peaks[W281]="WT"
+ref_peaks[I315]="I315I"
+
+antibodies=("H3K27me3" "H3K4me3" "SMARCB1" "SMARCA4" "SMARCE1")
+
+# Step 1: Map signals at cluster-specific WT reference peaks
+for cluster in "${!clusters[@]}"; do
+    for genotype in ${clusters[$cluster]}; do
+        for antibody in "${antibodies[@]}"; do
+            master_peak_file="${ref_peaks[$cluster]}_${antibody}_reproducible_peaks.bed"
+            bedgraph_file="/home/ec2-user/cutnrun/full_run/bams/processed_bams_pe/average_bedgraphs/${genotype}_${antibody}_averaged.bedgraph"
+            output_signal_file="${genotype}_${antibody}_signal_at_${ref_peaks[$cluster]}_peaks.bed"
+
+            echo "Mapping signal for $genotype $antibody at ${ref_peaks[$cluster]} peaks..."
+
+            bedtools map -a "$master_peak_file" -b "$bedgraph_file" -c 4 -o mean > "$output_signal_file"
+        done
+    done
+done
+
+# Step 2: Combine signals per antibody per cluster
+for cluster in "${!clusters[@]}"; do
+    genotypes=(${clusters[$cluster]})
+    for antibody in "${antibodies[@]}"; do
+        file1="${genotypes[0]}_${antibody}_signal_at_${ref_peaks[$cluster]}_peaks.bed"
+        file2="${genotypes[1]}_${antibody}_signal_at_${ref_peaks[$cluster]}_peaks.bed"
+        file3="${genotypes[2]}_${antibody}_signal_at_${ref_peaks[$cluster]}_peaks.bed"
+        output_file="combined_signals/${antibody}_${cluster}_combined_signal.bed"
+
+        echo -e "Chr\tStart\tEnd\t${genotypes[0]}_${antibody}_Signal\t${genotypes[1]}_${antibody}_Signal\t${genotypes[2]}_${antibody}_Signal" > "$output_file"
+
+        paste <(cut -f1-3 "$file1") \
+              <(cut -f4 "$file1") \
+              <(cut -f4 "$file2") \
+              <(cut -f4 "$file3") | \
+        awk 'BEGIN {OFS="\t"} {print $1,$2,$3,$4,$5,$6}' >> "$output_file"
+
+        echo "Created combined signal file: $output_file"
+    done
+done
+
+```
+
+
+Step 2: Create a matrix showing the median ratio of Mutant / WT peaks and % of peaks with reduced signal for posterity (these will also be included in the graph)
+
+```{r}
+
+library(tidyverse)
+library(glue)
+
+# List all *_combined_signal.bed files
+files <- list.files(pattern = "_combined_signal\\.bed$")
+
+# Create an empty list to store summary results
+summary_list <- list()
+
+for (file in files) {
+  # Read in the data
+  df <- read_tsv(file, col_types = cols())
+  
+  # Extract cluster label (e.g., I315 or W281)
+  cluster <- str_extract(file, "I315|W281")
+  
+  # Define reference and mutant names
+  if (cluster == "I315") {
+    reference <- "I315I"
+    mutants <- c("I315R", "I315X")
+  } else if (cluster == "W281") {
+    reference <- "WT"
+    mutants <- c("W281P", "W281X")
+  } else {
+    stop(glue("Unknown cluster in file: {file}"))
+  }
+  
+  # Find the relevant signal columns
+  antibody <- str_extract(file, "SMARCB1|SMARCA4|SMARCE1|H3K27me3|H3K4me3")
+  ref_col <- glue("{reference}_{antibody}_Signal")
+  mut_cols <- glue("{mutants}_{antibody}_Signal")
+  
+  # Compute fold changes and percentage lower
+  pct_lower <- numeric(length(mutants))
+  for (i in seq_along(mutants)) {
+    fc_col <- glue("{mutants[i]}_vs_{reference}_FC")
+    df[[fc_col]] <- df[[mut_cols[i]]] / df[[ref_col]]
+    
+    # Calculate percentage of regions where mutant signal < reference signal
+    pct_lower[i] <- mean(df[[mut_cols[i]]] < df[[ref_col]], na.rm = TRUE) * 100
+  }
+  
+  # Calculate median FC values
+  median_fc <- map_dbl(mutants, ~ median(df[[glue("{.x}_vs_{reference}_FC")]], na.rm = TRUE))
+  
+  # Store in summary data frame, add new columns for pct lower
+  summary_list[[file]] <- tibble(
+    file = file,
+    cluster = cluster,
+    antibody = antibody,
+    reference = reference,
+    mutant_1 = mutants[1],
+    mutant_1_median_FC = median_fc[1],
+    mutant_1_pct_lower = pct_lower[1],
+    mutant_2 = mutants[2],
+    mutant_2_median_FC = median_fc[2],
+    mutant_2_pct_lower = pct_lower[2]
+  )
+  
+  # Optionally: overwrite or write new FC file
+  output_file <- str_replace(file, "_combined_signal.bed", "_with_FC.tsv")
+  write_tsv(df, output_file)
+}
+
+# Combine all results into one summary data frame
+fc_summary <- bind_rows(summary_list)
+
+# View the summary
+print(fc_summary)
+
+# Optionally write summary to file
+write_tsv(fc_summary, "FC_summary_all_files.tsv")
+
+```
+
+Step 3: Do the same thing but analyze by replicate instead of averaged signal
+
+```{r}
+library(tidyverse)
+library(glue)
+
+# List all *_combined_signal.bed files from subdirectory
+files <- list.files("combined_signal_data_by_replicate", pattern = "_combined_signal\\.bed$", full.names = TRUE)
+
+# Store summary results
+summary_list <- list()
+
+for (file in files) {
+  message("Processing file: ", file)
+
+  # Force all columns to be numeric unless they fail completely
+  df <- read_tsv(file, col_types = cols(.default = col_double(), Chr = col_character()))
+
+  # Extract cluster and antibody from filename
+  cluster <- str_extract(file, "I315|W281")
+  antibody <- str_extract(file, "SMARCB1|SMARCA4|SMARCE1|H3K27me3|H3K4me3")
+
+  # Define reference and mutants
+  if (cluster == "I315") {
+    reference <- "I315I"
+    mutants <- c("I315R", "I315X")
+  } else if (cluster == "W281") {
+    reference <- "WT"
+    mutants <- c("W281P", "W281X")
+  } else {
+    stop(glue("Unknown cluster in file: {file}"))
+  }
+
+  # Identify replicate numbers from column names
+  replicate_numbers <- df %>%
+    select(contains(reference), contains(antibody)) %>%
+    names() %>%
+    str_extract("R\\d+") %>%
+    na.omit() %>%
+    unique()
+
+  # Loop through replicates
+  for (rep in replicate_numbers) {
+    ref_col <- glue("{reference}_{antibody}_{rep}_Signal")
+
+    for (mutant in mutants) {
+      mut_col <- glue("{mutant}_{antibody}_{rep}_Signal")
+      fc_col <- glue("{mutant}_vs_{reference}_{rep}_FC")
+
+      # Only calculate if both columns are present
+      if (all(c(ref_col, mut_col) %in% colnames(df))) {
+        # Compute fold change
+        df[[fc_col]] <- df[[mut_col]] / df[[ref_col]]
+
+        # Compute summary stats, skipping NAs
+        median_fc <- median(df[[fc_col]], na.rm = TRUE)
+        pct_lower <- mean(df[[mut_col]] < df[[ref_col]], na.rm = TRUE) * 100
+
+        # Add to summary list
+        summary_list[[length(summary_list) + 1]] <- tibble(
+          file = basename(file),
+          cluster = cluster,
+          antibody = antibody,
+          replicate = rep,
+          reference = reference,
+          mutant = mutant,
+          median_FC = median_fc,
+          pct_lower = pct_lower
+        )
+      } else {
+        warning(glue("Missing columns for {mutant} vs {reference} replicate {rep} in {file}"))
+      }
+    }
+  }
+
+  # Write out file with fold change columns
+  output_file <- str_replace(file, "_combined_signal.bed", "_with_FC.tsv")
+  write_tsv(df, output_file)
+}
+
+# Combine all summaries into one table
+fc_summary <- bind_rows(summary_list)
+
+# Print and write summary
+print(fc_summary)
+write_tsv(fc_summary, "FC_summary_all_files_by_replicate.tsv")
+
+
+```
+
+
+
+
+Step 3: Plot these matrices to see how signal differs globally between WT and mutant conditions for each target
+
+```{r}
+
+library(tidyverse)
+library(glue)
+
+# Define clusters and their reference genotypes
+clusters <- list(
+  I315 = list(reference = "I315I", mutants = c("I315R", "I315X")),
+  W281 = list(reference = "WT", mutants = c("W281P", "W281X"))
+)
+
+# Define antibodies
+antibodies <- c("SMARCB1", "SMARCA4", "SMARCE1", "H3K4me3")
+
+process_cluster_antibody <- function(cluster_name, cluster_info, antibody) {
+  file_path <- glue("{antibody}_{cluster_name}_combined_signal.bed")
+  
+  if (!file.exists(file_path)) {
+    message(glue("File not found: {file_path}, skipping..."))
+    return(NULL)
+  }
+
+  df <- readr::read_tsv(file_path, col_types = cols(.default = col_double(), Chr = col_character()))
+
+  reference <- cluster_info$reference
+  mutants <- cluster_info$mutants
+  
+  ref_col <- glue("{reference}_{antibody}_Signal")
+  mut_cols <- glue("{mutants}_{antibody}_Signal")
+
+  # Compute fold changes and % lower
+  fc_cols <- glue("{mutants}_vs_{reference}_FC")
+  for (i in seq_along(mutants)) {
+    df[[fc_cols[i]]] <- df[[mut_cols[i]]] / df[[ref_col]]
+  }
+
+  median_fc <- map_dbl(fc_cols, ~median(df[[.x]], na.rm = TRUE))
+  pct_lower <- map_dbl(mut_cols, ~mean(df[[.x]] < df[[ref_col]], na.rm = TRUE) * 100)
+
+  med_ref <- median(df[[ref_col]], na.rm = TRUE)
+  med_mutants <- map_dbl(mut_cols, ~median(df[[.x]], na.rm = TRUE))
+  names(med_mutants) <- mutants
+
+  df_long <- df %>%
+    select(all_of(c(ref_col, mut_cols))) %>%
+    pivot_longer(cols = all_of(mut_cols), names_to = "Genotype", values_to = "Signal") %>%
+    mutate(Short = str_remove(Genotype, glue("_{antibody}_Signal")))
+
+  # Build legend labels
+  legend_labels <- tibble(
+    Short = mutants,
+    legend_label = glue("{mutants}\nMedian ratio: {round(median_fc, 2)}\n{round(pct_lower, 1)}% peaks reduced")
+  )
+  
+  # Join legend labels and set factor levels for consistent color mapping
+  df_long <- df_long %>%
+    left_join(legend_labels, by = "Short") %>%
+    mutate(legend_label = factor(legend_label, levels = unique(legend_label)))
+
+  # Define colors for legend fill that match factor levels
+  legend_fill_colors <- scales::hue_pal()(length(levels(df_long$legend_label)))
+
+  x_99 <- quantile(df[[ref_col]], 0.99, na.rm = TRUE)
+  y_99 <- quantile(df_long$Signal, 0.99, na.rm = TRUE)
+  axis_max <- max(x_99, y_99)
+
+  p <- ggplot(df_long, aes_string(x = ref_col, y = "Signal", fill = "legend_label", color = "legend_label")) +
+    geom_point(shape = 21, size = 1.5, stroke = 0.15, alpha = 0.8, color = "black") +  # black outline
+    geom_abline(slope = 1, intercept = 0, linetype = "solid", color = "black", alpha = 0.5, show.legend = FALSE) +
+    geom_vline(xintercept = med_ref, linetype = "dashed", color = "black") +
+    geom_hline(yintercept = 0, color = "black") +
+    geom_vline(xintercept = 0, color = "black") +
+    geom_hline(data = tibble(Short = names(med_mutants), y = med_mutants) %>% 
+                 left_join(legend_labels, by = "Short"), 
+               aes(yintercept = y, color = legend_label), 
+               linetype = "dashed", show.legend = FALSE) +
+    geom_label(data = tibble(Short = names(med_mutants), y = med_mutants) %>% 
+                 left_join(legend_labels, by = "Short"), 
+               aes(x = 0, y = y, label = paste0("Median = ", round(y, 2)), fill = legend_label),  # colored background box
+               color = "black",    # black text
+               inherit.aes = FALSE, size = 3, label.size = NA, hjust = -0.1, show.legend = FALSE) +
+    annotate("label", x = med_ref, y = 0, label = glue("Median = {round(med_ref, 2)}"), 
+             vjust = -0.5, hjust = -0.1, size = 3, fill = "white", label.size = NA, show.legend = FALSE) +
+    scale_fill_manual(
+      values = setNames(legend_fill_colors, levels(df_long$legend_label))
+      ) +
+    coord_fixed() +
+    theme_minimal() +
+    theme(
+      panel.background = element_blank(),
+      panel.grid = element_blank(),
+      plot.background = element_blank(),
+      legend.position = c(0.25, 0.75),
+      legend.title = element_blank(),
+      legend.text = element_text(size = 8),
+      legend.text.align = 0,
+      legend.spacing.y = unit(2, "cm"),
+      legend.box = "vertical",
+      legend.key.height = unit(1.2, "cm"),
+    ) +
+    guides(
+  fill = guide_legend(
+    byrow = TRUE,
+    override.aes = list(
+      shape = 21,
+      size = 3,
+      stroke = 0.15,
+      color = "black"  # black outline
+    )
+  ),
+  color = "none"  # remove the color legend to avoid duplicates
+) +
+    labs(
+      x = glue("{reference} {antibody} Signal"),
+      y = "Mutant Signal"
+    ) +
+    xlim(0, axis_max) +
+    ylim(0, axis_max)
+
+  out_path <- glue("plots/{reference}_vs_Mutants_{antibody}_Signal.tif")
+  ggsave(out_path, plot = p, width = 6, height = 6, dpi = 300, device = "tiff")
+}
+
+# Run for each cluster and antibody
+walk2(
+  rep(names(clusters), each = length(antibodies)),
+  rep(clusters, each = length(antibodies)),
+  ~walk(antibodies, function(ab) process_cluster_antibody(.x, .y, ab))
+)
+
+```
+
+
+This one is plotting the best fit line and labeling the slope of the linear regression. Didnt love it so opted to do the mean signal intensity.
+
+```{r}
+library(tidyverse)
+library(glue)
+
+# Define clusters and their reference genotypes
+clusters <- list(
+  I315 = list(reference = "I315I", mutants = c("I315R", "I315X")),
+  W281 = list(reference = "WT", mutants = c("W281P", "W281X"))
+)
+
+# Define antibodies you want to loop over
+antibodies <- c("SMARCB1", "SMARCA4", "SMARCE1", "H3K4me3")
+
+# Function to process and plot each cluster-antibody combination
+process_cluster_antibody <- function(cluster_name, cluster_info, antibody) {
+  # Construct file path based on antibody and cluster
+  file_path <- glue("{antibody}_{cluster_name}_combined_signal.bed")
+  
+  # Skip if file doesn't exist
+  if (!file.exists(file_path)) {
+    message(glue("File not found: {file_path}, skipping..."))
+    return(NULL)
+  }
+  
+  # Read data
+  df <- readr::read_tsv(file_path, col_types = cols(.default = col_double(), Chr = col_character()))
+  
+  # Column names
+  ref_col <- glue("{cluster_info$reference}_{antibody}_Signal")
+  mutant_cols <- glue("{cluster_info$mutants}_{antibody}_Signal")
+
+  # Run linear models for each mutant vs reference
+  slope_df <- tibble(
+  Genotype = character(),
+  slope = numeric(),
+  x = numeric(),
+  y = numeric()
+)
+
+for (mut_col in mutant_cols) {
+  model <- lm(df[[mut_col]] ~ df[[ref_col]])
+  r2 <- summary(model)$r.squared
+  slope <- coef(model)[[2]]
+  message(glue("{cluster_name} {antibody}: {mut_col} vs {ref_col} — R² = {round(r2, 3)}, slope = {round(slope, 3)}"))
+  
+  # Position label near 95th percentile of x axis for that mutant
+  x_pos <- quantile(df[[ref_col]], 0.95, na.rm = TRUE)
+  y_pos <- coef(model)[[1]] + slope * x_pos
+  
+  slope_df <- slope_df %>% add_row(
+    Genotype = mut_col,
+    slope = slope,
+    x = x_pos,
+    y = y_pos
+  )
+}
+
+  # Pivot longer for plotting
+  df_long <- df %>%
+    pivot_longer(cols = all_of(mutant_cols), names_to = "Genotype", values_to = "Signal")
+
+  # Get maximum axis value across both axes for scaling
+  x_99 <- quantile(df[[ref_col]], 0.99, na.rm = TRUE)
+  y_99 <- quantile(df_long$Signal, 0.99, na.rm = TRUE)
+  axis_max <- max(x_99, y_99)
+
+  # Generate plot
+  p <- ggplot(df_long, aes_string(x = ref_col, y = "Signal", fill = "Genotype")) +
+    geom_point(shape = 21, size = 1.5, stroke = 0.1, alpha = 0.8, color = "black") +
+    geom_smooth(aes(color = Genotype), method = "lm", se = FALSE, linetype = "solid", size = 1, show.legend = FALSE) +
+    geom_smooth(method = "lm", se = FALSE, linetype = "dashed", size = 1, color = "black", alpha = 0.3, show.legend = FALSE) +
+    geom_abline(intercept = 0, slope = 1, linetype = "solid", color = "black", alpha = 0.5) +
+    geom_vline(xintercept = 0, color = "black") +
+    geom_hline(yintercept = 0, color = "black") +
+    coord_fixed() +  # Keep aspect ratio 1:1
+    theme_minimal() +
+    theme(
+      panel.background = element_blank(),
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank(),
+      plot.background = element_blank(),
+      legend.position = c(0.25, 0.75)
+    ) +
+    labs(
+      x = glue("{cluster_info$reference} {antibody} Signal"),
+      y = "Mutant Signal",
+      fill = "Genotype"
+    ) +
+    xlim(0, axis_max) +
+    ylim(0, axis_max)
+  
+  p <- p + 
+  geom_label(
+    data = slope_df,
+    aes(x = x, y = y, label = paste0("slope = ", round(slope, 3))),
+    color = "black",
+    size = 3,
+    hjust = 0,
+    vjust = 1,
+    show.legend = FALSE
+  )
+  
+  # Save plot
+  out_path <- glue("plots/{cluster_info$reference}_vs_Mutants_{antibody}_Signal.tif")
+  ggsave(out_path, plot = p, width = 6, height = 6, dpi = 300, device = "tiff")
+}
+
+# Run for each cluster and antibody
+walk2(
+  rep(names(clusters), each = length(antibodies)),
+  rep(clusters, each = length(antibodies)),
+  ~walk(antibodies, function(ab) process_cluster_antibody(.x, .y, ab))
+)
+
+```
+
+
+
+Creating a consensus sets of peaks bound by SWI/SNF subunits
+
+```{bash}
+
+cat WT_SMARCA4_reproducible_peaks.bed WT_SMARCB1_reproducible_peaks.bed WT_SMARCE1_reproducible_peaks.bed > WT_all_swisnf_peaks.bed
+
+sort -k1,1 -k2,2n WT_all_swisnf_peaks.bed > WT_all_swisnf_peaks.sorted.bed
+
+bedtools merge -i WT_all_swisnf_peaks.sorted.bed -d 100 > WT_unified_SWISNF_regions.bed
+
+```
+
+
+
+```{bash}
+
+cat I315I_SMARCA4_reproducible_peaks.bed I315I_SMARCB1_reproducible_peaks.bed I315I_SMARCE1_reproducible_peaks.bed > I315I_all_swisnf_peaks.bed
+
+sort -k1,1 -k2,2n I315I_all_swisnf_peaks.bed > I315I_all_swisnf_peaks.sorted.bed
+
+bedtools merge -i I315I_all_swisnf_peaks.sorted.bed -d 100 > I315I_unified_SWISNF_regions.bed
+
+```
+
+
+Merge I315I and WT unified bed files together to have a list of super confident peaks bound by at least one of the three subunits (SMARCA4, SMARCB1, and SMARCE1)
+
+```{bash}
+
+bedtools intersect -a I315I_unified_SWISNF_regions.bed -b WT_unified_SWISNF_regions.bed -u | sort -k1,1 -k2,2n | bedtools merge > consensus_SWISNF_binding_regions.bed
+
+```
+
+
+Overlap with ATAC sig and nonsig peaks to find swisnf sites with nonsig accessibility changes and sig accessibility changes
+
+```{bash}
+
+bedtools intersect -a consensus_SWISNF_binding_regions.bed \
+                   -b significant_gain_in_consensus.bed -u \
+  > significant_gain_swisnf.bed
+
+bedtools intersect -a consensus_SWISNF_binding_regions.bed \
+                   -b significant_loss_in_consensus.bed -u \
+| bedtools intersect -a - -b significant_gain_swisnf.bed -v \
+  > significant_loss_swisnf.bed
+  
+bedtools intersect -a consensus_SWISNF_binding_regions.bed \
+                   -b significant_gain_swisnf.bed significant_loss_swisnf.bed -v \
+  > nonsignificant_swisnf_sites.bed
+
+```
+
+
+Annotating each region
+
+```{bash}
+
+annotatePeaks.pl consensus_SWISNF_binding_regions.bed hg38 > consensus_SWISNF_binding_regions_annotated.bed
+
+annotatePeaks.pl nonsignificant_swisnf_sites.bed hg38 > nonsignificant_swisnf_sites_annotated.bed
+
+annotatePeaks.pl significant_gain_swisnf.bed hg38 > significant_gain_swisnf_annotated.bed
+
+annotatePeaks.pl significant_loss_swisnf.bed hg38 > significant_loss_swisnf_annotated.bed
+
+```
+
+```{r}
+
+library(readr)
+library(dplyr)
+
+all_swisnf_sites <- read_tsv("./results/CUTnRUN/consensus_SWISNF_binding_regions_annotated.bed")
+
+all_swisnf_annotation_counts <- all_swisnf_sites %>%
+  mutate(cleaned_annotation = gsub("\\s*\\([^)]*\\)", "", Annotation)) %>%
+  mutate(cleaned_annotation = trimws(cleaned_annotation)) %>%
+  mutate(cleaned_annotation = gsub("\\.[0-9]+$", "", cleaned_annotation)) %>%  # Remove .2, .3, .4 etc
+  count(cleaned_annotation, sort = TRUE)
+
+gained_swisnf_sites <- read_tsv("./results/CUTnRUN/significant_gain_swisnf_annotated.bed")
+
+gained_swisnf_annotation_counts <- gained_swisnf_sites %>%
+  mutate(cleaned_annotation = gsub("\\s*\\([^)]*\\)", "", Annotation)) %>%
+  mutate(cleaned_annotation = trimws(cleaned_annotation)) %>%
+  mutate(cleaned_annotation = gsub("\\.[0-9]+$", "", cleaned_annotation)) %>%  # Remove .2, .3, .4 etc
+  count(cleaned_annotation, sort = TRUE)
+
+lost_swisnf_sites <- read_tsv("./results/CUTnRUN/significant_loss_swisnf_annotated.bed")
+
+lost_swisnf_annotation_counts <- lost_swisnf_sites %>%
+  mutate(cleaned_annotation = gsub("\\s*\\([^)]*\\)", "", Annotation)) %>%
+  mutate(cleaned_annotation = trimws(cleaned_annotation)) %>%
+  mutate(cleaned_annotation = gsub("\\.[0-9]+$", "", cleaned_annotation)) %>%  # Remove .2, .3, .4 etc
+  count(cleaned_annotation, sort = TRUE)
+
+persistent_swisnf_sites <- read_tsv("./results/CUTnRUN/nonsignificant_swisnf_sites_annotated.bed")
+
+persistent_swisnf_annotation_counts <- persistent_swisnf_sites %>%
+  mutate(cleaned_annotation = gsub("\\s*\\([^)]*\\)", "", Annotation)) %>%
+  mutate(cleaned_annotation = trimws(cleaned_annotation)) %>%
+  mutate(cleaned_annotation = gsub("\\.[0-9]+$", "", cleaned_annotation)) %>%  # Remove .2, .3, .4 etc
+  count(cleaned_annotation, sort = TRUE)
+
+
+
+
+
+```
+
+
+```{r}
+
+
+# Filter for promoter-TSS peaks
+persistent_swisnf_promoter_peaks <- persistent_swisnf_sites[grepl("promoter-TSS", persistent_swisnf_sites$Annotation), ]
+
+persistent_swisnf_promoter_peaks_regions <- persistent_swisnf_promoter_peaks[,c(2,3,4)]
+
+write_tsv(persistent_swisnf_promoter_peaks_regions, "./results/CUTnRUN/persistent_promoter_swisnf_regions.bed")
+
+
+```
+
+
+
+
+Part 5: Plotting heatmaps of signal intensity over these reproducible peaks across mutant and WT samples
+
+```{bash}
+
+computeMatrix scale-regions \
+  -S ./bigwigs/I315I_SMARCA4_R1_IgGsubtracted.bw ./bigwigs/I315R_SMARCA4_R1_IgGsubtracted.bw ./bigwigs/I315X_SMARCA4_R1_IgGsubtracted.bw \
+  -R ./reproducible_peaks/I315I_SMARCA4_reproducible_peaks.bed \
+  -b 2500 -a 2500 \
+  --missingDataAsZero \
+  -o I315_SMARCA4_R1_peak_matrix.gz \
+  -p 18 \
+  --samplesLabel "I315I" "I315R" "I315X"
+
+
+computeMatrix scale-regions \
+  -S ./bigwigs/I315I_SMARCA4_R2_IgGsubtracted.bw ./bigwigs/I315R_SMARCA4_R2_IgGsubtracted.bw ./bigwigs/I315X_SMARCA4_R2_IgGsubtracted.bw \
+  -R ./reproducible_peaks/I315I_SMARCA4_reproducible_peaks.bed \
+  -b 2500 -a 2500 \
+  --missingDataAsZero \
+  -o I315_SMARCA4_R2_peak_matrix.gz \
+  -p 18 \
+  --samplesLabel "I315I" "I315R" "I315X"
+
+computeMatrix scale-regions \
+  -S ./bigwigs/WT_SMARCA4_R1_IgGsubtracted.bw ./bigwigs/W281P_SMARCA4_R1_IgGsubtracted.bw ./bigwigs/W281X_SMARCA4_R1_IgGsubtracted.bw \
+  -R ./reproducible_peaks/WT_SMARCA4_reproducible_peaks.bed \
+  -b 2500 -a 2500 \
+  --missingDataAsZero \
+  -o W281_SMARCA4_R1_peak_matrix.gz \
+  -p 18 \
+  --samplesLabel "WT" "W281P" "W281X"
+
+
+computeMatrix scale-regions \
+  -S ./bigwigs/WT_SMARCA4_R2_IgGsubtracted.bw ./bigwigs/W281P_SMARCA4_R2_IgGsubtracted.bw ./bigwigs/W281X_SMARCA4_R2_IgGsubtracted.bw \
+  -R ./reproducible_peaks/WT_SMARCA4_reproducible_peaks.bed \
+  -b 2500 -a 2500 \
+  --missingDataAsZero \
+  -o W281_SMARCA4_R2_peak_matrix.gz \
+  -p 18 \
+  --samplesLabel "WT" "W281P" "W281X"
+  
+computeMatrix scale-regions \
+  -S ./bigwigs/I315I_SMARCB1_R1_IgGsubtracted.bw ./bigwigs/I315R_SMARCB1_R1_IgGsubtracted.bw ./bigwigs/I315X_SMARCB1_R1_IgGsubtracted.bw \
+  -R ./reproducible_peaks/I315I_SMARCB1_reproducible_peaks.bed \
+  -b 2500 -a 2500 \
+  --missingDataAsZero \
+  -o I315_SMARCB1_R1_peak_matrix.gz \
+  -p 18 \
+  --samplesLabel "I315I" "I315R" "I315X"
+
+computeMatrix scale-regions \
+  -S ./bigwigs/I315I_SMARCB1_R2_IgGsubtracted.bw ./bigwigs/I315R_SMARCB1_R2_IgGsubtracted.bw ./bigwigs/I315X_SMARCB1_R2_IgGsubtracted.bw \
+  -R ./reproducible_peaks/I315I_SMARCB1_reproducible_peaks.bed \
+  -b 2500 -a 2500 \
+  --missingDataAsZero \
+  -o I315_SMARCB1_R2_peak_matrix.gz \
+  -p 18 \
+  --samplesLabel "I315I" "I315R" "I315X"
+
+computeMatrix scale-regions \
+  -S ./bigwigs/WT_SMARCB1_R1_IgGsubtracted.bw ./bigwigs/W281P_SMARCB1_R1_IgGsubtracted.bw ./bigwigs/W281X_SMARCB1_R1_IgGsubtracted.bw \
+  -R ./reproducible_peaks/WT_SMARCB1_reproducible_peaks.bed \
+  -b 2500 -a 2500 \
+  --missingDataAsZero \
+  -o W281_SMARCB1_R1_peak_matrix.gz \
+  -p 18 \
+  --samplesLabel "WT" "W281P" "W281X"
+
+computeMatrix scale-regions \
+  -S ./bigwigs/WT_SMARCB1_R2_IgGsubtracted.bw ./bigwigs/W281P_SMARCB1_R2_IgGsubtracted.bw ./bigwigs/W281X_SMARCB1_R2_IgGsubtracted.bw \
+  -R ./reproducible_peaks/WT_SMARCB1_reproducible_peaks.bed \
+  -b 2500 -a 2500 \
+  --missingDataAsZero \
+  -o W281_SMARCB1_R2_peak_matrix.gz \
+  -p 18 \
+  --samplesLabel "WT" "W281P" "W281X"
+  
+computeMatrix scale-regions \
+  -S ./bigwigs/I315I_SMARCE1_R1_IgGsubtracted.bw ./bigwigs/I315R_SMARCE1_R1_IgGsubtracted.bw ./bigwigs/I315X_SMARCE1_R1_IgGsubtracted.bw \
+  -R ./reproducible_peaks/I315I_SMARCE1_reproducible_peaks.bed \
+  -b 2500 -a 2500 \
+  --missingDataAsZero \
+  -o I315_SMARCE1_R1_peak_matrix.gz \
+  -p 18 \
+  --samplesLabel "I315I" "I315R" "I315X"
+
+
+computeMatrix scale-regions \
+  -S ./bigwigs/I315I_SMARCE1_R2_IgGsubtracted.bw ./bigwigs/I315R_SMARCE1_R2_IgGsubtracted.bw ./bigwigs/I315X_SMARCE1_R2_IgGsubtracted.bw \
+  -R ./reproducible_peaks/I315I_SMARCE1_reproducible_peaks.bed \
+  -b 2500 -a 2500 \
+  --missingDataAsZero \
+  -o I315_SMARCE1_R2_peak_matrix.gz \
+  -p 18 \
+  --samplesLabel "I315I" "I315R" "I315X"
+
+computeMatrix scale-regions \
+  -S ./bigwigs/WT_SMARCE1_R1_IgGsubtracted.bw ./bigwigs/W281P_SMARCE1_R1_IgGsubtracted.bw ./bigwigs/W281X_SMARCE1_R1_IgGsubtracted.bw \
+  -R ./reproducible_peaks/WT_SMARCE1_reproducible_peaks.bed \
+  -b 2500 -a 2500 \
+  --missingDataAsZero \
+  -o W281_SMARCE1_R1_peak_matrix.gz \
+  -p 18 \
+  --samplesLabel "WT" "W281P" "W281X"
+
+
+computeMatrix scale-regions \
+  -S ./bigwigs/WT_SMARCE1_R2_IgGsubtracted.bw ./bigwigs/W281P_SMARCE1_R2_IgGsubtracted.bw ./bigwigs/W281X_SMARCE1_R2_IgGsubtracted.bw \
+  -R ./reproducible_peaks/WT_SMARCE1_reproducible_peaks.bed \
+  -b 2500 -a 2500 \
+  --missingDataAsZero \
+  -o W281_SMARCE1_R2_peak_matrix.gz \
+  -p 18 \
+  --samplesLabel "WT" "W281P" "W281X"
+
+computeMatrix scale-regions \
+  -S ./bigwigs/I315I_H3K4me3_R1_IgGsubtracted.bw ./bigwigs/I315R_H3K4me3_R1_IgGsubtracted.bw ./bigwigs/I315X_H3K4me3_R1_IgGsubtracted.bw \
+  -R ./reproducible_peaks/I315I_H3K4me3_reproducible_peaks.bed \
+  -b 2500 -a 2500 \
+  --missingDataAsZero \
+  -o I315_H3K4me3_R1_peak_matrix.gz \
+  -p 18 \
+  --samplesLabel "I315I" "I315R" "I315X"
+
+
+computeMatrix scale-regions \
+  -S ./bigwigs/I315I_H3K4me3_R2_IgGsubtracted.bw ./bigwigs/I315R_H3K4me3_R2_IgGsubtracted.bw ./bigwigs/I315X_H3K4me3_R2_IgGsubtracted.bw \
+  -R ./reproducible_peaks/I315I_H3K4me3_reproducible_peaks.bed \
+  -b 2500 -a 2500 \
+  --missingDataAsZero \
+  -o I315_H3K4me3_R2_peak_matrix.gz \
+  -p 18 \
+  --samplesLabel "I315I" "I315R" "I315X"
+
+computeMatrix scale-regions \
+  -S ./bigwigs/WT_H3K4me3_R1_IgGsubtracted.bw ./bigwigs/W281P_H3K4me3_R1_IgGsubtracted.bw ./bigwigs/W281X_H3K4me3_R1_IgGsubtracted.bw \
+  -R ./reproducible_peaks/WT_H3K4me3_reproducible_peaks.bed \
+  -b 2500 -a 2500 \
+  --missingDataAsZero \
+  -o W281_H3K4me3_R1_peak_matrix.gz \
+  -p 18 \
+  --samplesLabel "WT" "W281P" "W281X"
+
+
+computeMatrix scale-regions \
+  -S ./bigwigs/WT_H3K4me3_R2_IgGsubtracted.bw ./bigwigs/W281P_H3K4me3_R2_IgGsubtracted.bw ./bigwigs/W281X_H3K4me3_R2_IgGsubtracted.bw \
+  -R ./reproducible_peaks/WT_H3K4me3_reproducible_peaks.bed \
+  -b 2500 -a 2500 \
+  --missingDataAsZero \
+  -o W281_H3K4me3_R2_peak_matrix.gz \
+  -p 18 \
+  --samplesLabel "WT" "W281P" "W281X"
+
+computeMatrix scale-regions \
+  -S ./bigwigs/I315I_H3K27me3_R1_IgGsubtracted.bw ./bigwigs/I315R_H3K27me3_R1_IgGsubtracted.bw ./bigwigs/I315X_H3K27me3_R1_IgGsubtracted.bw \
+  -R ./reproducible_peaks/I315I_H3K27me3_reproducible_peaks.bed \
+  -b 2500 -a 2500 \
+  --missingDataAsZero \
+  -o I315_H3K27me3_R1_peak_matrix.gz \
+  -p 18 \
+  --samplesLabel "I315I" "I315R" "I315X"
+
+
+computeMatrix scale-regions \
+  -S ./bigwigs/I315I_H3K27me3_R2_IgGsubtracted.bw ./bigwigs/I315R_H3K27me3_R2_IgGsubtracted.bw ./bigwigs/I315X_H3K27me3_R2_IgGsubtracted.bw \
+  -R ./reproducible_peaks/I315I_H3K27me3_reproducible_peaks.bed \
+  -b 2500 -a 2500 \
+  --missingDataAsZero \
+  -o I315_H3K27me3_R2_peak_matrix.gz \
+  -p 18 \
+  --samplesLabel "I315I" "I315R" "I315X"
+
+computeMatrix scale-regions \
+  -S ./bigwigs/WT_H3K27me3_R1_IgGsubtracted.bw ./bigwigs/W281P_H3K27me3_R1_IgGsubtracted.bw ./bigwigs/W281X_H3K27me3_R1_IgGsubtracted.bw \
+  -R ./reproducible_peaks/WT_H3K27me3_reproducible_peaks.bed \
+  -b 2500 -a 2500 \
+  --missingDataAsZero \
+  -o W281_H3K27me3_R1_peak_matrix.gz \
+  -p 18 \
+  --samplesLabel "WT" "W281P" "W281X"
+
+
+computeMatrix scale-regions \
+  -S ./bigwigs/WT_H3K27me3_R2_IgGsubtracted.bw ./bigwigs/W281P_H3K27me3_R2_IgGsubtracted.bw ./bigwigs/W281X_H3K27me3_R2_IgGsubtracted.bw \
+  -R ./reproducible_peaks/WT_H3K27me3_reproducible_peaks.bed \
+  -b 2500 -a 2500 \
+  --missingDataAsZero \
+  -o W281_H3K27me3_R2_peak_matrix.gz \
+  -p 18 \
+  --samplesLabel "WT" "W281P" "W281X"
+
+
+```
+
+Plot the heatmap
+
+```{bash}
+
+plotHeatmap \
+  -m I315_SMARCA4_R1_peak_matrix.gz \
+  -out I315_SMARCA4_R1_peak_heatmap.pdf \
+  --samplesLabel "I315I" "I315R" "I315X" \
+  --colorMap RdBu_r \
+  --dpi 300 \
+  --xAxisLabel "Distance from peak center (bp)" \
+  --refPointLabel "Peak center" \
+  --zMax 30
+
+
+plotHeatmap \
+  -m I315_SMARCA4_R2_peak_matrix.gz \
+  -out I315_SMARCA4_R2_peak_heatmap.pdf \
+  --samplesLabel "I315I" "I315R" "I315X" \
+  --colorMap RdBu_r \
+  --dpi 300 \
+  --xAxisLabel "Distance from peak center (bp)" \
+  --refPointLabel "Peak center" \
+  --zMax 40
+
+plotHeatmap \
+  -m W281_SMARCA4_R1_peak_matrix.gz \
+  -out W281_SMARCA4_R1_peak_heatmap.pdf \
+  --samplesLabel "WT" "W281P" "W281X" \
+  --colorMap RdBu_r \
+  --dpi 300 \
+  --xAxisLabel "Distance from peak center (bp)" \
+  --refPointLabel "Peak center" \
+  --zMax 20
+
+plotHeatmap \
+  -m W281_SMARCA4_R2_peak_matrix.gz \
+  -out W281_SMARCA4_R2_peak_heatmap.pdf \
+  --samplesLabel "WT" "W281P" "W281X" \
+  --colorMap RdBu_r \
+  --dpi 300 \
+  --xAxisLabel "Distance from peak center (bp)" \
+  --refPointLabel "Peak center" \
+  --zMax 30
+  
+  plotHeatmap \
+  -m I315_SMARCB1_R1_peak_matrix.gz \
+  -out I315_SMARCB1_R1_peak_heatmap.pdf \
+  --samplesLabel "I315I" "I315R" "I315X" \
+  --colorMap RdBu_r \
+  --dpi 300 \
+  --xAxisLabel "Distance from peak center (bp)" \
+  --refPointLabel "Peak center" \
+  --zMax 15
+
+plotHeatmap \
+  -m I315_SMARCB1_R2_peak_matrix.gz \
+  -out I315_SMARCB1_R2_peak_heatmap.pdf \
+  --samplesLabel "I315I" "I315R" "I315X" \
+  --colorMap RdBu_r \
+  --dpi 300 \
+  --xAxisLabel "Distance from peak center (bp)" \
+  --refPointLabel "Peak center" \
+  --zMax 30
+
+plotHeatmap \
+  -m W281_SMARCB1_R1_peak_matrix.gz \
+  -out W281_SMARCB1_R1_peak_heatmap.pdf \
+  --samplesLabel "WT" "W281P" "W281X" \
+  --colorMap RdBu_r \
+  --dpi 300 \
+  --xAxisLabel "Distance from peak center (bp)" \
+  --refPointLabel "Peak center" \
+  --zMax 20
+
+plotHeatmap \
+  -m W281_SMARCB1_R2_peak_matrix.gz \
+  -out W281_SMARCB1_R2_peak_heatmap.pdf \
+  --samplesLabel "WT" "W281P" "W281X" \
+  --colorMap RdBu_r \
+  --dpi 300 \
+  --xAxisLabel "Distance from peak center (bp)" \
+  --refPointLabel "Peak center" \
+  --zMax 20
+  
+plotHeatmap \
+  -m I315_SMARCE1_R1_peak_matrix.gz \
+  -out I315_SMARCE1_R1_peak_heatmap.pdf \
+  --samplesLabel "I315I" "I315R" "I315X" \
+  --colorMap RdBu_r \
+  --dpi 300 \
+  --xAxisLabel "Distance from peak center (bp)" \
+  --refPointLabel "Peak center" 
+  --zMax 30
+
+plotHeatmap \
+  -m I315_SMARCE1_R2_peak_matrix.gz \
+  -out I315_SMARCE1_R2_peak_heatmap.pdf \
+  --samplesLabel "I315I" "I315R" "I315X" \
+  --colorMap RdBu_r \
+  --dpi 300 \
+  --xAxisLabel "Distance from peak center (bp)" \
+  --refPointLabel "Peak center" \
+  --zMax 50
+
+plotHeatmap \
+  -m W281_SMARCE1_R1_peak_matrix.gz \
+  -out W281_SMARCE1_R1_peak_heatmap.pdf \
+  --samplesLabel "WT" "W281P" "W281X" \
+  --colorMap RdBu_r \
+  --dpi 300 \
+  --xAxisLabel "Distance from peak center (bp)" \
+  --refPointLabel "Peak center" \
+  --zMax 30
+
+plotHeatmap \
+  -m W281_SMARCE1_R2_peak_matrix.gz \
+  -out W281_SMARCE1_R2_peak_heatmap.pdf \
+  --samplesLabel "WT" "W281P" "W281X" \
+  --colorMap RdBu_r \
+  --dpi 300 \
+  --xAxisLabel "Distance from peak center (bp)" \
+  --refPointLabel "Peak center" \
+  --zMax 30
+
+
+plotHeatmap \
+  -m I315_H3K4me3_R1_peak_matrix.gz \
+  -out I315_H3K4me3_R1_peak_heatmap.pdf \
+  --samplesLabel "I315I" "I315R" "I315X" \
+  --colorMap RdBu_r \
+  --dpi 300 \
+  --xAxisLabel "Distance from peak center (bp)" \
+  --refPointLabel "Peak center" 
+
+
+plotHeatmap \
+  -m I315_H3K4me3_R2_peak_matrix.gz \
+  -out I315_H3K4me3_R2_peak_heatmap.pdf \
+  --samplesLabel "I315I" "I315R" "I315X" \
+  --colorMap RdBu_r \
+  --dpi 300 \
+  --xAxisLabel "Distance from peak center (bp)" \
+  --refPointLabel "Peak center" \
+
+
+plotHeatmap \
+  -m W281_H3K4me3_R1_peak_matrix.gz \
+  -out W281_H3K4me3_R1_peak_heatmap.pdf \
+  --samplesLabel "WT" "W281P" "W281X" \
+  --colorMap RdBu_r \
+  --dpi 300 \
+  --xAxisLabel "Distance from peak center (bp)" \
+  --refPointLabel "Peak center" \
+
+
+plotHeatmap \
+  -m W281_H3K4me3_R2_peak_matrix.gz \
+  -out W281_H3K4me3_R2_peak_heatmap.pdf \
+  --samplesLabel "WT" "W281P" "W281X" \
+  --colorMap RdBu_r \
+  --dpi 300 \
+  --xAxisLabel "Distance from peak center (bp)" \
+  --refPointLabel "Peak center" \
+
+  
+plotHeatmap \
+  -m I315_H3K27me3_R1_peak_matrix.gz \
+  -out I315_H3K27me3_R1_peak_heatmap.pdf \
+  --samplesLabel "I315I" "I315R" "I315X" \
+  --colorMap RdBu_r \
+  --dpi 300 \
+  --xAxisLabel "Distance from peak center (bp)" \
+  --refPointLabel "Peak center" 
+
+
+plotHeatmap \
+  -m I315_H3K27me3_R2_peak_matrix.gz \
+  -out I315_H3K27me3_R2_peak_heatmap.pdf \
+  --samplesLabel "I315I" "I315R" "I315X" \
+  --colorMap RdBu_r \
+  --dpi 300 \
+  --xAxisLabel "Distance from peak center (bp)" \
+  --refPointLabel "Peak center" \
+
+
+plotHeatmap \
+  -m W281_H3K27me3_R1_peak_matrix.gz \
+  -out W281_H3K27me3_R1_peak_heatmap.pdf \
+  --samplesLabel "WT" "W281P" "W281X" \
+  --colorMap RdBu_r \
+  --dpi 300 \
+  --xAxisLabel "Distance from peak center (bp)" \
+  --refPointLabel "Peak center" \
+
+
+plotHeatmap \
+  -m W281_H3K27me3_R2_peak_matrix.gz \
+  -out W281_H3K27me3_R2_peak_heatmap.pdf \
+  --samplesLabel "WT" "W281P" "W281X" \
+  --colorMap RdBu_r \
+  --dpi 300 \
+  --xAxisLabel "Distance from peak center (bp)" \
+  --refPointLabel "Peak center" \
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,68 @@
+
+
+
+```{r}
+library(yaml)
+library(stringr)
+library(dplyr)
+library(readr)
+library(dplyr)
+
+
+#read in data
+config <- read_yaml("./config.yaml")
+
+gnomad_data <- read.csv(file=config$gnomad_raw)
+
+
+#Filter for only variants in ENST00000644036.2 (SMARCB1 variant 1)
+gnomad_data_exons <- gnomad_data %>%
+  filter(Position >= 23787170 & Position <= 23787262 | #exon 1
+         Position >= 23791756 & Position <= 23791894 | #exon 2
+         Position >= 23793559 & Position <= 23793688 | #exon 3
+         Position >= 23800944 & Position <= 23801081 | #exon 4
+         Position >= 23803295 & Position <= 23803422 | #exon 5
+         Position >= 23816770 & Position <= 23816936 | #exon 6
+         Position >= 23825225 & Position <= 23825415 | #exon 7
+         Position >= 23833572 & Position <= 23833703 | #exon 8
+         Position >= 23834141 & Position <= 23834180)  #exon 9
+
+
+gnomad_data_exons
+  
+```
+
+```{r}
+
+aa_summary <- gnomad_data_exons %>%
+  # Only keep missense variants
+  filter(VEP.Annotation == "missense_variant") %>%
+  # Extract amino acid position
+  mutate(AA_position = as.numeric(str_extract(Protein.Consequence, "(?<=p\\.[A-Z][a-z]{2})[0-9]+(?=[A-Z][a-z]{2})"))) %>%
+  # Calculate number of individuals
+  mutate(num_individuals = Allele.Count - Homozygote.Count) %>%
+  # Collapse by amino acid residue
+  group_by(AA_position) %>%
+  summarise(
+    num_variants = n(),                # number of distinct variants at this residue
+    total_individuals = sum(num_individuals) # total number of people carrying any variant
+  ) %>%
+  ungroup()
+
+# View results
+head(aa_summary)
+
+aa_summary <- aa_summary %>%
+  mutate(
+    log10_num_variants = log10(num_variants + 1),
+    log10_total_individuals = log10(total_individuals + 1)
+  )
+
+# View results
+head(aa_summary)
+
+
+
+aa_summary$cM_length <- aa_summary$log10_total_individuals / 2 * 1
+
+```

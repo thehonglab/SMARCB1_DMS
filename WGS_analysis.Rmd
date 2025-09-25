@@ -269,4 +269,105 @@ ggsave(filename = "./plots/WGS_analysis/RCRF_SMARCB1_coverage.tiff", plot = SMAR
 
 
 
+```{r}
+library(readr)
+library(dplyr)
+library(ggplot2)
+
+BT16_coverage <- read_tsv("./data/WGS_analysis/average_coverage_10kb_BT16.bed")
+
+BT16_coverage_filt <- BT16_coverage %>%
+  filter(Chr %in% c(paste0("chr", 1:22)))
+
+
+BT16_coverage_filt$Chr <- factor(BT16_coverage_filt$Chr, levels = paste0("chr", 1:22))
+BT16_coverage_filt$color <- ifelse(as.numeric(factor(BT16_coverage_filt$Chr)) %% 2 == 0, "black", "gray")
+
+BT16_coverage_filt <- BT16_coverage_filt %>%
+  mutate(RegionLength = End - Start)
+
+# Create a cumulative sum column
+BT16_coverage_filt <- BT16_coverage_filt %>%
+  mutate(CumulativeSum = cumsum(RegionLength))
+
+start_positions <- BT16_coverage_filt %>%
+  group_by(Chr) %>%
+  filter(row_number() == 1) %>%
+  select(Chr, CumulativeSum)
+
+BT16_coverage_filt <- BT16_coverage_filt %>%
+  filter(!is.na(CumulativeSum) & !is.na(Coverage))
+
+chromosome_midpoints <- BT16_coverage_filt %>%
+  group_by(Chr) %>%
+  summarise(Midpoint = median(CumulativeSum))
+
+
+BT16_coverage_plot <- ggplot(BT16_coverage_filt, aes(x = CumulativeSum, y = Coverage)) +
+  geom_line(color = BT16_coverage_filt$color) +  # Line plot for coverage
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +  # Rotate x labels if needed
+  labs(y = "Coverage", x = NULL) +
+  theme_minimal() +
+  theme(
+    panel.background = element_blank(),  # Remove panel background
+    plot.background = element_blank(),   # Remove plot background
+    panel.grid = element_blank(),        # Remove grid lines
+    axis.text.x = element_blank(),  # **Remove x-axis labels**
+    axis.ticks.x = element_blank(),  # **Remove x-axis ticks**
+    legend.position = "none"  # Remove legend if unnecessary
+  ) +
+  # Add vertical lines at the chromosome start positions
+  geom_vline(data = start_positions, aes(xintercept = CumulativeSum), 
+             linetype = "dotted", color = "red", size = 0.5) +
+  geom_text(data = chromosome_midpoints, aes(x = Midpoint, y = -3, label = Chr), 
+            color = "black", size = 3, vjust = 1, angle = 90) +
+  ylim(-5,100)
+
+BT16_coverage_plot
+
+ggsave(filename = "./plots/WGS_analysis/BT16_coverage_uniformity.tiff", plot = BT16_coverage_plot, 
+       width = 10, height = 6, dpi = 300)
+
+
+```
+
+
+```{r}
+
+
+
+
+BT16_coverage_filt_chr22 <- BT16_coverage_filt %>%
+  filter(BT16_coverage_filt$Chr == "chr22")
+
+
+
+BT16_coverage_filt_chr22_SMARCB1 <- BT16_coverage_filt_chr22 %>%
+  filter(BT16_coverage_filt_chr22$Start >23500000 & BT16_coverage_filt_chr22$Start <24250000)
+
+SMARCB1_BT16 <- ggplot(BT16_coverage_filt_chr22_SMARCB1, aes(x = Start, y = Coverage)) +
+  geom_line() +
+  labs(x = "Position", y = "Coverage") +
+  theme_minimal() +
+  theme(
+    panel.background = element_blank(),  # Remove panel background
+    plot.background = element_blank(),   # Remove plot background
+    panel.grid = element_blank(),        # Remove grid lines
+    legend.position = "none"  # Remove legend if unnecessary
+  ) +
+  ylim(0, 60) +
+  geom_hline(yintercept = 0, color = "black", size = 0.5) + 
+  geom_vline(xintercept = 23500000, color = "black", size = 0.5) +
+  geom_rect(aes(xmin = 24129153, xmax = 24180196, ymin = 1, ymax = 4), 
+            fill = "red", alpha = 0.5) +
+  geom_text(aes(x = (24100000 + 24180196) / 2, y = 5, label = "SMARCB1"), 
+            color = "black", size = 3, fontface = "plain")
+
+SMARCB1_BT16
+
+ggsave(filename = "./plots/WGS_analysis/BT16_SMARCB1_coverage.tiff", plot = SMARCB1_BT16, 
+       width = 10, height = 6, dpi = 300)
+
+
+```
 

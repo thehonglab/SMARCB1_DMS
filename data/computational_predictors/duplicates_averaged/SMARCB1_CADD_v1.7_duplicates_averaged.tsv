@@ -1,4 +1,4 @@
-AA_Substitution	#Chrom	Pos	Ref	Alt	RawScore	Site	Codon	Ref_Codon	codon_site	Alt_Codon	Amino_Acid_Ref	Amino_Acid_Alt	Mutation_type	PHRED
+AA_Substitution	Chrom	Pos	Ref	Alt	RawScore	Site	Codon	Ref_Codon	codon_site	Alt_Codon	Amino_Acid_Ref	Amino_Acid_Alt	Mutation_type	PHRED
 A109A	22	23793653	T	A	0.155873	327	109	GCT	3	GCA	A	A	S	2.005333333333333
 A109D	22	23793652	C	A	4.928915	326	109	GCT	2	GAT	A	D	M	27.5
 A109G	22	23793652	C	G	4.050355	326	109	GCT	2	GGT	A	G	M	24.2

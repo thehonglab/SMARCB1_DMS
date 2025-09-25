@@ -10,10 +10,12 @@ cadd: ./data/computational_predictors/SMARCB1_CADD_v1.7_annotated.tsv
 cadd_duplicate_avg: ./data/computational_predictors/duplicates_averaged/SMARCB1_CADD_v1.7_duplicates_averaged.tsv
 cadd_missense: ./data/computational_predictors/SMARCB1_CADD_v1.7_missense_only.tsv
 cadd_res_avg: ./data/computational_predictors/residue_averaged_zscores/CADD_SMARCB1_v1.7_res_avg.tsv
-revel_raw: ./data/computational_predictors/revel_chr22_v1.3.csv
+revel_raw: ../computational_predictor_raw_data/revel_chr22_v1.3.csv
 revel: ./data/computational_predictors/SMARCB1_REVEL_v1.3_annotated.tsv 
 revel_duplicate_avg: ./data/computational_predictors/duplicates_averaged/SMARCB1_REVEL_v1.3_duplicates_averaged.tsv
 revel_res_avg: ./data/computational_predictors/residue_averaged_zscores/REVEL_SMARCB1_v1.3_res_avg.tsv
+SIFT_SMARCB1: ./data/computational_predictors/SIFT_SMARCB1.tsv
+polyphen_SMARCB1: ./data/computational_predictors/polyphen_output_SMARCB1_02212025.txt
 
 #ClinVar (data obtained -  November 22, 2024)
 clinvar_SMARCB1_raw: ./data/clinvar/clinvar_SMARCB1_12042024.txt
@@ -21,6 +23,9 @@ clinvar: ./data/clinvar/clinvar_SMARCB1_coding_variants.tsv
 clinvar_BRCA1_raw: ./data/clinvar/clinvar_BRCA1_12042024.txt
 clinvar_TP53_raw: ./data/clinvar/clinvar_TP53_12042024.txt
 clinvar_PTEN_raw: ./data/clinvar/clinvar_PTEN_12042024.txt
+
+#gnomADv4.1.0
+gnomad_raw: ./data/gnomADv4.1.0/gnomAD_v4.1.0_ENSG00000099956_2025_09_03_13_42_46.csv 
 
 #Screen Data
 mitedata: ./results/functional_scores/DMS_collapsed_data.csv 
