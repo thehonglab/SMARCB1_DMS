@@ -1,10 +1,159 @@
+Dependency Analysis base don several biochemical propoerties
+
+
+
+Read in functional data and calculate amino-acid-specific sensitivity
+
+
 ```{r}
+
 
 library(readr)
 
 all_reps_data <- read.csv("./results/functional_scores/DMS_collapsed_data.csv")
 
 
+
+```
+
+
+```{r}
+
+all_reps_data_median_residue <- all_reps_data %>%
+  group_by(Residue) %>%
+  summarise(
+    mean_zscore = mean(all_reps_zscore, na.rm = TRUE),
+    median_zscore = median(all_reps_zscore, na.rm = TRUE),
+    centered_sd = sd(all_reps_zscore - median_zscore, na.rm = TRUE)
+  )
+
+
+```
+
+
+######################RSA Values to determine buried vs exposed residues#################
+
+```{bash}
+
+freesasa WT.pdb --format=rsa > smarcb1_rsa.txt
+
+```
+
+
+```{r}
+
+rsa_data <- read_tsv("./data/smarcb1_rsa.tsv", 
+                     col_names = c("RES", "AA", "Chain", "ResNum", 
+                                  "AllAtoms_ABS", "AllAtoms_REL",
+                                  "TotalSide_ABS", "TotalSide_REL",
+                                  "MainChain_ABS", "MainChain_REL",
+                                  "NonPolar_ABS", "NonPolar_REL",
+                                  "AllPolar_ABS", "AllPolar_REL")) %>%
+  mutate(
+    TotalSide_REL = as.numeric(TotalSide_REL),  # Handles N/A
+    RSA = TotalSide_REL / 100,
+    Buried = RSA < 0.1
+  )
+
+
+rsa_data_filt <- rsa_data[,c(1,2,4,15,16)]
+
+```
+
+
+
+
+###################SALT BRIDGE ANALYSIS#############################
+
+In PyMol, read in the AlphaFold SMARCB1 predicted structure, then run the following command
+
+```{python}
+
+select positive, resn LYS+ARG+HIS and name NZ+NH1+NH2+ND1+NE2
+
+select negative, resn ASP+GLU and name OD1+OD2+OE1+OE2
+
+select pos_near_neg, positive within 4.0 of negative
+
+select neg_near_pos, negative within 4.0 of positive
+
+iterate pos_near_neg or neg_near_pos, print(f"{resi},{resn},{chain}")
+
+```
+
+
+
+```{r}
+
+library(tidyverse)
+
+# List of residues with salt bridges
+salt_bridge_residues <- c(13, 16, 24, 53, 59, 92, 97, 98, 104, 105, 106, 108, 
+                          143, 155, 162, 178, 194, 199, 211, 216, 224, 225, 
+                          242, 259, 261, 280, 291, 296, 300, 316, 341, 354, 
+                          362, 364, 366, 367, 369, 370, 373, 376)
+
+rsa_data_filt <- rsa_data_filt %>%
+  mutate(Salt_Bridge = ResNum %in% salt_bridge_residues)
+
+```
+
+
+################ HYDROGEN BOND ANALYSIS  ################################
+
+
+```{python}
+
+select sc_donors, (resn SER+THR+TYR+CYS and name OG+OG1+OH+SG) or \
+                  (resn ASN+GLN and name ND2+NE2) or \
+                  (resn LYS and name NZ) or \
+                  (resn ARG and name NE+NH1+NH2) or \
+                  (resn HIS and name ND1+NE2) or \
+                  (resn TRP and name NE1)
+                  
+select sc_acceptors, (resn SER+THR+TYR and name OG+OG1+OH) or \
+                     (resn ASP+GLU and name OD1+OD2+OE1+OE2) or \
+                     (resn ASN+GLN and name OD1+OE1) or \
+                     (resn HIS and name ND1+NE2) or \
+                     (resn MET and name SD)
+
+select sc_hbond_atoms, sc_donors within 3.0 of sc_acceptors
+
+
+iterate sc_hbond_atoms, print(f"{resi},{resn},{chain}")
+
+```
+
+
+
+
+
+```{r}
+
+hbond_residues <- c(7, 9, 12, 18, 26, 30, 34, 35, 42, 44, 47, 49, 53, 56, 66, 67, 68, 72, 75, 76, 79, 81, 82, 83, 86, 87, 89, 92, 94, 103, 106, 107, 108, 111, 113, 114, 118, 119, 123, 128, 129, 130, 134, 137, 138, 139, 140, 141, 148, 149, 150, 152, 154, 162, 163, 171, 177, 179, 181, 182, 198, 205, 207, 209, 211, 214, 219, 229, 232, 239, 242, 243, 244, 247, 248, 250, 252, 257, 258, 260, 261, 267, 269, 272, 274, 278, 284, 288, 289, 296, 299, 309, 310, 313, 314, 316, 318, 320, 322, 323, 325, 326, 329, 331, 335, 341, 342, 343, 348, 355, 357, 364, 366, 368, 370, 371, 372, 373, 376, 380, 381)
+
+# Add to your dataframe
+rsa_data_filt <- rsa_data_filt %>%
+  mutate(HBond = ResNum %in% hbond_residues)
+
+# Check overlap with salt bridges
+rsa_data_filt %>%
+  count(Salt_Bridge, HBond)
+
+
+```
+
+#####################   PI STACKING ANALYSIS ################################
+
+
+```{python}
+
+# PI-STACKING
+select aromatic, resn PHE+TYR+TRP+HIS
+select pi_interact, aromatic within 6.0 of aromatic
+iterate pi_interact, print(f"{resi},{resn},{chain}")
+
+
 ```
 
 
@@ -12,9 +161,183 @@ all_reps_data <- read.csv("./results/functional_scores/DMS_collapsed_data.csv")
 
 ```{r}
 
+pi_stacking_residues <- c(10, 17, 25, 26, 35, 39, 44, 47, 51, 68, 79, 81, 107, 119, 131, 140, 141, 164, 168, 171, 177, 204, 206, 218, 233, 248, 269, 279, 281, 293, 307, 313, 321, 322, 326, 328, 349, 385)
 
+# Add to dataframe
+rsa_data_filt <- rsa_data_filt %>%
+  mutate(Pi_Stacking = ResNum %in% pi_stacking_residues)
 
 
 ```
+
+
+
+#####################  Secondary Structure Analysis ############################
+
+Run this in PyMol with the WT AlphaFold SMARCB1 structure already loaded
+
+
+```{python}
+
+f = open('ss.csv', 'w')
+f.write("ResNum,SS\n")
+for resi in sorted(ss_dict.keys(), key=int): f.write(f"{resi},{ss_dict[resi]}\n")
+f.close()
+
+
+```
+
+
+
+```{r}
+
+ss_data <- read_csv("./data/dependency_analysis/ss.csv") %>%
+  mutate(
+    SS_Type = case_when(
+      SS == "H" ~ "Helix",
+      SS == "S" ~ "Sheet",
+      SS == "L" ~ "Loop",
+      TRUE ~ "Loop"
+    )
+  )
+
+rsa_data_filt <- rsa_data_filt %>%
+  left_join(ss_data %>% select(ResNum, SS_Type), by = "ResNum")
+
+```
+
+
+
+```{r}
+
+library(tidyverse)
+
+# Merge the two dataframes
+combined_data <- rsa_data_filt %>%
+  left_join(all_reps_data_median_residue, 
+            by = c("ResNum" = "Residue"))
+
+# Check it worked
+print(combined_data)
+
+```
+
+
+
+
+
+```{r}
+
+# Secondary structure
+combined_data %>%
+  group_by(SS_Type) %>%
+  summarise(
+    mean_zscore = mean(mean_zscore, na.rm = TRUE),
+    mean_centered_sd = mean(centered_sd, na.rm = TRUE),
+    median_centered_sd = median(centered_sd, na.rm = TRUE),
+    n = n()
+  )
+
+# By burial
+combined_data %>%
+  group_by(Buried) %>%
+  summarise(
+    mean_zscore = mean(mean_zscore, na.rm = TRUE),
+    mean_centered_sd = mean(centered_sd, na.rm = TRUE),
+    n = n()
+  )
+
+# By salt bridge
+combined_data %>%
+  group_by(Salt_Bridge) %>%
+  summarise(
+    mean_zscore = mean(mean_zscore, na.rm = TRUE),
+    mean_centered_sd = mean(centered_sd, na.rm = TRUE),
+    n = n()
+  )
+
+# Bonus: By H-bonds
+combined_data %>%
+  group_by(HBond) %>%
+  summarise(
+    mean_zscore = mean(mean_zscore, na.rm = TRUE),
+    mean_centered_sd = mean(centered_sd, na.rm = TRUE),
+    n = n()
+  )
+
+# Bonus: By pi-stacking
+combined_data %>%
+  group_by(Pi_Stacking) %>%
+  summarise(
+    mean_zscore = mean(mean_zscore, na.rm = TRUE),
+    mean_centered_sd = mean(centered_sd, na.rm = TRUE),
+    n = n()
+  )
+
+
+```
+
+
+
+```{r}
+# Create summary for all categories
+structural_summary <- bind_rows(
+  combined_data %>%
+    group_by(Category = SS_Type) %>%
+    summarise(mean_zscore = mean(mean_zscore, na.rm = TRUE),
+              mean_centered_sd = mean(centered_sd, na.rm = TRUE),
+              n = n()) %>%
+    mutate(Type = "Secondary Structure"),
+  
+  combined_data %>%
+    filter(!is.na(Buried)) %>%  # Remove NA values
+    group_by(Category = as.character(Buried)) %>%
+    summarise(mean_zscore = mean(mean_zscore, na.rm = TRUE),
+              mean_centered_sd = mean(centered_sd, na.rm = TRUE),
+              n = n()) %>%
+    mutate(Type = "Buried Residue (RSA < 0.1)"),
+  
+  combined_data %>%
+    group_by(Category = as.character(HBond)) %>%
+    summarise(mean_zscore = mean(mean_zscore, na.rm = TRUE),
+              mean_centered_sd = mean(centered_sd, na.rm = TRUE),
+              n = n()) %>%
+    mutate(Type = "H-bond (< 3.0 Å)")
+)
+
+ggplot(structural_summary, aes(x = mean_zscore, y = mean_centered_sd, 
+                               color = Type)) +
+  geom_point(aes(size = n)) +
+  geom_text(aes(label = Category), hjust = 1.3, size = 4, show.legend = FALSE) +
+  labs(x = "Average z-score",
+       y = "Amino acid selectivity (centered SD)",
+       size = "Residue (n)") +
+  theme_minimal() +
+  ylim(1,1.6) +
+  xlim(-0.1, 0.25) +
+  scale_color_manual(values = c(
+    "Secondary Structure" = "#0072B2",              # blue
+    "Buried Residue (RSA < 0.1)" = "#009E73", # green
+    "H-bond (< 3.0 Å)" = "#D55E00"                 # orange-red
+  )) +
+  theme(
+    axis.title.x = element_text(size = 16),
+    axis.title.y = element_text(size = 16),
+    axis.text.x  = element_text(size = 14),
+    axis.text.y  = element_text(size = 14)
+  )
+
+ggsave("./plots/dependency_analysis/structural_summary_plot.png", width = 8, height = 5, dpi = 300)
+
+
+```
+
+
+
+
+
+
+
+
 
 

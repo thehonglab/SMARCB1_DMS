@@ -5,6 +5,8 @@ Study and analysis by Garrett Cooper, Benjamin Lee, [Andrew Hong](https://www.th
 
 For the full paper, see X
 
+All raw sequencing data can be obtained from dbGaP under accession number phs003896.v1.p1.
+
 ## Repository Contents
 
 1. Raw Data 
