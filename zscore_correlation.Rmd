@@ -268,25 +268,160 @@ RCRF1009T_consistent_signal_missense <- RCRF1009T_consistent_signal %>%
 
 ```{r}
 
-common_subs <- Reduce(intersect, list(RCRF1009T_consistent_signal_missense$Substitution, BT16_consistent_signal_missense$Substitution, G401_consistent_signal_missense$Substitution))
+DMS_data_sig <- DMS_data %>%
+  filter(DMS_data$all_reps_zscore > 2)
 
-print(common_subs)
+DMS_data_sig_missense <- DMS_data_sig %>%
+  filter(DMS_data_sig$Mutation_Type == "M")
 
+DMS_data_sig_nonsense <- DMS_data_sig %>%
+  filter(DMS_data_sig$Mutation_Type == "N")
 
+DMS_data_sig_frameshift <- DMS_data_sig %>%
+  filter(DMS_data_sig$Mutation_Type == "F")
+
+```
+
+```{r}
+DMS_plot_data <- DMS_data_sig_missense %>%
+  pivot_longer(
+    cols = c(G401_R1_zscore, G401_R2_zscore, 
+             BT16_R1_zscore, BT16_R2_zscore,
+             RCRF1009T_R1_zscore, RCRF1009T_R2_zscore),
+    names_to = "Sample",
+    values_to = "zscore"
+  ) %>%
+  mutate(
+    # Extract cell line and replicate info
+    Cell_Line = str_extract(Sample, "^[^_]+"),
+    Replicate = str_extract(Sample, "R[12]"),
+    # Create a factor for residue to maintain order
+    Residue = factor(Residue)
+  )
+
+# Create the plot
+ggplot(DMS_plot_data, aes(x = Residue, y = zscore)) +
+  geom_point(aes(color = Cell_Line), 
+             alpha = 0.6, size = 2,
+             position = position_jitter(width = 0.2, height = 0)) +
+  scale_color_manual(values = c("G401" = "#E41A1C", 
+                                 "BT16" = "#377EB8", 
+                                 "RCRF1009T" = "#4DAF4A")) +
+  labs(
+    title = "DMS Z-scores by Residue Position",
+    x = "Residue Position",
+    y = "Z-score",
+    color = "Cell Line",
+    shape = "Replicate"
+  ) +
+  theme_bw() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    panel.grid.minor = element_blank()
+  ) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "gray50") +
+  ylim(-10,20)
 ```
 
 
 
 ```{r}
 
-library(dplyr)
 
-mean_scores <- DMS_data %>%
-  group_by(Mutant_Amino_Acid) %>%
-  summarize(mean_zscore = mean(all_reps_zscore, na.rm = TRUE)) %>%
-  arrange(desc(mean_zscore))
+DMS_plot_data2 <- DMS_data_sig_nonsense %>%
+  pivot_longer(
+    cols = c(G401_R1_zscore, G401_R2_zscore, 
+             BT16_R1_zscore, BT16_R2_zscore,
+             RCRF1009T_R1_zscore, RCRF1009T_R2_zscore),
+    names_to = "Sample",
+    values_to = "zscore"
+  ) %>%
+  mutate(
+    # Extract cell line and replicate info
+    Cell_Line = str_extract(Sample, "^[^_]+"),
+    Replicate = str_extract(Sample, "R[12]"),
+    # Create a factor for residue to maintain order
+    Residue = factor(Residue)
+  )
+
+# Create the plot
+ggplot(DMS_plot_data2, aes(x = Residue, y = zscore)) +
+  geom_point(aes(color = Cell_Line), 
+             alpha = 0.6, size = 2,
+             position = position_jitter(width = 0.2, height = 0)) +
+  scale_color_manual(values = c("G401" = "#E41A1C", 
+                                 "BT16" = "#377EB8", 
+                                 "RCRF1009T" = "#4DAF4A")) +
+  labs(
+    title = "DMS Z-scores by Residue Position",
+    x = "Residue Position",
+    y = "Z-score",
+    color = "Cell Line",
+    shape = "Replicate"
+  ) +
+  theme_bw() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    panel.grid.minor = element_blank()
+  ) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "gray50") +
+  ylim(-10,20)
+```
+
+
+```{r}
+
+DMS_plot_data3 <- DMS_data_sig_frameshift %>%
+  pivot_longer(
+    cols = c(G401_R1_zscore, G401_R2_zscore, 
+             BT16_R1_zscore, BT16_R2_zscore,
+             RCRF1009T_R1_zscore, RCRF1009T_R2_zscore),
+    names_to = "Sample",
+    values_to = "zscore"
+  ) %>%
+  mutate(
+    # Extract cell line and replicate info
+    Cell_Line = str_extract(Sample, "^[^_]+"),
+    Replicate = str_extract(Sample, "R[12]"),
+    # Create a factor for residue to maintain order
+    Residue = factor(Residue)
+  )
+
+# Create the plot
+ggplot(DMS_plot_data2, aes(x = Residue, y = zscore)) +
+  geom_point(aes(color = Cell_Line), 
+             alpha = 0.6, size = 2,
+             position = position_jitter(width = 0.2, height = 0)) +
+  scale_color_manual(values = c("G401" = "#E41A1C", 
+                                 "BT16" = "#377EB8", 
+                                 "RCRF1009T" = "#4DAF4A")) +
+  labs(
+    title = "DMS Z-scores by Residue Position",
+    x = "Residue Position",
+    y = "Z-score",
+    color = "Cell Line",
+    shape = "Replicate"
+  ) +
+  theme_bw() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    panel.grid.minor = element_blank()
+  ) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "gray50") +
+  ylim(-10,20)
 
 ```
+
+
+
+
+
+
+
+
+
+
+
 
 
 

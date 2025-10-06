@@ -152,7 +152,7 @@ ggplot(merged_dataframe, aes(x = all_reps_zscore, y = total_count)) +
   geom_point(size = 1) +
   geom_text_repel(
     aes(label = label),
-    size = 4,
+    size = 6,
     max.overlaps = Inf,
     segment.color = "gray30",
     segment.size = 0.3,
@@ -160,15 +160,16 @@ ggplot(merged_dataframe, aes(x = all_reps_zscore, y = total_count)) +
     point.padding = 0.3,
     min.segment.length = 0,
     direction = "y",
-    nudge_y = 2,
-    nudge_x = 0.2
+    nudge_y = 0.5,
+    nudge_x = -0.2
   ) +
   annotate("text", x = Inf, y = Inf, 
            label = paste("R² =", r_squared), 
-           hjust = 4, vjust = 2, size = 8, color = "black") +  # Increased from 5 to 8
+           hjust = 4.5, vjust = 2, size = 8, color = "black") +  # Increased from 5 to 8
+  scale_y_log10() +
   labs(
     x = "DMS z-score", 
-    y = "Mutation Count (Genie)"
+    y = "log10(Patient Count (GENIE))"
   ) +
   theme_classic() +
   theme(
