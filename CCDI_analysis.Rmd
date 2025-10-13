@@ -1,0 +1,49 @@
+```{r}
+
+ccdi <- read_tsv("./data/patient_mutation_data/CCDI_ATRT_MRT_nonsense_mutants.tsv")
+
+ccdi <- ccdi[c(1:13),]
+
+library(tidyverse)
+
+# Extract position from ProteinChange column
+ccdi <- ccdi %>%
+  mutate(Position = as.numeric(str_extract(ProteinChange, "\\d+")))
+
+# Count mutations at each position
+mutation_counts <- ccdi %>%
+  count(Position, ProteinChange)
+
+library(ggrepel)
+
+library(ggrepel)
+
+plot <- ggplot(mutation_counts, aes(x = Position, y = n)) +
+  geom_segment(aes(x = Position, xend = Position, y = 0, yend = n), 
+               color = "black", linewidth = 0.5) +
+  geom_point(size = 3, color = "black") +
+  geom_text_repel(aes(label = ProteinChange), 
+                  size = 3,
+                  min.segment.length = 0,
+                  segment.color = "black",
+                  segment.size = 0.3,
+                  box.padding = 0.8,
+                  point.padding = 0.5,
+                  direction = "both",
+                  nudge_y = 0.5,
+                  nudge_x = 4,
+                  max.overlaps = Inf,
+                  force = 4,
+                  force_pull = 0.5) +
+  scale_x_continuous(limits = c(0, 385), breaks = c(1, seq(50, 385, by = 50))) +
+  scale_y_continuous(limits = c(0, max(mutation_counts$n) + 2), 
+                     breaks = seq(0, max(mutation_counts$n) + 1, by = 1)) +
+  labs(x = "Position", y = "# patients") +
+  theme_classic() +
+  theme(panel.grid.major.y = element_line(color = "gray90"),
+        axis.line.x = element_line(color = "black", linewidth = 0.5),
+        axis.line.y = element_line(color = "black", linewidth = 0.5))
+
+ggsave("./plots/patient_data/CCDI_nonsense_mutants.tif", plot, width =7, height = 4)
+```
+

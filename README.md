@@ -7,6 +7,8 @@ For the full paper, see X
 
 All raw sequencing data can be obtained from dbGaP under accession number phs003896.v1.p1.
 
+To obtain an interactive heatmap of DMS results, download the DMS_heatmap_download_to_open.html file in the parent directory.
+
 ## Repository Contents
 
 1. Raw Data 
