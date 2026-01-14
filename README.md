@@ -3,7 +3,8 @@ Deep mutational scanning of the SMARCB1 coding sequence to evaluate mutations wh
 
 Study and analysis by Garrett Cooper, Benjamin Lee, [Andrew Hong](https://www.thehonglab.org/), and co authors.
 
-For the full paper, see X
+For the full preprint, see 
+https://www.researchsquare.com/article/rs-6018128/v1
 
 All raw sequencing data can be obtained from dbGaP under accession number phs003896.v1.p1.
 
