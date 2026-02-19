@@ -638,11 +638,8 @@ and combine_subtract_stats_final.sh
 
 echo "Starting complete energy analysis pipeline (VdW, Elec, Total)..."
 
-# First, concatenate all mean files
-echo "Concatenating all mean files..."
 cat *_means.txt > all_means_combined.txt
 
-# Array of energy types to analyze
 energy_types=("VdW" "Elec" "Total")
 
 for energy_type in "${energy_types[@]}"; do
@@ -651,10 +648,8 @@ for energy_type in "${energy_types[@]}"; do
     echo "Processing ${energy_type} analysis..."
     echo "=========================================="
     
-    # Create header for differences file
     echo -e "Rep\tWT_${energy_type}\tI315R_${energy_type}\tS299L_${energy_type}\tW281P_${energy_type}\tI315R_diff\tS299L_diff\tW281P_diff" > ${energy_type,,}_differences.txt
     
-    # Process each rep (reps 4-15)
     for rep in {4..15}; do
         echo "Processing rep $rep for ${energy_type}..."
 
@@ -663,7 +658,6 @@ for energy_type in "${energy_types[@]}"; do
         s299l_val=$(grep -A5 "Results for: S299L-rep${rep}_energy.dat" all_means_combined.txt | grep "${energy_type} mean:" | awk '{print $3}')
         w281p_val=$(grep -A5 "Results for: W281P-rep${rep}_energy.dat" all_means_combined.txt | grep "${energy_type} mean:" | awk '{print $3}')
 
-        # Calculate differences
         i315r_diff="NA"
         s299l_diff="NA"
         w281p_diff="NA"
@@ -682,8 +676,6 @@ for energy_type in "${energy_types[@]}"; do
     done
 
     echo "${energy_type} differences calculated!"
-
-    # Delta-delta G analysis
     echo "Calculating ${energy_type} delta-delta values and t-statistics..."
 
     gawk -F'\t' -v energy_type="$energy_type" '
@@ -731,11 +723,10 @@ for energy_type in "${energy_types[@]}"; do
         }
     }' ${energy_type,,}_differences.txt > ${energy_type,,}_delta_delta_analysis.txt
 
-    # Statistics summary
     echo "Creating ${energy_type} statistics summary table..."
 
     gawk -F'\t' -v energy_type="$energy_type" '
-    BEGIN { print "Mutation\tEnergy_Type\tMean_ddG\tStdev\tSE\tt_statistic\tn\tSignificance" }
+    BEGIN { print "Mutation\tEnergy_Type\tMean_ddG\tStdev\tSE\tt_statistic\tn" }
     NR > 1 {
         if ($6 != "NA" && $7 != "NA") {
             ddg = $6 - $7
@@ -749,34 +740,59 @@ for energy_type in "${energy_types[@]}"; do
         }
     }
     END {
-        # I315R stats
         mean1 = sum1 / n1
         sq1 = 0
         for (i = 0; i < n1; i++) sq1 += (i315r_vals[i] - mean1)^2
         stdev1 = sqrt(sq1 / (n1 - 1))
         se1 = stdev1 / sqrt(n1)
         t1 = mean1 / se1
-        sig1 = (t1 > 3.71 || t1 < -3.71) ? "p < 0.01" : ((t1 > 2.45 || t1 < -2.45) ? "p < 0.05" : "n.s.")
-        printf "I315R\t%s\t%.4f\t%.4f\t%.4f\t%.4f\t%d\t%s\n", energy_type, mean1, stdev1, se1, t1, n1, sig1
+        printf "I315R\t%s\t%.4f\t%.4f\t%.4f\t%.4f\t%d\n", energy_type, mean1, stdev1, se1, t1, n1
 
-        # W281P stats
         mean2 = sum2 / n2
         sq2 = 0
         for (i = 0; i < n2; i++) sq2 += (w281p_vals[i] - mean2)^2
         stdev2 = sqrt(sq2 / (n2 - 1))
         se2 = stdev2 / sqrt(n2)
         t2 = mean2 / se2
-        sig2 = (t2 > 3.71 || t2 < -3.71) ? "p < 0.01" : ((t2 > 2.45 || t2 < -2.45) ? "p < 0.05" : "n.s.")
-        printf "W281P\t%s\t%.4f\t%.4f\t%.4f\t%.4f\t%d\t%s\n", energy_type, mean2, stdev2, se2, t2, n2, sig2
-    }' ${energy_type,,}_differences.txt > ${energy_type,,}_statistics_summary.txt
+        printf "W281P\t%s\t%.4f\t%.4f\t%.4f\t%.4f\t%d\n", energy_type, mean2, stdev2, se2, t2, n2
+    }' ${energy_type,,}_differences.txt | \
+    awk -F'\t' 'NR==1 { print $0 "\tDF\tp_value\tCohen_d\tCI_lower\tCI_upper"; next }
+    {
+        t_val = $6
+        n_val = $7
+        mean_val = $3
+        se_val = $5
+        stdev_val = $4
+        df_val = n_val - 1
+        pyfile = "/tmp/calc_stats_" NR ".py"
+        outfile = "/tmp/calc_stats_" NR ".out"
+        print "from scipy.stats import t as tdist" > pyfile
+        print "df=" df_val >> pyfile
+        print "t_val=" t_val >> pyfile
+        print "n=" n_val >> pyfile
+        print "mean=" mean_val >> pyfile
+        print "se=" se_val >> pyfile
+        print "stdev=" stdev_val >> pyfile
+        print "pval = 2 * tdist.sf(abs(t_val), df=df)" >> pyfile
+        print "t_crit = tdist.ppf(0.975, df=df)" >> pyfile
+        print "ci_lower = mean - t_crit * se" >> pyfile
+        print "ci_upper = mean + t_crit * se" >> pyfile
+        print "cohen_d = mean / stdev" >> pyfile
+        print "print(f\"{df}\\t{pval:.6e}\\t{cohen_d:.4f}\\t{ci_lower:.4f}\\t{ci_upper:.4f}\")" >> pyfile
+        close(pyfile)
+        system("python3 " pyfile " > " outfile)
+        getline result < outfile
+        close(outfile)
+        print $0 "\t" result
+    }' > ${energy_type,,}_statistics_summary.txt
 
     echo "${energy_type} analysis complete!"
 done
 
-# Create a combined statistics summary
+# Create combined statistics summary
 echo ""
 echo "Creating combined statistics summary..."
-echo -e "Mutation\tEnergy_Type\tMean_ddG\tStdev\tSE\tt_statistic\tn\tSignificance" > combined_statistics_summary.txt
+echo -e "Mutation\tEnergy_Type\tMean_ddG\tStdev\tSE\tt_statistic\tn\tDF\tp_value\tCohen_d\tCI_lower\tCI_upper" > combined_statistics_summary.txt
 tail -n +2 vdw_statistics_summary.txt >> combined_statistics_summary.txt
 tail -n +2 elec_statistics_summary.txt >> combined_statistics_summary.txt  
 tail -n +2 total_statistics_summary.txt >> combined_statistics_summary.txt
@@ -807,6 +823,7 @@ echo "Combined Files:"
 echo "  - all_means_combined.txt           : All individual mean files"
 echo "  - combined_statistics_summary.txt  : All statistics in one table"
 echo ""
+
 
 ```
 
