@@ -7,7 +7,7 @@ Preprint of the paper can be found here: https://pubmed.ncbi.nlm.nih.gov/4019600
 
 All raw sequencing data can be obtained from dbGaP under accession number phs003896.v1.p1.
 
-To obtain an interactive heatmap of DMS results, download the DMS_heatmap_download_to_open.html file in the parent directory.
+An interactive heatmap of DMS results: https://thehonglab.github.io/SMARCB1_DMS/.
 
 ## Repository Contents
 
