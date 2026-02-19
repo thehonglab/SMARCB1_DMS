@@ -18,3 +18,6 @@
 # Python
 *.pyc
 __pycache__/
+
+# Large files
+plots/rnaseq_analysis/I315R_W281P_common_heatmap.tiff
