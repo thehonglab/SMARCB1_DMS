@@ -12,7 +12,7 @@ To obtain an interactive heatmap of DMS results, download the DMS_heatmap_downlo
 ## Repository Contents
 
 1. Raw Data 
-All raw data used to generate the analyses presented in the manuscript. Files such as ```.bam``` and ```.fastq``` and ```.bw``` can be obtained from dbGAP (X).
+All raw data used to generate the analyses presented in the manuscript. Files such as ```.bam``` and ```.fastq``` and ```.bw``` can be obtained from dbGAP (phs003896.v1.p1).
 
   - For Hong Lab members, data files can be accessed via the lab's secure s3 storage system. Contact the administrator for details.
 
