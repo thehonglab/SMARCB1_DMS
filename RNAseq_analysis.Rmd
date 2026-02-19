@@ -132,8 +132,12 @@ plot3
 
 ggsave("./plots/rnaseq_analysis/pca.tiff", plot = plot3, width = 6, height = 6, dpi=600)
 
+normalized_counts_df2 <- normalized_counts_df %>%
+  t()
 
 
+normalized_counts_df3 <-  rownames_to_column(as.data.frame(normalized_counts_df2))
+  
 ```
 
 W281 DESeq2 RNA Analysis
@@ -519,11 +523,9 @@ normlzd_dds_i315i <- rownames_to_column(normlzd_dds_i315i)
 
 
 
+keep = rowSums(counts(dds_i315i)) >= 10
+dds_i315i = dds_i315i[keep,]
 
-
-
-#keep = rowSums(counts(dds_i315i)) >= 5
-#dds_i315i = dds_i315i[keep,]
 
 dds_norm_i315i = vst(dds_i315i)
 
@@ -578,6 +580,9 @@ sizeFactors(dds_i315r)
 
 normlzd_dds_i315r <- as.data.frame(counts(dds_i315r, normalized=TRUE))
 normlzd_dds_i315r <- rownames_to_column(normlzd_dds_i315r)
+
+keep = rowSums(counts(dds_i315r)) >= 10
+dds_i315r = dds_i315r[keep,]
 
 
 dds_norm_i315r = vst(dds_i315r)
@@ -906,6 +911,58 @@ W281PvI315R_down <- filter(res_df_281Pv315R,
        res_df_281Pv315R$padj < 0.05 & res_df_281Pv315R$log2FoldChange < -2)
 
 W281PvI315R_signif <- rbind(W281PvI315R_down, W281PvI315R_up)
+
+```
+
+
+
+
+```{r}
+
+I315IvI315X_up <- I315IvI315X_up[order(-I315IvI315X_up$log2FoldChange),] 
+
+I315IvI315X_up_top50 <- head(I315IvI315X_up, 25)
+
+I315IvI315X_up_SMARCB1 <- I315IvI315X_up %>%
+  filter(I315IvI315X_up$ENSEMBL == "SMARCB1")
+
+I315IvI315X_up_top50 <- rbind(I315IvI315X_up_top50, I315IvI315X_up_SMARCB1)
+
+all_heatmap_input <- normalized_counts_df2 %>%
+  filter(normalized_counts_df2$rowname %in% I315IvI315X_up_top50$ENSEMBL)
+
+all_heatmap_input <- all_heatmap_input[order(-all_heatmap_input$G401_P16_STT21_MRT00_SEQ61_WT_NOV5.quant.sf),] 
+
+gene_names_all <- all_heatmap_input$rowname
+
+
+
+#all_heatmap_input <- all_heatmap_input[,c(7,13,5,11,6,12,2,8,3,9,4,10)]
+
+
+#colnames(all_heatmap_input) <- c("WT_R1","WT_R2","W281P_R1","W281P_R2","W281X_R1","W281X_R2","I315I_R1","I315I_R2","I315R_R1","I315R_R2","I315X_R1","I315X_R2")
+
+all_heatmap_input <- all_heatmap_input[,c(10,4,9,3,8,2,12,6,11,5,13,7)]
+
+colnames(all_heatmap_input) <- c("I315X_R2","I315X_R1","I315R_R2","I315R_R1","I315I_R2","I315I_R1","W281X_R2","W281X_R1","W281P_R2","W281P_R1","WT_R2","WT_R1")
+
+all_heatmap_input <- as.data.frame(all_heatmap_input)
+
+
+all_heatmap_input <- all_heatmap_input[order(-all_heatmap_input$WT_R1),] 
+
+
+
+
+
+
+plot <- pheatmap(all_heatmap_input, labels_row = gene_names_all, cluster_cols=F, cluster_rows=F, fontsize_row = 18, fontsize_col=15)
+
+plot
+
+
+ggsave("/Users/pedadministrator/Library/CloudStorage/GoogleDrive-gcooper.gene@gmail.com/My Drive/Hong Lab Project Folders (1)/Results GC/17-SMARCB1_MITEseq2/RNAseq/all_heatmap_top25_up.tiff", plot = plot, width = 5, height = 10, dpi=600)
+
 
 ```
 

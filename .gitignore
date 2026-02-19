@@ -1,0 +1,20 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# R
+.Rhistory
+.RData
+.Rproj.user/
+*.Rproj
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Microsoft Office temp files
+~$*
+
+# Python
+*.pyc
+__pycache__/

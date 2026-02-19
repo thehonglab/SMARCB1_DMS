@@ -29,6 +29,13 @@ gnomad_data_exons <- gnomad_data %>%
 
 
 gnomad_data_exons
+
+
+gnomad_data_exons_missense <- gnomad_data_exons %>%
+  filter(VEP.Annotation == "missense_variant")
+
+
+write_tsv(gnomad_data_exons_missense, "./data/gnomADv4.1.0/gnomad_missense_mutants.tsv")
   
 ```
 

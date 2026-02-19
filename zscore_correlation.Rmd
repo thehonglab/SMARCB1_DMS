@@ -35,6 +35,8 @@ subset_data <- subset(
   (G401_R1_zscore < -2 & G401_R2_zscore < -2)
 )
 
+r2 <- summary(lm(G401_R2_zscore ~ G401_R1_zscore, data = DMS_data))$r.squared
+
 # Calculate R² on this subset
 r2_subset <- summary(lm(G401_R2_zscore ~ G401_R1_zscore, data = subset_data))$r.squared
 
@@ -119,6 +121,8 @@ subset_data <- subset(
 )
 
 # Calculate R² on this subset
+r2 <- summary(lm(BT16_R2_zscore ~ BT16_R1_zscore, data = DMS_data))$r.squared
+
 r2_subset <- summary(lm(BT16_R2_zscore ~ BT16_R1_zscore, data = subset_data))$r.squared
 
 DMS_data$Mutation_Type <- factor(DMS_data$Mutation_Type, levels = c("M", "N", "F", "S"))
@@ -197,6 +201,8 @@ subset_data <- subset(
   (RCRF1009T_R1_zscore < -2 & RCRF1009T_R2_zscore < -2)
 )
 
+r2 <- summary(lm(RCRF1009T_R2_zscore ~ RCRF1009T_R1_zscore, data = DMS_data))$r.squared
+
 # Calculate R² on this subset
 r2_subset <- summary(lm(RCRF1009T_R2_zscore ~ RCRF1009T_R1_zscore, data = subset_data))$r.squared
 
@@ -268,25 +274,646 @@ RCRF1009T_consistent_signal_missense <- RCRF1009T_consistent_signal %>%
 
 ```{r}
 
-common_subs <- Reduce(intersect, list(RCRF1009T_consistent_signal_missense$Substitution, BT16_consistent_signal_missense$Substitution, G401_consistent_signal_missense$Substitution))
+DMS_data_sig <- DMS_data %>%
+  filter(DMS_data$all_reps_zscore > 2)
 
-print(common_subs)
+DMS_data_sig_missense <- DMS_data_sig %>%
+  filter(DMS_data_sig$Mutation_Type == "M")
 
+DMS_data_sig_nonsense <- DMS_data_sig %>%
+  filter(DMS_data_sig$Mutation_Type == "N")
 
+DMS_data_sig_frameshift <- DMS_data_sig %>%
+  filter(DMS_data_sig$Mutation_Type == "F")
+
+```
+
+```{r}
+DMS_plot_data <- DMS_data_sig_missense %>%
+  pivot_longer(
+    cols = c(G401_R1_zscore, G401_R2_zscore, 
+             BT16_R1_zscore, BT16_R2_zscore,
+             RCRF1009T_R1_zscore, RCRF1009T_R2_zscore),
+    names_to = "Sample",
+    values_to = "zscore"
+  ) %>%
+  mutate(
+    # Extract cell line and replicate info
+    Cell_Line = str_extract(Sample, "^[^_]+"),
+    Replicate = str_extract(Sample, "R[12]"),
+    # Extract numeric residue position for sorting
+    Residue_Num = as.numeric(str_extract(Substitution, "\\d+")),
+    # Extract the substitution amino acid
+    Sub_AA = str_extract(Substitution, "[A-Z]$"),
+    # Order by residue number first, then alphabetically by substitution
+    Substitution = factor(Substitution, 
+                         levels = unique(Substitution[order(Residue_Num, Sub_AA)]))
+  )
+
+# Create the plot
+missense <- ggplot(DMS_plot_data, aes(x = Substitution, y = zscore)) +
+  geom_point(aes(color = Cell_Line), 
+             alpha = 0.6, size = 2,
+             position = position_jitter(width = 0.2, height = 0)) +
+  scale_color_manual(values = c("G401" = "#E41A1C", 
+                                 "BT16" = "#377EB8", 
+                                 "RCRF1009T" = "#4DAF4A")) +
+  labs(
+    title = "Substitutions with AVG z-score > 2: Missense",
+    x = "Residue Position",
+    y = "Z-score",
+    color = "Cell Line",
+    shape = "Replicate"
+  ) +
+  theme_bw() +
+  theme(
+    axis.text.x = element_text(angle = 90, hjust = 1),
+    panel.grid.minor = element_blank()
+  ) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "gray50") +
+  geom_hline(yintercept = 2, linetype = "solid", color = "black") +
+  geom_hline(yintercept = -2, linetype = "solid", color = "black") +
+  ylim(-10,20)
+
+ggsave("./plots/DMS_plots/correlation_plots/missense_sig_mutations_cell_line_correlaions.tif", plot = missense, width = 25, height=4)
 ```
 
 
 
 ```{r}
 
-library(dplyr)
 
-mean_scores <- DMS_data %>%
-  group_by(Mutant_Amino_Acid) %>%
-  summarize(mean_zscore = mean(all_reps_zscore, na.rm = TRUE)) %>%
-  arrange(desc(mean_zscore))
+DMS_plot_data2 <- DMS_data_sig_nonsense %>%
+  pivot_longer(
+    cols = c(G401_R1_zscore, G401_R2_zscore, 
+             BT16_R1_zscore, BT16_R2_zscore,
+             RCRF1009T_R1_zscore, RCRF1009T_R2_zscore),
+    names_to = "Sample",
+    values_to = "zscore"
+  ) %>%
+  mutate(
+    # Extract cell line and replicate info
+    Cell_Line = str_extract(Sample, "^[^_]+"),
+    Replicate = str_extract(Sample, "R[12]"),
+    # Extract numeric residue position for sorting
+    Residue_Num = as.numeric(str_extract(Substitution, "\\d+")),
+    # Extract the substitution amino acid
+    Sub_AA = str_extract(Substitution, "[A-Z]$"),
+    # Order by residue number first, then alphabetically by substitution
+    Substitution = factor(Substitution, 
+                         levels = unique(Substitution[order(Residue_Num, Sub_AA)]))
+  )
+
+# Create the plot
+nonsense <- ggplot(DMS_plot_data2, aes(x = Substitution, y = zscore)) +
+  geom_point(aes(color = Cell_Line), 
+             alpha = 0.6, size = 2,
+             position = position_jitter(width = 0.2, height = 0)) +
+  scale_color_manual(values = c("G401" = "#E41A1C", 
+                                 "BT16" = "#377EB8", 
+                                 "RCRF1009T" = "#4DAF4A")) +
+  labs(
+    title = "Substitutions with AVG z-score > 2: Nonsense",
+    x = "Residue Position",
+    y = "Z-score",
+    color = "Cell Line",
+    shape = "Replicate"
+  ) +
+  theme_bw() +
+  theme(
+    axis.text.x = element_text(angle = 90, hjust = 1),
+    panel.grid.minor = element_blank()
+  ) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "gray50") +
+  geom_hline(yintercept = 2, linetype = "solid", color = "black") +
+  geom_hline(yintercept = -2, linetype = "solid", color = "black") +
+  ylim(-10,20)
+
+ggsave("./plots/DMS_plots/correlation_plots/nonsense_sig_mutations_cell_line_correlaions.tif", plot = nonsense, width = 25, height=4)
+```
+
+
+```{r}
+
+DMS_plot_data3 <- DMS_data_sig_frameshift %>%
+  pivot_longer(
+    cols = c(G401_R1_zscore, G401_R2_zscore, 
+             BT16_R1_zscore, BT16_R2_zscore,
+             RCRF1009T_R1_zscore, RCRF1009T_R2_zscore),
+    names_to = "Sample",
+    values_to = "zscore"
+  ) %>%
+  mutate(
+    # Extract cell line and replicate info
+    Cell_Line = str_extract(Sample, "^[^_]+"),
+    Replicate = str_extract(Sample, "R[12]"),
+    # Extract numeric residue position for sorting
+    Residue_Num = as.numeric(str_extract(Substitution, "\\d+")),
+    # Extract the substitution amino acid
+    Sub_AA = str_extract(Substitution, "[A-Z]$"),
+    # Order by residue number first, then alphabetically by substitution
+    Substitution = factor(Substitution, 
+                         levels = unique(Substitution[order(Residue_Num, Sub_AA)]))
+  )
+
+# Create the plot
+frameshift <- ggplot(DMS_plot_data3, aes(x = Substitution, y = zscore)) +
+  geom_point(aes(color = Cell_Line), 
+             alpha = 0.6, size = 2,
+             position = position_jitter(width = 0.2, height = 0)) +
+  scale_color_manual(values = c("G401" = "#E41A1C", 
+                                 "BT16" = "#377EB8", 
+                                 "RCRF1009T" = "#4DAF4A")) +
+  labs(
+    title = "Substitutions with AVG z-score > 2: Frameshift",
+    x = "Residue Position",
+    y = "Z-score",
+    color = "Cell Line",
+    shape = "Replicate"
+  ) +
+  theme_bw() +
+  theme(
+    axis.text.x = element_text(angle = 90, hjust = 1),
+    panel.grid.minor = element_blank()
+  ) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "gray50") +
+  geom_hline(yintercept = 2, linetype = "solid", color = "black") +
+  geom_hline(yintercept = -2, linetype = "solid", color = "black") +
+  ylim(-10,20)
+
+ggsave("./plots/DMS_plots/correlation_plots/frameshift_sig_mutations_cell_line_correlaions.tif", plot = frameshift, width = 30, height=4)
 
 ```
+
+```{r}
+
+DMS_data_sig
+
+DMS_plot_data_all <- DMS_data_sig %>%
+  pivot_longer(
+    cols = c(G401_R1_zscore, G401_R2_zscore, 
+             BT16_R1_zscore, BT16_R2_zscore,
+             RCRF1009T_R1_zscore, RCRF1009T_R2_zscore),
+    names_to = "Sample",
+    values_to = "zscore"
+  ) %>%
+  mutate(
+    # Extract cell line and replicate info
+    Cell_Line = str_extract(Sample, "^[^_]+"),
+    Replicate = str_extract(Sample, "R[12]"),
+    # Extract numeric residue position for sorting
+    Residue_Num = as.numeric(str_extract(Substitution, "\\d+")),
+    # Extract the substitution amino acid
+    Sub_AA = str_extract(Substitution, "[A-Z]$"),
+    # Order by residue number first, then alphabetically by substitution
+    Substitution = factor(Substitution, 
+                         levels = unique(Substitution[order(Residue_Num, Sub_AA)]))
+  )
+
+paired_data_all <- DMS_plot_data_all %>%
+  group_by(Substitution, Cell_Line) %>%
+  summarise(mean_zscore = mean(zscore, na.rm = TRUE), .groups = "drop") %>%
+  pivot_wider(names_from = Cell_Line, values_from = mean_zscore)
+
+paired_data_summary_all <- paired_data_all %>%
+  mutate(
+    G401_dir = case_when(G401 > 2 ~ "gain", G401 < -2 ~ "loss", TRUE ~ "neutral"),
+    BT16_dir = case_when(BT16 > 2 ~ "gain", BT16 < -2 ~ "loss", TRUE ~ "neutral"),
+    RCRF_dir = case_when(RCRF1009T > 2 ~ "gain", RCRF1009T < -2 ~ "loss", TRUE ~ "neutral"),
+    G401_BT16_agree = G401_dir == BT16_dir,
+    BT16_RCRF_agree = BT16_dir == RCRF_dir,
+    G401_RCRF_agree = G401_dir == RCRF_dir,
+    all_agree = (G401_dir == BT16_dir) & (BT16_dir == RCRF_dir)
+  )
+
+summary_stats_all <- paired_data_summary_all %>%
+  summarise(
+    G401_BT16 = mean(G401_BT16_agree, na.rm = TRUE) * 100,
+    BT16_RCRF = mean(BT16_RCRF_agree, na.rm = TRUE) * 100,
+    G401_RCRF = mean(G401_RCRF_agree, na.rm = TRUE) * 100,
+    All_three = mean(all_agree, na.rm = TRUE) * 100
+  )
+
+print(summary_stats_all)
+
+
+
+paired_data_annotated <- paired_data_all %>%
+  mutate(
+    both_gain = G401 > 1 & BT16 > 1,
+    both_loss = G401 < -1 & BT16 < -1,
+    both_neutral = abs(G401) < 1 & abs(BT16) < 1,
+    directional_type = case_when(
+      both_gain ~ "Both Gain",
+      both_loss ~ "Both Loss",
+      both_neutral ~ "Both Neutral",
+      TRUE ~ "Discordant"
+    )
+  )
+
+ggplot(paired_data_annotated, aes(x = G401, y = BT16, color = directional_type)) +
+  geom_point(alpha = 0.7, size = 2) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "gray50") +
+  geom_hline(yintercept = c(-2, 2), linetype = "dotted", color = "gray70") +
+  geom_vline(xintercept = c(-2, 2), linetype = "dotted", color = "gray70") +
+  scale_color_manual(
+    values = c("Both Gain" = "#2166ac", 
+               "Both Loss" = "#b2182b",
+               "Both Neutral" = "gray60",
+               "Discordant" = "#d6604d"),
+    name = "Directional Agreement"
+  ) +
+  theme_bw() +
+  labs(
+    title = "Missense: G401 vs BT16",
+    subtitle = sprintf("Directional agreement: 71.5%%"),
+    x = "G401 z-score",
+    y = "BT16 z-score",
+    caption = "Dashed line = perfect magnitude agreement\nDotted lines = directional thresholds"
+  ) +
+  xlim(-2.5, 25) +
+  ylim(-2.5, 25)
+
+
+paired_data_annotated2 <- paired_data_all %>%
+  mutate(
+    both_gain = G401 > 2 & RCRF1009T > 2,
+    both_loss = G401 < -2 & RCRF1009T < -2,
+    both_neutral = abs(G401) < 2 & abs(RCRF1009T) < 2,
+    directional_type = case_when(
+      both_gain ~ "Both Gain",
+      both_loss ~ "Both Loss",
+      both_neutral ~ "Both Neutral",
+      TRUE ~ "Discordant"
+    )
+  )
+
+ggplot(paired_data_annotated2, aes(x = RCRF1009T, y = G401, color = directional_type)) +
+  geom_point(alpha = 0.7, size = 2) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "gray50") +
+  geom_hline(yintercept = c(-2, 2), linetype = "dotted", color = "gray70") +
+  geom_vline(xintercept = c(-2, 2), linetype = "dotted", color = "gray70") +
+  scale_color_manual(
+    values = c("Both Gain" = "#2166ac", 
+               "Both Loss" = "#b2182b",
+               "Both Neutral" = "gray60",
+               "Discordant" = "#d6604d"),
+    name = "Directional Agreement"
+  ) +
+  theme_bw() +
+  labs(
+    title = "CCLF_PEDS1009T vs BT16",
+    subtitle = sprintf("Directional agreement: 79.8%%"),
+    x = "CCLF_PEDS1009T z-score",
+    y = "G401 z-score",
+    caption = "Dashed line = perfect magnitude agreement\nDotted lines = directional thresholds"
+  ) +
+  xlim(-2.5, 25) +
+  ylim(-2.5, 25)
+
+
+paired_data_annotated3 <- paired_data_all %>%
+  mutate(
+    both_gain = BT16 > 2 & RCRF1009T > 2,
+    both_loss = BT16 < -2 & RCRF1009T < -2,
+    both_neutral = abs(BT16) < 2 & abs(RCRF1009T) < 2,
+    directional_type = case_when(
+      both_gain ~ "Both Gain",
+      both_loss ~ "Both Loss",
+      both_neutral ~ "Both Neutral",
+      TRUE ~ "Discordant"
+    )
+  )
+
+ggplot(paired_data_annotated3, aes(x = RCRF1009T, y = BT16, color = directional_type)) +
+  geom_point(alpha = 0.7, size = 2) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "gray50") +
+  geom_hline(yintercept = c(-2, 2), linetype = "dotted", color = "gray70") +
+  geom_vline(xintercept = c(-2, 2), linetype = "dotted", color = "gray70") +
+  scale_color_manual(
+    values = c("Both Gain" = "#2166ac", 
+               "Both Loss" = "#b2182b",
+               "Both Neutral" = "gray60",
+               "Discordant" = "#d6604d"),
+    name = "Directional Agreement"
+  ) +
+  theme_bw() +
+  labs(
+    title = "CCLF_PEDS1009T vs BT16",
+    subtitle = sprintf("Directional agreement: 69.9%%"),
+    x = "CCLF_PEDS1009T z-score",
+    y = "BT16 z-score",
+    caption = "Dashed line = perfect magnitude agreement\nDotted lines = directional thresholds"
+  ) +
+  xlim(-2.5, 25) +
+  ylim(-2.5, 25)
+
+
+
+
+
+```
+
+
+
+
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(patchwork)
+library(ggVennDiagram)
+
+# Function to annotate and analyze a pair of cell lines
+analyze_pair <- function(data, cell_line_1, cell_line_2, name1, name2) {
+  
+  # Annotate the data
+  annotated_data <- data %>%
+    mutate(
+      status_1 = case_when(
+        .data[[cell_line_1]] > 2 ~ "gain",
+        .data[[cell_line_1]] < -2 ~ "loss",
+        TRUE ~ "neutral"
+      ),
+      status_2 = case_when(
+        .data[[cell_line_2]] > 2 ~ "gain",
+        .data[[cell_line_2]] < -2 ~ "loss",
+        TRUE ~ "neutral"
+      ),
+      agreement_type = case_when(
+        status_1 == "gain" & status_2 == "gain" ~ "Both Gain",
+        status_1 == "loss" & status_2 == "loss" ~ "Both Loss",
+        status_1 == "neutral" & status_2 == "neutral" ~ "Both Neutral",
+        TRUE ~ "Discordant"
+      )
+    )
+  
+  # Calculate concordance statistics
+  concordance_summary <- annotated_data %>%
+    count(agreement_type) %>%
+    mutate(
+      percentage = n / sum(n) * 100,
+      is_concordant = agreement_type %in% c("Both Gain", "Both Loss", "Both Neutral")
+    )
+  
+  # Overall concordance rate
+  concordance_rate <- concordance_summary %>%
+    filter(is_concordant) %>%
+    summarise(
+      total_concordant = sum(n),
+      total = sum(concordance_summary$n),
+      concordance_pct = total_concordant / total * 100
+    )
+  
+  # Concordant gains
+  both_gain <- sum(annotated_data$status_1 == "gain" & annotated_data$status_2 == "gain")
+  total_n <- sum(nrow(annotated_data))
+  
+  # Correlation for concordant gains
+  sig_concordant_data <- annotated_data %>%
+    filter(agreement_type == "Both Gain")
+  
+  cor_result <- NULL
+  if(nrow(sig_concordant_data) > 2) {
+    cor_result <- cor.test(sig_concordant_data[[cell_line_1]], 
+                           sig_concordant_data[[cell_line_2]])
+  }
+  
+  # Create plot
+  p <- ggplot(annotated_data, aes(x = .data[[cell_line_1]], y = .data[[cell_line_2]], 
+                                   color = agreement_type)) +
+    geom_point(alpha = 0.7, size = 2) +
+    geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "gray50") +
+    geom_hline(yintercept = c(-2, 2), linetype = "dotted", color = "gray70") +
+    geom_vline(xintercept = c(-2, 2), linetype = "dotted", color = "gray70") +
+    scale_color_manual(
+      values = c("Both Gain" = "#2166ac", 
+                 "Both Loss" = "#b2182b",
+                 "Both Neutral" = "gray60",
+                 "Discordant" = "#d6604d"),
+      name = "Agreement"
+    ) +
+    theme_bw() +
+    labs(
+      title = sprintf("%s vs %s", name2, name1),
+      subtitle = sprintf("Concordance: %.1f%% | Concordant gains: %d (%.1f%%)", 
+                        concordance_rate$concordance_pct,
+                        both_gain,
+                        both_gain/total_n * 100),
+      x = sprintf("%s z-score", name1),
+      y = sprintf("%s z-score", name2)
+    ) +
+    coord_cartesian(xlim = c(-2.5, 25), ylim = c(-2.5, 25)) +
+    theme(legend.position = "right")
+  
+  # Return results
+  list(
+    data = annotated_data,
+    plot = p,
+    concordance_summary = concordance_summary,
+    concordance_rate = concordance_rate,
+    cor_test = cor_result,
+    both_gain = both_gain,
+    total = total_n
+  )
+}
+
+# Analyze all three pairs
+pair1 <- analyze_pair(paired_data_all, "RCRF1009T", "BT16", "RCRF1009T", "BT16")
+pair2 <- analyze_pair(paired_data_all, "RCRF1009T", "G401", "RCRF1009T", "G401")
+pair3 <- analyze_pair(paired_data_all, "BT16", "G401", "BT16", "G401")
+
+# Print summaries
+cat("\n=== RCRF1009T vs BT16 ===\n")
+print(pair1$concordance_summary)
+cat(sprintf("\nOverall concordance: %.1f%%\n", pair1$concordance_rate$concordance_pct))
+cat(sprintf("Concordant gains: %d (%.1f%%)\n", pair1$both_gain, 
+            pair1$both_gain/pair1$total * 100))
+if(!is.null(pair1$cor_test)) {
+  cat(sprintf("Correlation (concordant gains): r = %.3f, p = %.2e\n", 
+              pair1$cor_test$estimate, pair1$cor_test$p.value))
+}
+
+cat("\n=== RCRF1009T vs G401 ===\n")
+print(pair2$concordance_summary)
+cat(sprintf("\nOverall concordance: %.1f%%\n", pair2$concordance_rate$concordance_pct))
+cat(sprintf("Concordant gains: %d (%.1f%%)\n", pair2$both_gain, 
+            pair2$both_gain/pair2$total * 100))
+if(!is.null(pair2$cor_test)) {
+  cat(sprintf("Correlation (concordant gains): r = %.3f, p = %.2e\n", 
+              pair2$cor_test$estimate, pair2$cor_test$p.value))
+}
+
+cat("\n=== BT16 vs G401 ===\n")
+print(pair3$concordance_summary)
+cat(sprintf("\nOverall concordance: %.1f%%\n", pair3$concordance_rate$concordance_pct))
+cat(sprintf("Concordant gains: %d (%.1f%%)\n", pair3$both_gain, 
+            pair3$both_gain/pair3$total * 100))
+if(!is.null(pair3$cor_test)) {
+  cat(sprintf("Correlation (concordant gains): r = %.3f, p = %.2e\n", 
+              pair3$cor_test$estimate, pair3$cor_test$p.value))
+}
+
+# === THREE-WAY OVERLAP ANALYSIS ===
+
+# Identify significant gains in each cell line
+# Assuming you have a mutation identifier column - adjust name as needed
+gains_BT16 <- paired_data_all %>% 
+  filter(BT16 > 2) %>% 
+  pull(1)  # Pulls first column as mutation ID - adjust if needed
+
+gains_RCRF <- paired_data_all %>% 
+  filter(RCRF1009T > 2) %>% 
+  pull(1)
+
+gains_G401 <- paired_data_all %>% 
+  filter(G401 > 2) %>% 
+  pull(1)
+
+# Create Venn diagram list
+venn_list <- list(
+  BT16 = gains_BT16,
+  RCRF1009T = gains_RCRF,
+  G401 = gains_G401
+)
+
+# Create Venn diagram
+venn_plot <- ggVennDiagram(venn_list, 
+                           label_alpha = 0,
+                           category.names = c("BT16", "RCRF1009T", "G401")) +
+  scale_fill_gradient(low = "white", high = "#2166ac") +
+  labs(title = "Overlap of Significant Gain Mutations (z > 2)",
+       subtitle = "Across Three Rhabdoid Tumor Cell Lines") +
+  theme(legend.position = "none")
+
+print(venn_plot)
+
+# Calculate overlap statistics
+all_three <- Reduce(intersect, list(gains_BT16, gains_RCRF, gains_G401))
+at_least_two <- unique(c(
+  intersect(gains_BT16, gains_RCRF),
+  intersect(gains_BT16, gains_G401),
+  intersect(gains_RCRF, gains_G401)
+))
+
+total_mutations <- nrow(paired_data_all)
+
+cat("\n=== THREE-WAY OVERLAP SUMMARY ===\n")
+cat(sprintf("Total mutations analyzed: %d\n", total_mutations))
+cat(sprintf("Significant gains in BT16: %d (%.1f%%)\n", 
+            length(gains_BT16), length(gains_BT16)/total_mutations*100))
+cat(sprintf("Significant gains in RCRF1009T: %d (%.1f%%)\n", 
+            length(gains_RCRF), length(gains_RCRF)/total_mutations*100))
+cat(sprintf("Significant gains in G401: %d (%.1f%%)\n", 
+            length(gains_G401), length(gains_G401)/total_mutations*100))
+cat(sprintf("\nConsensus hits (all 3 cell lines): %d (%.1f%%)\n", 
+            length(all_three), length(all_three)/total_mutations*100))
+cat(sprintf("Replicated in ≥2 cell lines: %d (%.1f%%)\n", 
+            length(at_least_two), length(at_least_two)/total_mutations*100))
+
+# Cell line-specific hits
+specific_BT16 <- setdiff(gains_BT16, c(gains_RCRF, gains_G401))
+specific_RCRF <- setdiff(gains_RCRF, c(gains_BT16, gains_G401))
+specific_G401 <- setdiff(gains_G401, c(gains_BT16, gains_RCRF))
+
+cat(sprintf("\nCell line-specific gains:\n"))
+cat(sprintf("  BT16 only: %d (%.1f%%)\n", 
+            length(specific_BT16), length(specific_BT16)/total_mutations*100))
+cat(sprintf("  RCRF1009T only: %d (%.1f%%)\n", 
+            length(specific_RCRF), length(specific_RCRF)/total_mutations*100))
+cat(sprintf("  G401 only: %d (%.1f%%)\n", 
+            length(specific_G401), length(specific_G401)/total_mutations*100))
+
+# Combine all plots
+combined_plot <- (pair1$plot / pair2$plot / pair3$plot) +
+  plot_layout(guides = "collect") +
+  plot_annotation(
+    title = "Pairwise Cell Line Concordance Analysis",
+    theme = theme(plot.title = element_text(size = 16, face = "bold"))
+  )
+
+print(combined_plot)
+
+# Save plots
+ggsave("./plots/three_cellline_comparison.tif", combined_plot, width = 10, height = 14, dpi = 300)
+ggsave("./plots/venn_diagram_overlap.tif", venn_plot, width = 8, height = 6, dpi = 300)
+
+# Create comprehensive summary table
+summary_table <- data.frame(
+  Comparison = c("RCRF1009T vs BT16", "RCRF1009T vs G401", "BT16 vs G401"),
+  Total_Mutations = c(pair1$total, pair2$total, pair3$total),
+  Concordance_Pct = c(pair1$concordance_rate$concordance_pct,
+                      pair2$concordance_rate$concordance_pct,
+                      pair3$concordance_rate$concordance_pct),
+  Concordant_Gains = c(pair1$both_gain, pair2$both_gain, pair3$both_gain),
+  Concordant_Gains_Pct = c(pair1$both_gain/pair1$total * 100,
+                           pair2$both_gain/pair2$total * 100,
+                           pair3$both_gain/pair3$total * 100),
+  Correlation_r = c(
+    ifelse(!is.null(pair1$cor_test), pair1$cor_test$estimate, NA),
+    ifelse(!is.null(pair2$cor_test), pair2$cor_test$estimate, NA),
+    ifelse(!is.null(pair3$cor_test), pair3$cor_test$estimate, NA)
+  ),
+  Correlation_Pvalue = c(
+    ifelse(!is.null(pair1$cor_test), pair1$cor_test$p.value, NA),
+    ifelse(!is.null(pair2$cor_test), pair2$cor_test$p.value, NA),
+    ifelse(!is.null(pair3$cor_test), pair3$cor_test$p.value, NA)
+  )
+)
+
+cat("\n=== PAIRWISE COMPARISON SUMMARY TABLE ===\n")
+print(summary_table)
+
+# Create overlap summary table
+overlap_table <- data.frame(
+  Category = c("Total mutations", 
+               "BT16 gains", "RCRF1009T gains", "G401 gains",
+               "All 3 cell lines (consensus)", 
+               "≥2 cell lines",
+               "BT16 only", "RCRF1009T only", "G401 only"),
+  Count = c(total_mutations,
+            length(gains_BT16), length(gains_RCRF), length(gains_G401),
+            length(all_three),
+            length(at_least_two),
+            length(specific_BT16), length(specific_RCRF), length(specific_G401)),
+  Percentage = c(100,
+                 length(gains_BT16)/total_mutations*100,
+                 length(gains_RCRF)/total_mutations*100,
+                 length(gains_G401)/total_mutations*100,
+                 length(all_three)/total_mutations*100,
+                 length(at_least_two)/total_mutations*100,
+                 length(specific_BT16)/total_mutations*100,
+                 length(specific_RCRF)/total_mutations*100,
+                 length(specific_G401)/total_mutations*100)
+)
+
+cat("\n=== OVERLAP SUMMARY TABLE ===\n")
+print(overlap_table)
+
+# Save summary tables
+write.csv(summary_table, "./plots/cellline_pairwise_summary.csv", row.names = FALSE)
+write.csv(overlap_table, "./plots/cellline_overlap_summary.csv", row.names = FALSE)
+
+# Optional: Save consensus hit list
+if(length(all_three) > 0) {
+  consensus_mutations <- paired_data_all %>%
+    filter(BT16 > 2 & RCRF1009T > 2 & G401 > 2) %>%
+    select(1, BT16, RCRF1009T, G401) %>%  # Adjust columns as needed
+    arrange(desc((BT16 + RCRF1009T + G401)/3))  # Sort by mean z-score
+  
+  write.csv(consensus_mutations, "./plots/consensus_hits_all3_celllines.csv", row.names = FALSE)
+  cat(sprintf("\nConsensus hit list saved to: ./plots/consensus_hits_all3_celllines.csv\n"))
+}
+```
+
+
+
+
+
+
+
+
+
 
 
 

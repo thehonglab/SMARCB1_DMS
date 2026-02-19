@@ -400,3 +400,215 @@ write_tsv(ROC_supp_data, "./results/ROC_curve_analysis/ROC_supp_data.tsv")
 
 ```
 
+
+
+```{r}
+
+gnomAD_missense <- read_tsv("~/Library/CloudStorage/GoogleDrive-gcooper.gene@gmail.com/.shortcut-targets-by-id/1rALxO157_wDKXF4JjmT8CFruCpBbWa5o/Hong Lab Project Folders/Results GC/17-SMARCB1_MITEseq2/Manuscript/SMARCB1_DMS/data/gnomADv4.1.0/gnomad_missense_mutants.tsv")
+
+# Create amino acid conversion table
+aa_convert <- c(
+  'Ala' = 'A', 'Arg' = 'R', 'Asn' = 'N', 'Asp' = 'D',
+  'Cys' = 'C', 'Gln' = 'Q', 'Glu' = 'E', 'Gly' = 'G',
+  'His' = 'H', 'Ile' = 'I', 'Leu' = 'L', 'Lys' = 'K',
+  'Met' = 'M', 'Phe' = 'F', 'Pro' = 'P', 'Ser' = 'S',
+  'Thr' = 'T', 'Trp' = 'W', 'Tyr' = 'Y', 'Val' = 'V',
+  'Ter' = '*', 'Sec' = 'U', 'Pyl' = 'O'
+)
+
+# Function to convert protein consequence format
+convert_protein_consequence <- function(protein_conseq) {
+  # Remove "p." prefix
+  conseq <- gsub("^p\\.", "", protein_conseq)
+  
+  # Extract reference AA (3-letter), position, and alternate AA (3-letter)
+  # Pattern: 3 letters, then numbers, then 3 letters
+  ref_aa <- substr(conseq, 1, 3)
+  alt_aa <- substr(conseq, nchar(conseq)-2, nchar(conseq))
+  position <- gsub("[A-Za-z]", "", conseq)
+  
+  # Convert to 1-letter code
+  ref_1letter <- aa_convert[ref_aa]
+  alt_1letter <- aa_convert[alt_aa]
+  
+  # Combine
+  result <- paste0(ref_1letter, position, alt_1letter)
+  
+  return(result)
+}
+
+# Apply to gnomAD dataframe
+gnomAD_missense <- gnomAD_missense %>%
+  mutate(Protein.Consequence.Short = sapply(Protein.Consequence, convert_protein_consequence))
+
+
+```
+
+
+GnomAD variants as negative
+
+```{r}
+library(pROC)
+library(dplyr)
+
+# Filter for missense mutations
+integrated_data_missense_only <- integrated_data %>%
+  filter(Mutation_Type == "M")
+
+
+integrated_data_missense_only <- integrated_data_missense_only %>%
+  left_join(
+    gnomAD_missense %>% select(Protein.Consequence.Short, Allele.Frequency),
+    by = c("Substitution" = "Protein.Consequence.Short")
+  )
+
+
+# Define positive cases
+clinvar_pos <- c('Pathogenic/Likely pathogenic', 'Pathogenic', 'Likely pathogenic')
+condition <- c('Hereditary cancer-predisposing syndrome|not provided')
+
+# Create response variable:
+# 1 = Pathogenic cancer variants
+# 0 = Observed in gnomAD (but not pathogenic cancer variants)
+# NA = everything else (excluded)
+# Create response variable with pathogenic cancer variants taking priority
+integrated_data_missense_only <- integrated_data_missense_only %>%
+  mutate(response = case_when(
+    # FIRST: Positive cases (checked first, so these take priority)
+    `Germline classification` %in% clinvar_pos & `Condition(s)` %in% condition ~ 1,
+    # SECOND: Negative controls (any variant with gnomAD data that wasn't already classified as positive)
+    !is.na(Allele.Frequency) ~ 0,
+    # Everything else excluded
+    TRUE ~ NA_real_
+  ))
+
+# Filter to only variants with defined response
+roc_data <- integrated_data_missense_only %>%
+  filter(!is.na(response))
+
+# Check class distribution
+cat("Class distribution:\n")
+table(roc_data$response)
+cat("\nPositives:", sum(roc_data$response == 1), 
+    "\nNegatives:", sum(roc_data$response == 0), "\n")
+
+# Create ROC curves
+roc_cadd <- roc(roc_data$response, roc_data$PHRED)
+roc_revel <- roc(roc_data$response, roc_data$REVEL)
+roc_zscore <- roc(roc_data$response, roc_data$all_reps_zscore)
+roc_am <- roc(roc_data$response, roc_data$am_pathogenicity)
+
+# Plot
+tiff("./plots/ROC_curves/ROC_missense_cancer_vs_gnomad.tiff", 
+     units="in", width=6, height=6, res=600)
+plot(roc_zscore, col = "red", lwd=4, xlab = "Specificity", ylab = "Sensitivity",
+     cex.lab=2, cex.axis=1.5)
+plot(roc_cadd, col = "lightblue", lwd=4, add = TRUE)
+plot(roc_revel, col = "gainsboro", lwd=4, add = TRUE)
+plot(roc_am, col = "black", lwd=4, add = TRUE)
+
+legend_text <- c(paste0("DMS (AUC=", round(auc(roc_zscore), 2), ")"),
+                 paste0("CADD (AUC=", round(auc(roc_cadd), 2), ")"),
+                 paste0("REVEL (AUC=", round(auc(roc_revel), 2), ")"),
+                 paste0("AlphaMissense (AUC=", round(auc(roc_am), 2), ")"))
+legend("bottomright", legend = legend_text, 
+       col = c("red", "lightblue", "gainsboro", "black"), lwd = 4, cex=1.25)
+dev.off()
+
+# Save supplementary data
+ROC_supp_data <- roc_data[,c(1,3,4,5,17,18,19,20,21,12,22)]
+write_tsv(ROC_supp_data, "./results/ROC_curve_analysis/ROC_supp_data_gnomad_negatives.tsv")
+
+
+```
+
+gnomAD and ClinVar benign at negative
+
+```{r}
+
+library(pROC)
+library(dplyr)
+
+# Filter for missense mutations
+integrated_data_missense_only <- integrated_data %>%
+  filter(Mutation_Type == "M")
+
+integrated_data_missense_only <- integrated_data_missense_only %>%
+  left_join(
+    gnomAD_missense %>% select(Protein.Consequence.Short, Allele.Frequency),
+    by = c("Substitution" = "Protein.Consequence.Short")
+  )
+
+# Define positive and negative cases
+clinvar_pos <- c('Pathogenic/Likely pathogenic', 'Pathogenic', 'Likely pathogenic')
+clinvar_neg <- c('Benign', 'Likely benign', 'Benign/Likely benign')
+condition <- c('Hereditary cancer-predisposing syndrome|not provided')
+
+# Create response variable with hierarchy:
+# 1. Pathogenic cancer variants = 1 (highest priority)
+# 2. Benign ClinVar variants = 0
+# 3. gnomAD variants (not already classified) = 0
+integrated_data_missense_only <- integrated_data_missense_only %>%
+  mutate(response = case_when(
+    # Positive cases: pathogenic cancer variants (checked first)
+    `Germline classification` %in% clinvar_pos & `Condition(s)` %in% condition ~ 1,
+    # Negative controls: benign ClinVar variants
+    `Germline classification` %in% clinvar_neg ~ 0,
+    # Additional negative controls: gnomAD variants
+    !is.na(Allele.Frequency) ~ 0,
+    # Everything else excluded
+    TRUE ~ NA_real_
+  ))
+
+# Filter to only variants with defined response
+roc_data <- integrated_data_missense_only %>%
+  filter(!is.na(response))
+
+# Check class distribution
+cat("Class distribution:\n")
+print(table(roc_data$response))
+cat("\nPositives:", sum(roc_data$response == 1), 
+    "\nNegatives:", sum(roc_data$response == 0), "\n")
+
+# Break down the negative class
+negatives_breakdown <- roc_data %>%
+  filter(response == 0) %>%
+  summarise(
+    benign_clinvar = sum(`Germline classification` %in% clinvar_neg, na.rm = TRUE),
+    gnomad_only = sum(!(`Germline classification` %in% clinvar_neg) & !is.na(Allele.Frequency), na.rm = TRUE)
+  )
+cat("\nNegative class breakdown:\n")
+cat("  Benign ClinVar:", negatives_breakdown$benign_clinvar, "\n")
+cat("  gnomAD only:", negatives_breakdown$gnomad_only, "\n")
+
+# Create ROC curves
+roc_cadd <- roc(roc_data$response, roc_data$PHRED)
+roc_revel <- roc(roc_data$response, roc_data$REVEL)
+roc_zscore <- roc(roc_data$response, roc_data$all_reps_zscore)
+roc_am <- roc(roc_data$response, roc_data$am_pathogenicity)
+
+# Plot
+tiff("./plots/ROC_curves/ROC_missense_cancer_vs_benign_gnomad.tiff", 
+     units="in", width=6, height=6, res=600)
+plot(roc_zscore, col = "red", lwd=4, xlab = "Specificity", ylab = "Sensitivity",
+     cex.lab=2, cex.axis=1.5)
+plot(roc_cadd, col = "lightblue", lwd=4, add = TRUE)
+plot(roc_revel, col = "gainsboro", lwd=4, add = TRUE)
+plot(roc_am, col = "black", lwd=4, add = TRUE)
+
+legend_text <- c(paste0("DMS (AUC=", round(auc(roc_zscore), 2), ")"),
+                 paste0("CADD (AUC=", round(auc(roc_cadd), 2), ")"),
+                 paste0("REVEL (AUC=", round(auc(roc_revel), 2), ")"),
+                 paste0("AlphaMissense (AUC=", round(auc(roc_am), 2), ")"))
+legend("bottomright", legend = legend_text, 
+       col = c("red", "lightblue", "gainsboro", "black"), lwd = 4, cex=1.25)
+dev.off()
+
+# Save supplementary data
+ROC_supp_data <- roc_data[,c(1,3,4,5,17,18,19,20,21,12,22)]
+write_tsv(ROC_supp_data, "./results/ROC_curve_analysis/ROC_supp_data_benign_gnomad.tsv")
+
+
+```
+
+

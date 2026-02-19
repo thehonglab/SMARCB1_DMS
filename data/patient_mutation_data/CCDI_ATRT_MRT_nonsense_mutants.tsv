@@ -1,0 +1,29 @@
+SampleID	CancerType	ProteinChange	MutationType	Copynum	COSMICfreq	Allelefreq	numMutsamp
+0D9W5T	Atypical teratoid/rhabdoid tumor	Q318*	Nonsense	Diploid		0.77	40
+0DGOAQ	Atypical teratoid/rhabdoid tumor	R53*	Nonsense	Diploid	12	0.55	24
+0DXAR1	Atypical teratoid/rhabdoid tumor	R53*	Nonsense	Diploid	12	0.93	18
+0DCUL4	Atypical teratoid/rhabdoid tumor	R201*	Nonsense	ShallowDel	21	0.73	50
+0DU816	Atypical teratoid/rhabdoid tumor	R201*	Nonsense	Diploid	21	0.42	6
+0DM6A0	Atypical teratoid/rhabdoid tumor	E287*	Nonsense	ShallowDel		0.74	38
+0DMWTS	"Rhabdoid tumor, NOS"	E95*	Nonsense	ShallowDel		0.6	134
+0DOBTE	Atypical teratoid/rhabdoid tumor	W281*	Nonsense	ShallowDel	3	0.76	16
+0DPJT9	Atypical teratoid/rhabdoid tumor	Q182*	Nonsense	ShallowDel	1	0.72	45
+0DR7Y8	Atypical teratoid/rhabdoid tumor	W281*	Nonsense	ShallowDel	3	0.87	5
+0DUXPS	Atypical teratoid/rhabdoid tumor	Y47*	Nonsense	Diploid	7	0.94	46
+0DZK5D	Malignant rhabdoid tumor	Y47*	Nonsense	Diploid	7	0.35	25
+0E0QXL	Atypical teratoid rhabdoid tumor	Q198*	Nonsense	Diploid		0.75	23
+							
+							
+							
+							
+							
+							
+							
+							
+							
+							
+							
+							
+							
+							
+							

@@ -1046,6 +1046,8 @@ write_csv(single_mutants_data,
 
 ################################################################################
 ```{r}
+
+single_mutants_data <- read.csv("./results/functional_scores/DMS_single_mutant_data.csv")
 # Recreate the silent data filtering (same as original)
 single_mutants_data = single_mutants_data[order(single_mutants_data$mut_1_final), ]
 
@@ -1830,6 +1832,9 @@ print(p)
 ggsave("./plots/DMS_plots/log2FC_by_mutation_plot.png", plot = p, width = 10, height = 6, dpi = 300)
 
 
+write_xlsx(all_mutations_position_summary, "./results/functional_scores/all_mutations_position_summary_detection_threshold.xlsx")
+
+
 ```
 
 
@@ -2531,6 +2536,19 @@ print(individual_point_plot)
 
 ggsave("./plots/DMS_plots/amino_acid_rank_plot_individual_values.tif", individual_point_plot, width=5, height=6)
 
+
+individual_plot_data$Mutant_Amino_Acid <- as.factor(individual_plot_data$Mutant_Amino_Acid)
+
+
+ordered_df <- individual_plot_data %>%
+  group_by(Mutant_Amino_Acid) %>%
+  mutate(mean_zscore = mean(all_reps_zscore, na.rm = TRUE)) %>%
+  ungroup() %>%
+  arrange(desc(mean_zscore)) %>%
+  dplyr::select(-mean_zscore)
+
+
+write_tsv(ordered_df, "./results/functional_scores/individual_mutant_zscores_ordered_by_mean.tsv")
 ```
 
 
