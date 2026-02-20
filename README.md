@@ -32,7 +32,7 @@ Analysis are split between two environments
 
 We primarily used a t2.2xlarge instance (8 CPU, 32 GiB RAM, 1 TB storage)
 
-2. Install minicoda
+1. Install minicoda
 
 ```
 wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
@@ -50,7 +50,7 @@ conda install python=3.10
 
 
 
-d) Install required packages
+2. Install required packages
 ```
 conda install -c bioconda samtools
 conda install -c bioconda deeptools
@@ -58,7 +58,7 @@ conda install -c bioconda macs3
 conda install -c bioconda bedtools
 ```
 
-e) Install HOMER
+3. Install HOMER
 ```
 wget http://homer.ucsd.edu/homer/configureHomer.pl
 perl configureHomer.pl -install
