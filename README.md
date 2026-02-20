@@ -40,7 +40,6 @@ bash Miniconda3-latest-Linux-x86_64.sh
 ```
 Close and reconnect to your instance, then configure:
 
-b) Configure your miniconda installation
 ```
 conda config --add channels defaults
 conda config --add channels bioconda
