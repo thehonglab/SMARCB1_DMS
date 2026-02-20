@@ -3,7 +3,7 @@ Deep mutational scanning of the SMARCB1 coding sequence to evaluate missense mut
 
 Authors: Garrett Cooper, Benjamin Lee, [Andrew Hong](https://www.thehonglab.org/), and co authors.
 
-📄 [Preprint](https://pubmed.ncbi.nlm.nih.gov/40196006/) | 🧬 [Interactive Heatmap](https://thehonglab.github.io/SMARCB1_DMS/) | 📦 Raw Data: dbGaP accession [phs003896.v1.p1](https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs003896.v1.p1) | [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18716542.svg)](https://doi.org/10.5281/zenodo.18716542)
+ [Preprint](https://pubmed.ncbi.nlm.nih.gov/40196006/) | [Interactive Heatmap](https://thehonglab.github.io/SMARCB1_DMS/) | Raw Data: dbGaP accession [phs003896.v1.p1](https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs003896.v1.p1) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18716542.svg)](https://doi.org/10.5281/zenodo.18716542)
 
 ## Repository Contents
 
