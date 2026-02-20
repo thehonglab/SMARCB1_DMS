@@ -76,7 +76,7 @@ Launch a DRAGEN instance via the AWS marketplace.
 
 > **Note:** Different DRAGEN versions require different reference genome hash tables. Build instructions are provided below.
 
-ATAC-seq (v4.2.4)
+### ATAC-seq Analysis (v4.2.4)
 
 1. Transfer raw FASTQ files to the /ephemeral directory.
 
@@ -102,7 +102,7 @@ dragen -r GRCh38p13v9 \
 --RGSM I315I-R1_01_S1;
 ```
 
-### RNAseq Analysis (v3.7.5)
+### RNA-seq Analysis (v3.7.5)
 1. Build v8 hash tables for the GrCh38p13:
 
 ```
