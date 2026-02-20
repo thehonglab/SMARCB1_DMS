@@ -1,62 +1,54 @@
 # SMARCB1 Deep Mutational Scanning
-Deep mutational scanning of the SMARCB1 coding sequence to evaluate mutations which disrupt its tumor suppressor function
+Deep mutational scanning of the SMARCB1 coding sequence to evaluate mutations which disrupt its antiproliferative function
 
-Study and analysis by Garrett Cooper, Benjamin Lee, [Andrew Hong](https://www.thehonglab.org/), and co authors.
+Authors: Garrett Cooper, Benjamin Lee, [Andrew Hong](https://www.thehonglab.org/), and co authors.
 
-Preprint of the paper can be found here: https://pubmed.ncbi.nlm.nih.gov/40196006/
-
-All raw sequencing data can be obtained from dbGaP under accession number phs003896.v1.p1.
-
-An interactive heatmap of DMS results: https://thehonglab.github.io/SMARCB1_DMS/.
+📄 [Preprint](https://pubmed.ncbi.nlm.nih.gov/40196006/) | 🧬 [Interactive Heatmap](https://thehonglab.github.io/SMARCB1_DMS/) | 📦 Raw Data: dbGaP accession [phs003896.v1.p1](https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs003896.v1.p1)
 
 ## Repository Contents
 
-1. Raw Data 
+1. Raw Data: 
 All raw data used to generate the analyses presented in the manuscript. Files such as ```.bam``` and ```.fastq``` and ```.bw``` can be obtained from dbGAP (phs003896.v1.p1).
 
   - For Hong Lab members, data files can be accessed via the lab's secure s3 storage system. Contact the administrator for details.
 
-2. Analysis Code
-Computer scripts and tools required to reproduce the analysis.
+2. Analysis Code:
+Annotated scripts required to reproduce the analysis.
 
-3. AWS Processing Instructions
+3. AWS Processing Instructions:
 Step-by-step guidance for setting up and running data processing on an AWS instance.
 
 ## Running the Analysis
 
-### Overview
-- Cloud Computing (AWS): Portions of the analysis utilize AWS cloud servers, with corresponding code labeled as "bash" within .Rmd files.
+### Computing Environment
+Analysis are split between two environments
 
-- Local Computing: Other analyses are performed locally using R or Python. The repository is organized to allow users to run these analyses after downloading the repository. **Exception:** Differential accessibility analysis requires BAM files, which are too large to store in this repository. Refer to dbGAP ([X]) for access.
+- Cloud (AWS): Portions of the pipeline run on AWS; corresponding code is labeled as bash within .Rmd files.
+
+- Local (R/Python): All other analyses can be run locally after cloning this repository. (Of note: MD simulations utilized a NVIDIA GeForce RTX 5090 GPU, which may not be available on all local machines.)
 
 
+### Cloud Setup (AWS)
 
-### Setting up cloud computing
-To set up cloud computing environment:
+We primarily used a t2.2xlarge instance (8 CPU, 32 GiB RAM, 1 TB storage)
 
-1. Set up your Linux AWS instance
-  - We used a t2.2xlarge instance with 32 GiB of memory and 8 vCPU with 1Tb of storage.
-  
-2. Install software necessary to run analysis
+2. Install minicoda
 
-a) Install miniconda on your instance
 ```
 wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
 bash Miniconda3-latest-Linux-x86_64.sh
 ```
-(Close terminal and reconnect to your instance)
+Close and reconnect to your instance, then configure:
 
 b) Configure your miniconda installation
 ```
 conda config --add channels defaults
 conda config --add channels bioconda
 conda config --add channels conda-forge
-```
-
-c) Update python version
-```
 conda install python=3.10
 ```
+
+
 
 d) Install required packages
 ```
@@ -76,21 +68,26 @@ source ~/.bashrc
 
 ## Genome Alignment Using Illumina Dragen
 
-To perform genome alignment using Illumina Dragen, launch an in instance using AWS Marketplace.
-We utilized version v4.2.4 for ATACseq processing and v3.7.5 for RNAseq alignment and transcript quantification. Of note these different version use different hash tables for their reference genome. Instructions on making of this hash table are provided below.
+Launch a DRAGEN instance via the AWS marketplace.
 
-### ATACSeq Analysis (v4.2.4)
-1. Transfer raw FASTQ files into the /ephemeral directory on the instance.
-**NOTE** Computational resources are limited to this directory. 
+| Pipeline | DRAGEN Version | Notes |
+|----------|---------------|-------|
+| ATAC-seq | v4.2.4 | Uses v9 hash tables |
+| RNA-seq | v3.7.5 | Uses v8 hash tables |
 
-2. Build v9 hash tables for the GrCh38p13 reference genome:
+> **Note:** Different DRAGEN versions require different reference genome hash tables. Build instructions are provided below.
+
+ATAC-seq (v4.2.4)
+
+1. Transfer raw FASTQ files to the /ephemeral directory.
+
+2. Build v9 hash tables for the GrCh38p13:
 
 ```
 dragen --build-hash-table true --ht-reference hashref/GRCh38.p13.genome.fa --ht-build-rna-hashtable true --output-directory ref/  --enable-cnv true
 ```
 
-3. Align, trim, and remove duplicates:
-This code needs to be run for each sample
+3. Align, trim, and remove duplicates (run per sample):
 ```
 dragen -r GRCh38p13v9 \
 -1 DNA/I315I-R1_S1_R1_001.fastq.gz \
@@ -107,14 +104,14 @@ dragen -r GRCh38p13v9 \
 ```
 
 ### RNAseq Analysis (v3.7.5)
-1. Build v8 hash tables for the GrCh38p13 reference genome:
+1. Build v8 hash tables for the GrCh38p13:
 
 ```
 dragen --build-hash-table true --ht-reference hashref/GRCh38.p13.genome.fa --ht-build-rna-hashtable true --output-directory hashref/ --enable-cnv true --enable-rna true
 ```
 
-2. Align and quantify reads:
-This code needs to be run for each sample
+2. Align and quantify reads (run per sample):
+
 ```
 dragen -f -r GrCh38p13 \
 -1 RNA/G401_P16_STT21_MRT00_SEQ61_I315I_NOV5_1.fq.gz \
@@ -131,17 +128,17 @@ dragen -f -r GrCh38p13 \
 ```
 
 
-## Configurations and Input Files
+## Configuration
 
-- The analysis configuration is defined in the ```config.yaml``` file.
-- Input files referenced in ```config.yaml``` are located in the ```./data/``` subdirectory.
-To customize the analysis, edit the ```config.yaml``` file as needed.
+- Analysis parameters are defined in ```config.yaml``` .
+- Input files referenced in ```config.yaml``` are located in ```./data/```.
+- To customize the analysis, edit ```config.yaml``` as needed.
 
 
-## Utilizing Code in this Repository
+## Running Notebooks
 
-- Jupyter Notebooks (```*.ipynb```) and R Markdown scripts (```*.Rmd```) are located at the top level of this repository.
-- Follow the instructions provided in the code comments and documentation for execution.
+Jupyter Notebooks (*.ipynb) and R Markdown scripts (*.Rmd) are located at the top level of the repository. Follow the instructions in each file's comments and documentation for execution details.
+
 
 
 
