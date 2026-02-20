@@ -1,5 +1,5 @@
-# SMARCB1 Deep Mutational Scanning
-Deep mutational scanning of the SMARCB1 coding sequence to evaluate mutations which disrupt its antiproliferative function
+# SMARCB1 missense mutants disrupt SWI/SNF complex stability and remodeling activity
+Deep mutational scanning of the SMARCB1 coding sequence to evaluate missense mutations that disrupt its antiproliferative function
 
 Authors: Garrett Cooper, Benjamin Lee, [Andrew Hong](https://www.thehonglab.org/), and co authors.
 
@@ -136,7 +136,7 @@ dragen -f -r GrCh38p13 \
 
 ## Running Notebooks
 
-Jupyter Notebooks (*.ipynb) and R Markdown scripts (*.Rmd) are located at the top level of the repository. Follow the instructions in each file's comments and documentation for execution details.
+Jupyter Notebooks (*.ipynb*) and R Markdown scripts (*.Rmd*) are located at the top level of the repository. Follow the instructions in each file's comments and documentation for execution details.
 
 
 
